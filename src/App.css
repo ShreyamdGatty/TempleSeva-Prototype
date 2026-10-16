@@ -1,0 +1,375 @@
+/* Local temple artwork replaces the generic remote hero image. */
+img[src*="photo-1609766857041"] {
+  content: url('/temple-hero.webp');
+}
+
+/* Distinctive home-page treatment: a framed “sanctuary at dawn” composition. */
+main > section:first-child {
+  position: relative;
+  isolation: isolate;
+  margin: 1.5rem auto 0;
+  overflow: hidden;
+  border: 1px solid rgba(193, 68, 14, .12);
+  border-radius: 2.25rem;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(212, 166, 74, .18), transparent 28%),
+    radial-gradient(circle at 88% 70%, rgba(193, 68, 14, .10), transparent 32%),
+    #fffaf1;
+}
+
+main > section:first-child::before,
+main > section:first-child::after {
+  position: absolute;
+  z-index: -1;
+  border: 1px solid rgba(193, 68, 14, .12);
+  border-radius: 999px;
+  content: '';
+  pointer-events: none;
+}
+
+main > section:first-child::before {
+  top: -10rem;
+  right: 31%;
+  width: 28rem;
+  height: 28rem;
+}
+
+main > section:first-child::after {
+  right: -7rem;
+  bottom: -10rem;
+  width: 25rem;
+  height: 25rem;
+}
+
+main > section:first-child h1 {
+  max-width: 10ch;
+  text-wrap: balance;
+}
+
+#about {
+  position: relative;
+}
+
+#about::before {
+  position: absolute;
+  top: 1rem;
+  left: 0;
+  width: 4rem;
+  height: 1px;
+  background: #d4a64a;
+  content: '';
+}
+
+@media (max-width: 640px) {
+  main > section:first-child {
+    margin: .75rem .75rem 0;
+    border-radius: 1.5rem;
+  }
+}
+
+.sevas-route > header {
+  display: none;
+}
+
+.home-route {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-route > header { order: 0; }
+.home-route > main { order: 1; }
+.home-route > .home-benefits,
+.home-route > .home-cta { order: 2; }
+.home-route > footer { order: 3; }
+
+/* Seva booking studio */
+.sevas-route {
+  background:
+    radial-gradient(circle at 92% 12%, rgba(212, 166, 74, .16), transparent 22rem),
+    linear-gradient(180deg, #fffaf2 0%, #f8efe3 100%);
+}
+
+.sevas-route > main {
+  position: relative;
+  padding-top: 2.5rem;
+  padding-bottom: 8rem;
+}
+
+.sevas-route > main > div:first-child h1 {
+  letter-spacing: -.04em;
+  line-height: .95;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CREATIVE HOME PAGE & SACRED ANIMATIONS
+   ───────────────────────────────────────────────────────────── */
+
+/* Slow rotating sacred mandala geometry */
+@keyframes spinMandala {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-mandala {
+  animation: spinMandala 50s linear infinite;
+  transform-origin: center center;
+}
+
+/* Floating 3D gentle breath on hero card */
+@keyframes floatHero {
+  0%, 100% {
+    transform: translateY(0px) rotate(1deg);
+    box-shadow: 0 20px 45px rgba(83, 48, 29, 0.16);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1.6deg);
+    box-shadow: 0 28px 60px rgba(193, 68, 14, 0.22);
+  }
+}
+
+.animate-float-hero {
+  animation: floatHero 6s ease-in-out infinite;
+  border: 6px solid #fffaf1;
+  transition: all 0.3s ease;
+}
+
+/* Diya glow flame breathing */
+@keyframes diyaGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(242, 199, 120, 0.7)) drop-shadow(0 0 16px rgba(193, 68, 14, 0.4));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(242, 199, 120, 0.95)) drop-shadow(0 0 24px rgba(193, 68, 14, 0.6));
+    transform: scale(1.06);
+  }
+}
+
+.animate-diya {
+  display: inline-block;
+  animation: diyaGlow 2.5s ease-in-out infinite;
+}
+
+/* Pulse beacon dot */
+@keyframes pulseDot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(193, 68, 14, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(193, 68, 14, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(193, 68, 14, 0); }
+}
+
+.pulse-beacon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background-color: #c1440e;
+  animation: pulseDot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Continuous Marquee Ticker */
+@keyframes marqueeLeft {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: 200%;
+  animation: marqueeLeft 28s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Floating sparkle particle */
+@keyframes floatParticle {
+  0% { transform: translateY(0px) scale(0.8); opacity: 0; }
+  30% { opacity: 0.8; }
+  70% { opacity: 0.8; }
+  100% { transform: translateY(-35px) scale(1.2); opacity: 0; }
+}
+
+.particle-1 { animation: floatParticle 3.5s ease-in-out infinite; }
+.particle-2 { animation: floatParticle 4.2s ease-in-out 1.2s infinite; }
+.particle-3 { animation: floatParticle 3.8s ease-in-out 2.1s infinite; }
+
+/* Golden sheen sweep on hover */
+.sheen-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.sheen-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sheen-card:hover::after {
+  animation: sheenSweep 0.9s ease forwards;
+  opacity: 1;
+}
+
+@keyframes sheenSweep {
+  0% { left: -60%; }
+  100% { left: 140%; }
+}
+
+/* Temple card hover lift & golden rim glow */
+.temple-animated-card {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.temple-animated-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -10px rgba(193, 68, 14, 0.22), 0 0 0 2px rgba(193, 68, 14, 0.18);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   GLOBAL E-COMMERCE DESIGN SYSTEM & MODAL STYLES
+   ───────────────────────────────────────────────────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: rgba(45, 28, 20, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 1rem;
+  animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-container {
+  position: relative;
+  border-radius: 1.75rem;
+  background: #fffdf9;
+  border: 1px solid rgba(193, 68, 14, 0.12);
+  padding: 2rem;
+  box-shadow: 0 25px 60px -15px rgba(52, 37, 30, 0.35);
+  animation: modalPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-close {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background: #f5ede2;
+  color: #7a685b;
+  font-size: 1.25rem;
+  font-weight: bold;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: #ecd9c6;
+  color: #34251e;
+  transform: rotate(90deg);
+}
+
+.input-field {
+  width: 100%;
+  border-radius: 0.875rem;
+  border: 1.5px solid #e3d7ca;
+  background: #fff;
+  padding: 0.8rem 1rem;
+  font-size: 0.925rem;
+  color: #34251e;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-field:focus {
+  border-color: #c1440e;
+  box-shadow: 0 0 0 3px rgba(193, 68, 14, 0.15);
+}
+
+.input-field::placeholder {
+  color: #b5a496;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.875rem;
+  background: linear-gradient(135deg, #c1440e 0%, #df5619 100%);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.85rem 1.5rem;
+  box-shadow: 0 6px 18px rgba(193, 68, 14, 0.28);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(193, 68, 14, 0.38);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Processing Spinner */
+.processing-spinner {
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 4px solid #f2c778;
+  border-top-color: #c1440e;
+  border-radius: 50%;
+  animation: spin 0.85s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Receipt Checkmark Bounce */
+.receipt-check {
+  display: inline-block;
+  animation: checkBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes checkBounce {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}

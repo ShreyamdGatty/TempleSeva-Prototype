@@ -1,0 +1,93 @@
+{
+  "expo": {
+    "name": "TempleSeva",
+    "slug": "TempleSeva",
+    "version": "1.0.0",
+    "orientation": "unspecified",
+    "icon": "./assets/images/appsplash.png",
+    "scheme": "templeseva",
+    "newArchEnabled": false,
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": [
+          "paytm",
+          "phonepe",
+          "tez",
+          "credpay",
+          "bhim",
+          "mobikwik",
+          "freecharge",
+          "amazonpay",
+          "navi",
+          "kiwi",
+          "payzapp",
+          "jupiter",
+          "omnicard",
+          "icici",
+          "popclubapp",
+          "sbiyono",
+          "myjio",
+          "slice-upi",
+          "bobupi",
+          "shriramone",
+          "whatsapp",
+          "com.rediff.pay",
+          "hdfcbanknb",
+          "aunb",
+          "yonolitenb",
+          "yesirisnb",
+          "fedmobilenb",
+          "axisbanknb"
+        ],
+        "NSCameraUsageDescription": "Camera permission is required to scan card details securely."
+      }
+    },
+    "android": {
+      "softwareKeyboardLayoutMode": "resize",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon-foreground.png",
+        "backgroundImage": "./assets/images/icon-background.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.automation.TempleSeva"
+    },
+    "plugins": [
+      "expo-router",
+      "./plugins/withCCAvenue",
+      [
+        "expo-stallion-plugin",
+        {
+          "projectId": "6a8d2ff70940997c5ca12272",
+          "appToken": "spb_ap_XloanHmJb_XxS0l837NjvoMOyoiKtanjbnPiXIZxT1"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/icon-foreground-splash.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#D97706"
+        }
+      ],
+      "expo-image",
+      "expo-secure-store",
+      "expo-font",
+      "expo-localization",
+      "expo-web-browser",
+      "expo-sharing"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "82076904-a126-488a-9aaa-84d66b478a3f"
+      }
+    },
+    "owner": "Automation"
+  }
+}
