@@ -217,7 +217,11 @@ const MainLayout = ({
           if (onWishlist) onWishlist()
         }}
         onDevoteeDetails={() => {
-          if (onDevoteeDetails) onDevoteeDetails()
+          if (onDevoteeDetails) {
+            onDevoteeDetails()
+          } else {
+            navigate('/profile?tab=devotee-list', { state: { tab: 'devotee-list' } })
+          }
         }}
         onProfile={onProfile}
         onLogout={onLogout}

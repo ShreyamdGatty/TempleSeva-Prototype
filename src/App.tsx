@@ -39,10 +39,8 @@ import CheckoutModal from './components/CheckoutModal/CheckoutModal'
 import ReceiptModal from './components/ReceiptModal/ReceiptModal'
 import OrdersModal from './components/OrdersModal/OrdersModal'
 import ProfileModal from './components/ProfileModal/ProfileModal'
-import WishlistModal from './components/WishlistModal/WishlistModal'
 import SevaDetailModal from './components/SevaDetailModal/SevaDetailModal'
 import PaymentQrModal from './components/PaymentQrModal/PaymentQrModal'
-import DevoteeDetailsModal from './components/DevoteeDetailsModal/DevoteeDetailsModal'
 import SideMenuDrawer from './components/SideMenuDrawer/SideMenuDrawer'
 
 const AppContent = () => {
@@ -79,7 +77,6 @@ const AppContent = () => {
 
   // ── Wishlist ──────────────────────────────────────────
   const { wishlist, toggle: toggleWish, isWished } = useWishlist()
-  const [wishlistOpen, setWishlistOpen] = useState(false)
 
   // ── Addresses ─────────────────────────────────────────
   const { addresses, defaultAddress, addAddress, removeAddress, setDefault: setDefaultAddress } = useAddresses()
@@ -102,7 +99,6 @@ const AppContent = () => {
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState<Order | null>(null)
   const [qrPassOpen, setQrPassOpen] = useState(false)
-  const [devoteeDetailsOpen, setDevoteeDetailsOpen] = useState(false)
   const [sideMenuOpen, setSideMenuOpen] = useState(false)
 
   const handleNavigateToMySevas = useCallback(() => {
@@ -111,6 +107,14 @@ const AppContent = () => {
 
   const handleNavigateToProfile = useCallback(() => {
     navigate('/profile')
+  }, [navigate])
+
+  const handleNavigateToDevotees = useCallback(() => {
+    navigate('/profile?tab=devotee-list', { state: { tab: 'devotee-list' } })
+  }, [navigate])
+
+  const handleNavigateToWishlist = useCallback(() => {
+    navigate('/profile?tab=wishlist', { state: { tab: 'wishlist' } })
   }, [navigate])
 
   // ── Handlers ──────────────────────────────────────────
@@ -284,8 +288,8 @@ const AppContent = () => {
               onRegister={() => setAuthMode('register')}
               onOrders={handleNavigateToMySevas}
               onProfile={handleNavigateToProfile}
-              onWishlist={() => setWishlistOpen(true)}
-              onDevoteeDetails={() => setDevoteeDetailsOpen(true)}
+              onWishlist={handleNavigateToWishlist}
+              onDevoteeDetails={handleNavigateToDevotees}
               onOpenQrPass={() => setQrPassOpen(true)}
               onLogout={handleLogout}
             >
@@ -329,10 +333,10 @@ const AppContent = () => {
                 logout={handleLogout}
                 onOrders={handleNavigateToMySevas}
                 onProfile={handleNavigateToProfile}
-                onWishlist={() => setWishlistOpen(true)}
+                onWishlist={handleNavigateToWishlist}
                 wishlistCount={wishlist.length}
                 ordersCount={orders.length}
-                onDevoteeDetails={() => setDevoteeDetailsOpen(true)}
+                onDevoteeDetails={handleNavigateToDevotees}
                 onOpenQrPass={() => setQrPassOpen(true)}
                 onLogin={() => setAuthMode('login')}
                 onRegister={() => setAuthMode('register')}
@@ -367,7 +371,7 @@ const AppContent = () => {
               onLogin={() => setAuthMode('login')}
               onRegister={() => setAuthMode('register')}
               onProfile={handleNavigateToProfile}
-              onWishlist={() => setWishlistOpen(true)}
+              onWishlist={handleNavigateToWishlist}
               wishlistCount={wishlist.length}
               showToast={addToast}
             />
@@ -382,13 +386,16 @@ const AppContent = () => {
               user={user}
               addresses={addresses}
               onUpdateUser={updateUser}
-              onWishlist={() => setWishlistOpen(true)}
+              onWishlist={handleNavigateToWishlist}
               onOrders={handleNavigateToMySevas}
               onOpenQrPass={() => setQrPassOpen(true)}
               onOpenSideMenu={() => setSideMenuOpen(true)}
               onLogout={handleLogout}
               showToast={addToast}
-              onDevoteeDetails={() => setDevoteeDetailsOpen(true)}
+              onDevoteeDetails={handleNavigateToDevotees}
+              wishlist={wishlist}
+              onToggleWishlist={toggleWish}
+              onAddToCart={(seva) => addSeva(seva, selectedDate, addToast)}
             />
           }
         />
@@ -430,22 +437,6 @@ const AppContent = () => {
             setActiveSevaDetail(null)
           }}
           onClose={() => setActiveSevaDetail(null)}
-        />
-      )}
-
-      {/* Wishlist Drawer */}
-      {wishlistOpen && (
-        <WishlistModal
-          wishlistIds={wishlist}
-          onClose={() => setWishlistOpen(false)}
-          onRemove={(id) => toggleWish(id)}
-          onAddToCart={(seva) => {
-            addSeva(seva, selectedDate, addToast)
-          }}
-          onViewDetails={(seva) => {
-            setWishlistOpen(false)
-            setActiveSevaDetail(seva)
-          }}
         />
       )}
 
@@ -522,20 +513,6 @@ const AppContent = () => {
         />
       )}
 
-      {/* Devotee Details Manager Modal */}
-      {devoteeDetailsOpen && (
-        <DevoteeDetailsModal
-          devotee={devotee}
-          defaultUserName={user?.name}
-          onSave={(updatedDevotee) => {
-            setDevotee(updatedDevotee)
-            addDevotee(updatedDevotee)
-          }}
-          onClose={() => setDevoteeDetailsOpen(false)}
-          onToast={addToast}
-        />
-      )}
-
       {/* Global Slide Menu Drawer */}
       <SideMenuDrawer
         isOpen={sideMenuOpen}
@@ -543,8 +520,8 @@ const AppContent = () => {
         user={user}
         wishlistCount={wishlist.length}
         ordersCount={orders.length}
-        onWishlist={() => setWishlistOpen(true)}
-        onDevoteeDetails={() => setDevoteeDetailsOpen(true)}
+        onWishlist={handleNavigateToWishlist}
+        onDevoteeDetails={handleNavigateToDevotees}
         onProfile={handleNavigateToProfile}
         onLogout={handleLogout}
         onOrders={handleNavigateToMySevas}

@@ -80,16 +80,7 @@ const MySevasPage = ({
   }
 
   const openAddDevotee = () => {
-    setEditingDevoteeId(null)
-    setDevoteeForm({
-      name: user ? user.name : '',
-      nakshatra: nakshatras[0],
-      rashi: rashis[0],
-      gotram: '',
-      relationship: devotees.length === 0 ? 'Self' : 'Family Member',
-    })
-    setFormErrors({})
-    setIsDevoteeModalOpen(true)
+    navigate('/profile?tab=devotees', { state: { tab: 'devotees' } })
   }
 
   const openEditDevotee = (devotee: Devotee) => {

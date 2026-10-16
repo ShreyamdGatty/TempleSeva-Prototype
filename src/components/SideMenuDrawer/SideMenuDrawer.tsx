@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useNavigate } from 'react-router-dom'
 import type { User } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
 
@@ -9,14 +10,14 @@ export interface SideMenuDrawerProps {
   user: User | null
   wishlistCount?: number
   ordersCount?: number
-  onWishlist: () => void
-  onDevoteeDetails: () => void
+  onWishlist?: () => void
+  onDevoteeDetails?: () => void
   onProfile: () => void
   onLogout: () => void
   onOrders?: () => void
   onOpenQrPass?: () => void
   onLogin: () => void
-  onRegister: () => void
+  onRegister?: () => void
 }
 
 const SideMenuDrawer = ({
@@ -25,14 +26,13 @@ const SideMenuDrawer = ({
   user,
   wishlistCount = 0,
   ordersCount = 0,
-  onWishlist,
-  onDevoteeDetails,
   onProfile,
   onLogout,
   onOrders,
   onOpenQrPass,
   onLogin,
 }: SideMenuDrawerProps) => {
+  const navigate = useNavigate()
   const { language } = useLanguage()
 
   // Prevent background scrolling and close on Escape
@@ -94,7 +94,8 @@ const SideMenuDrawer = ({
                 type="button"
                 onClick={() => {
                   onClose()
-                  onProfile()
+                  navigate('/profile?tab=profile', { state: { tab: 'profile' } })
+                  if (onProfile) onProfile()
                 }}
                 className="mt-1 flex items-center gap-1 text-xs font-semibold text-[#666666] hover:text-[#f84464] transition cursor-pointer"
               >
@@ -109,7 +110,8 @@ const SideMenuDrawer = ({
                 type="button"
                 onClick={() => {
                   onClose()
-                  onProfile()
+                  navigate('/profile?tab=profile', { state: { tab: 'profile' } })
+                  if (onProfile) onProfile()
                 }}
                 className="grid h-13 w-13 place-items-center rounded-full bg-[#e4e4e7] text-white shadow-xs cursor-pointer hover:opacity-90 transition"
                 aria-label="Profile"
@@ -148,7 +150,7 @@ const SideMenuDrawer = ({
             <div
               onClick={() => {
                 onClose()
-                onDevoteeDetails()
+                navigate('/profile?tab=add-devotee', { state: { tab: 'add-devotee' } })
               }}
               className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
             >
@@ -199,7 +201,7 @@ const SideMenuDrawer = ({
             <div
               onClick={() => {
                 onClose()
-                onWishlist()
+                navigate('/profile?tab=wishlist', { state: { tab: 'wishlist' } })
               }}
               className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
             >
@@ -228,7 +230,7 @@ const SideMenuDrawer = ({
             <div
               onClick={() => {
                 onClose()
-                onDevoteeDetails()
+                navigate('/profile?tab=devotee-list', { state: { tab: 'devotee-list' } })
               }}
               className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
             >
