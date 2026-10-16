@@ -25,11 +25,9 @@ const ProfilePage = ({
   onUpdateUser,
   onWishlist,
   onOrders,
-  onOpenQrPass,
   onOpenSideMenu,
   onLogout,
   showToast,
-  onDevoteeDetails,
 }: ProfilePageProps) => {
   const navigate = useNavigate()
   const { language, toggleLanguage: _toggleLanguage, t } = useLanguage()
@@ -62,8 +60,8 @@ const ProfilePage = ({
     addDevotee({
       name: devoteeForm.name.trim(),
       relationship: devoteeForm.relationship,
-      nakshatra: devoteeForm.nakshatra || undefined,
-      rashi: devoteeForm.rashi || undefined,
+      nakshatra: devoteeForm.nakshatra || '',
+      rashi: devoteeForm.rashi || '',
       gotram: devoteeForm.gotram.trim() || undefined,
     })
 
@@ -841,11 +839,13 @@ const ProfilePage = ({
                           <button
                             type="button"
                             onClick={() => {
-                              removeDevotee(dev.id)
-                              showToast(
-                                language === 'KN' ? `${dev.name} ತೆಗೆದುಹಾಕಲಾಗಿದೆ` : `${dev.name} removed`,
-                                'info'
-                              )
+                              if (dev.id) {
+                                removeDevotee(dev.id)
+                                showToast(
+                                  language === 'KN' ? `${dev.name} ತೆಗೆದುಹಾಕಲಾಗಿದೆ` : `${dev.name} removed`,
+                                  'info'
+                                )
+                              }
                             }}
                             className="grid h-8 w-8 place-items-center rounded-lg text-sm text-[#aaaaaa] hover:bg-[#fff0f2] hover:text-[#f84464] transition cursor-pointer"
                             title="Remove Devotee"

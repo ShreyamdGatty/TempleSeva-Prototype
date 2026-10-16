@@ -41,8 +41,8 @@ export type User = {
 export type Devotee = {
   id?: string
   name: string
-  nakshatra: string
-  rashi: string
+  nakshatra?: string
+  rashi?: string
   gotram?: string
   relationship?: string
 }
