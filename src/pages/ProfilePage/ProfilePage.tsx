@@ -134,7 +134,7 @@ const ProfilePage = ({
   const [editDevoteeErrors, setEditDevoteeErrors] = useState<Record<string, boolean>>({})
 
   const startEditingDevotee = (dev: Devotee) => {
-    setEditingDevoteeId(dev.id)
+    setEditingDevoteeId(dev.id!)
     setEditDevoteeForm({
       name: dev.name,
       relationship: dev.relationship || 'Self',
@@ -967,7 +967,7 @@ const ProfilePage = ({
                               return (
                                 <tr key={dev.id} className="bg-[#fffaf5]">
                                   <td colSpan={7} className="p-4 sm:p-5 border-l-4 border-l-[#f84464]">
-                                    <form onSubmit={(e) => handleUpdateDevotee(dev.id, e)} className="space-y-4">
+                                    <form onSubmit={(e) => handleUpdateDevotee(dev.id!, e)} className="space-y-4">
                                       <div className="flex items-center justify-between pb-2 border-b border-[#f0e6dc]">
                                         <div className="flex items-center gap-2">
                                           <span className="text-sm font-bold text-[#f84464]">✏️</span>
@@ -1134,38 +1134,17 @@ const ProfilePage = ({
 
                                 {/* Nakshatra */}
                                 <td className="py-3.5 px-4 font-medium text-[#444444]">
-                                  {dev.nakshatra ? (
-                                    <span className="inline-flex items-center gap-1">
-                                      <span className="text-[#f59e0b]">⭐</span>
-                                      <span>{dev.nakshatra}</span>
-                                    </span>
-                                  ) : (
-                                    <span className="text-[#999999]">—</span>
-                                  )}
+                                  {dev.nakshatra || <span className="text-[#999999]">—</span>}
                                 </td>
 
                                 {/* Rashi */}
                                 <td className="py-3.5 px-4 font-medium text-[#444444]">
-                                  {dev.rashi ? (
-                                    <span className="inline-flex items-center gap-1">
-                                      <span className="text-[#3b82f6]">🌙</span>
-                                      <span>{dev.rashi}</span>
-                                    </span>
-                                  ) : (
-                                    <span className="text-[#999999]">—</span>
-                                  )}
+                                  {dev.rashi || <span className="text-[#999999]">—</span>}
                                 </td>
 
                                 {/* Gotram */}
                                 <td className="py-3.5 px-4 font-medium text-[#444444]">
-                                  {dev.gotram ? (
-                                    <span className="inline-flex items-center gap-1">
-                                      <span className="text-[#8b5cf6]">🔱</span>
-                                      <span>{dev.gotram}</span>
-                                    </span>
-                                  ) : (
-                                    <span className="text-[#999999]">—</span>
-                                  )}
+                                  {dev.gotram || <span className="text-[#999999]">—</span>}
                                 </td>
 
                                 {/* Actions */}
@@ -1190,7 +1169,7 @@ const ProfilePage = ({
                                               : `Are you sure you want to delete ${dev.name} from your devotee list?`
                                           )
                                         ) {
-                                          removeDevotee(dev.id)
+                                          removeDevotee(dev.id!)
                                           showToast(
                                             language === 'KN' ? `${dev.name} ಪಟ್ಟಿಯಿಂದ ತೆಗೆದುಹಾಕಲಾಗಿದೆ` : `${dev.name} removed from devotee list`,
                                             'info'
