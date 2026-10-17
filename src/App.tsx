@@ -117,6 +117,34 @@ const AppContent = () => {
     navigate('/profile?tab=wishlist', { state: { tab: 'wishlist' } })
   }, [navigate])
 
+  const handleAddToCartFromWishlist = useCallback(
+    (seva: Seva) => {
+      // 1. Choose auspicious date
+      const now = new Date()
+      const defaultDate = `${now.getDate()} ${now.toLocaleString('en-US', { month: 'short' })}`
+      const dateToUse = selectedDate || defaultDate
+      if (!selectedDate) {
+        setSelectedDate(dateToUse)
+      }
+
+      // 2. Switch temple if seva belongs to another sanctuary
+      if (seva.templeId && (!selectedTemple || selectedTemple.id !== seva.templeId)) {
+        const matching = temples.find((t) => t.id === seva.templeId)
+        if (matching) {
+          setSelectedTemple(matching)
+          window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(matching))
+        }
+      }
+
+      // 3. Add to cart silently without showing any warning or toast message
+      addSeva(seva, dateToUse)
+
+      // 4. Navigate directly to /sevas and instruct it to immediately open the cart!
+      navigate('/sevas', { state: { openCart: true } })
+    },
+    [selectedDate, setSelectedDate, selectedTemple, setSelectedTemple, addSeva, navigate]
+  )
+
   // ── Handlers ──────────────────────────────────────────
   const handleLogin = useCallback(
     (account: User) => {
@@ -419,7 +447,7 @@ const AppContent = () => {
               onSwitchTemple={() => setPickerOpen(true)}
               wishlist={wishlist}
               onToggleWishlist={toggleWish}
-              onAddToCart={(seva) => addSeva(seva, selectedDate, addToast)}
+              onAddToCart={handleAddToCartFromWishlist}
             />
           }
         />

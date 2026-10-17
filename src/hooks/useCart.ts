@@ -38,10 +38,9 @@ export function useCart() {
       const slot = typeof slotOrNotice === 'string' ? slotOrNotice : (seva.availableSlots && seva.availableSlots[0]) || '07:00 AM - Morning Pooja'
       const onNotice = typeof slotOrNotice === 'function' ? slotOrNotice : maybeNotice
 
-      if (!selectedDate) {
-        if (onNotice) onNotice('Choose a date before adding a Seva.', 'warning')
-        return
-      }
+      const now = new Date()
+      const fallbackDate = `${now.getDate()} ${now.toLocaleString('en-US', { month: 'short' })}`
+      const effectiveDate = selectedDate || fallbackDate
 
       const maxQty = seva.maxQuantity || 5
 
@@ -60,7 +59,7 @@ export function useCart() {
             ...updated[existingIndex],
             quantity: currentQty + 1,
             slot: slot || updated[existingIndex].slot,
-            date: selectedDate || updated[existingIndex].date,
+            date: effectiveDate || updated[existingIndex].date,
           }
           if (onNotice) onNotice(`${seva.name} quantity updated (${currentQty + 1})`, 'success')
           return updated
@@ -73,7 +72,7 @@ export function useCart() {
             id: `${seva.id}-${Date.now()}`,
             seva,
             quantity: 1,
-            date: selectedDate,
+            date: effectiveDate,
             slot,
           },
         ]

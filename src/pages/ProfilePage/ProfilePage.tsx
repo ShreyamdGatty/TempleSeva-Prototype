@@ -1351,14 +1351,8 @@ const ProfilePage = ({
                                   if (onAddToCart) {
                                     onAddToCart(rawSeva)
                                   } else {
-                                    navigate('/sevas')
+                                    navigate('/sevas', { state: { openCart: true } })
                                   }
-                                  showToast(
-                                    language === 'KN'
-                                      ? `${seva.name} ಬುಟ್ಟಿಗೆ ಸೇರಿಸಲಾಗಿದೆ!`
-                                      : `${seva.name} added to your seva basket!`,
-                                    'success'
-                                  )
                                 }}
                                 className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] px-4 py-2 text-xs font-bold text-white shadow-2xs hover:shadow-md transition cursor-pointer"
                               >

@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import type { Temple, Seva, CartItem, User, Coupon } from '../../types'
 import { sevas, categories, temples } from '../../data'
 import { formatPrice } from '../../utils/helpers'
@@ -95,6 +96,15 @@ const SevasPage = ({
 
   const [sideMenuOpen, setSideMenuOpen] = useState(false)
   const [sankalpamOpen, setSankalpamOpen] = useState(false)
+
+  // Listen to openCart state from navigation (e.g. Book Seva from Favorites)
+  const location = useLocation()
+  useEffect(() => {
+    if (location.state && (location.state as any).openCart) {
+      setSankalpamOpen(true)
+      window.history.replaceState({}, document.title)
+    }
+  }, [location.state])
   const [selectedSlots, setSelectedSlots] = useState<Record<string, string>>({})
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
