@@ -19,7 +19,7 @@ interface SankalpamModalProps {
   removeItem: (id: string) => void
   devotees: Devotee[]
   onAddDevotee: (devotee: Omit<Devotee, 'id'>) => Devotee
-  onCompleteOrder: (paymentMethod: string, ticketAllocations: Record<string, Devotee[]>) => Order
+  onCompleteOrder: (paymentMethod: string, ticketAllocations: Record<string, Devotee[]>) => Order | null
   user: User | null
   onLogin: () => void
   showToast: (msg: string, variant: 'success' | 'error' | 'info' | 'warning') => void
@@ -86,7 +86,7 @@ const SankalpamModal = ({
   }, [cart, devotees])
 
   useEffect(() => {
-    if (!applyAllDevoteeId && devotees.length > 0) {
+    if (!applyAllDevoteeId && devotees.length > 0 && devotees[0].id) {
       setApplyAllDevoteeId(devotees[0].id)
     }
   }, [devotees, applyAllDevoteeId])
@@ -122,7 +122,7 @@ const SankalpamModal = ({
 
   // Handle Apply specific devotee to all tickets
   const handleApplyDevoteeToAll = (dev: Devotee) => {
-    setApplyAllDevoteeId(dev.id)
+    if (dev.id) setApplyAllDevoteeId(dev.id)
     setTicketAssignments((prev) => {
       const next = { ...prev }
       cart.forEach((item) => {
@@ -533,8 +533,10 @@ const SankalpamModal = ({
                   const isSelected = applyAllDevoteeId === dev.id
                   return (
                     <div
-                      key={dev.id}
-                      onClick={() => setApplyAllDevoteeId(dev.id)}
+                      key={dev.id || dev.name}
+                      onClick={() => {
+                        if (dev.id) setApplyAllDevoteeId(dev.id)
+                      }}
                       className={`flex flex-col justify-between rounded-2xl border p-3.5 text-xs transition cursor-pointer ${
                         isSelected
                           ? 'border-[#c1440e] bg-[#fffaf5] shadow-sm ring-2 ring-[#c1440e]/20'

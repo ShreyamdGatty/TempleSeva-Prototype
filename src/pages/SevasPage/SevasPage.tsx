@@ -726,7 +726,7 @@ const SevasPage = ({
           removeItem={removeItem}
           devotees={devotees}
           onAddDevotee={onAddDevotee || ((d) => ({ ...d, id: `dev-${Date.now()}` }))}
-          onCompleteOrder={onCompleteOrder || (() => ({} as any))}
+          onCompleteOrder={onCompleteOrder || (() => null)}
           user={user}
           onLogin={onLogin || (() => {})}
           showToast={showToast}
