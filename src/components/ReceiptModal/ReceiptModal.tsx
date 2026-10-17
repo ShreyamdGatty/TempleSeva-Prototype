@@ -1,6 +1,7 @@
 import type { Order } from '../../types'
 import { formatPrice } from '../../utils/helpers'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { SacredQrCodeSvg } from '../PaymentQrModal/PaymentQrModal'
 
 interface ReceiptModalProps {
   order: Order
@@ -13,8 +14,19 @@ const ReceiptModal = ({ order, onClose, onTrack }: ReceiptModalProps) => {
   const localizedTemple = translateTemple(order.temple)
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container w-full max-w-md text-center">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-container relative w-full max-w-md max-h-[92vh] overflow-y-auto text-center mx-auto my-auto" onClick={(e) => e.stopPropagation()}>
+        {/* Top Right Close Icon */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full bg-[#f5ede2] text-base font-bold text-[#674f40] hover:bg-[#c1440e] hover:text-white transition cursor-pointer z-10"
+          aria-label="Close"
+          title="Close Receipt"
+        >
+          ×
+        </button>
+
         {/* Success Animation */}
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#e9f5ed]">
           <span className="receipt-check text-4xl text-[#28724d]">✓</span>
@@ -74,11 +86,11 @@ const ReceiptModal = ({ order, onClose, onTrack }: ReceiptModalProps) => {
           </div>
         </div>
 
-        {/* QR Code Placeholder */}
-        <div className="mx-auto mt-5 grid h-28 w-28 place-items-center rounded-xl border-2 border-dashed border-[#34251e] text-xs font-bold text-[#8b7a6d]">
-          DEMO<br />QR PASS
+        {/* Scannable Sacred QR Code Pass */}
+        <div className="mt-5 text-center">
+          <SacredQrCodeSvg code={order.id} />
+          <p className="mt-2 text-xs text-[#8b7a6d] font-semibold">{t('showAtEntrance')}</p>
         </div>
-        <p className="mt-2 text-xs text-[#8b7a6d]">{t('showAtEntrance')}</p>
 
         {/* Actions */}
         <div className="mt-6 flex gap-2">

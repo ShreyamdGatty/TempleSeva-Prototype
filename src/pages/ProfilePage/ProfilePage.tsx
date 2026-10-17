@@ -19,6 +19,7 @@ interface ProfilePageProps {
   onLogout: () => void
   showToast: (msg: string, variant: 'success' | 'error' | 'info' | 'warning') => void
   onDevoteeDetails?: () => void
+  onSwitchTemple?: () => void
   wishlist?: string[]
   onToggleWishlist?: (sevaId: string) => void
   onAddToCart?: (seva: Seva) => void
@@ -33,6 +34,7 @@ const ProfilePage = ({
   onOpenSideMenu,
   onLogout,
   showToast,
+  onSwitchTemple,
   wishlist: propWishlist,
   onToggleWishlist,
   onAddToCart,
@@ -249,9 +251,9 @@ const ProfilePage = ({
   const displayName = firstName.trim() || user?.name || 'Guest'
 
   return (
-    <div className="min-h-screen bg-[#f2f5f9] text-[#222222]">
-      {/* ── Top Header (BookMyShow / TempleSeva Style) ── */}
-      <header className="sticky top-0 z-30 border-b border-[#e5e9f0] bg-white transition-all shadow-2xs">
+    <div className="min-h-screen bg-[#fffcf6] text-[#34251e]">
+      {/* ── Top Header (Temple Theme) ── */}
+      <header className="sticky top-0 z-30 border-b border-[#eadfd1] bg-[#fffcf6]/95 backdrop-blur-md transition-all shadow-2xs">
         <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <button
@@ -264,11 +266,11 @@ const ProfilePage = ({
             <span className="font-serif text-2xl font-bold tracking-tight whitespace-nowrap">
               {language === 'KN' ? (
                 <>
-                  ಟೆಂಪಲ್<span className="text-[#f84464]">ಸೇವಾ</span>
+                  ಟೆಂಪಲ್<span className="text-[#c1440e]">ಸೇವಾ</span>
                 </>
               ) : (
                 <>
-                  Temple<span className="text-[#f84464]">Seva</span>
+                  Temple<span className="text-[#c1440e]">Seva</span>
                 </>
               )}
             </span>
@@ -278,11 +280,9 @@ const ProfilePage = ({
           <div className="flex items-center gap-3">
 
             {/* User Profile Pill */}
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#333333]">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-[#e4e4e7] text-white">
-                <svg className="h-5 w-5 text-[#71717a]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-                </svg>
+            <div className="flex items-center gap-2 text-xs font-semibold text-[#34251e]">
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-[#c1440e] to-[#d4a64a] text-white text-[10px] font-bold">
+                {displayName.charAt(0).toUpperCase()}
               </span>
               <span className="hidden sm:inline">Hi, {displayName}</span>
             </div>
@@ -292,14 +292,14 @@ const ProfilePage = ({
               <button
                 type="button"
                 onClick={onOpenSideMenu}
-                className="group flex items-center justify-center h-10 w-10 rounded-xl border border-[#e5e9f0] bg-white text-[#333333] shadow-xs transition hover:border-[#c1440e] hover:bg-[#fff9f3] hover:text-[#c1440e] cursor-pointer shrink-0"
+                className="group flex items-center justify-center h-10 w-10 rounded-xl border border-[#e0d3c5] bg-white text-[#34251e] shadow-xs transition hover:border-[#c1440e] hover:bg-[#fff9f3] hover:text-[#c1440e] cursor-pointer shrink-0"
                 aria-label="Open profile menu"
                 title={`${displayName} - Profile & Menu`}
               >
                 {/* Desktop View: Profile Icon */}
                 <div className="relative hidden sm:flex items-center justify-center pointer-events-none">
                   <svg
-                    className="h-5 w-5 text-[#333333] group-hover:text-[#c1440e] transition-colors"
+                    className="h-5 w-5 text-[#34251e] group-hover:text-[#c1440e] transition-colors"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -315,9 +315,9 @@ const ProfilePage = ({
 
                 {/* Mobile View: 3-Line Hamburger Icon */}
                 <span className="flex sm:hidden flex-col gap-1 w-5 items-center justify-center pointer-events-none">
-                  <span className="block h-0.5 w-full bg-[#333333] rounded-full group-hover:bg-[#c1440e] transition-colors" />
-                  <span className="block h-0.5 w-full bg-[#333333] rounded-full group-hover:bg-[#c1440e] transition-colors" />
-                  <span className="block h-0.5 w-full bg-[#333333] rounded-full group-hover:bg-[#c1440e] transition-colors" />
+                  <span className="block h-0.5 w-full bg-[#34251e] rounded-full group-hover:bg-[#c1440e] transition-colors" />
+                  <span className="block h-0.5 w-full bg-[#34251e] rounded-full group-hover:bg-[#c1440e] transition-colors" />
+                  <span className="block h-0.5 w-full bg-[#34251e] rounded-full group-hover:bg-[#c1440e] transition-colors" />
                 </span>
               </button>
             )}
@@ -325,43 +325,37 @@ const ProfilePage = ({
         </div>
 
         {/* Category Subheader */}
-        <div className="hidden lg:flex border-t border-[#f0f2f5] bg-white px-8 py-2 text-xs font-medium text-[#555555]">
+        <div className="hidden lg:flex border-t border-[#eadfd1] bg-[#fffcf6] px-8 py-2 text-xs font-medium text-[#75685d]">
           <div className="mx-auto flex max-w-7xl w-full items-center justify-between">
             <div className="flex gap-6">
-              <button onClick={() => navigate('/sevas')} className="hover:text-[#f84464] cursor-pointer">
+              <button onClick={() => navigate('/sevas')} className="hover:text-[#c1440e] cursor-pointer">
                 {t('navTemples')}
               </button>
-              <button onClick={() => navigate('/sevas')} className="hover:text-[#f84464] cursor-pointer">
+              <button onClick={() => navigate('/sevas')} className="hover:text-[#c1440e] cursor-pointer">
                 {t('heroBookSeva')}
               </button>
-              <button onClick={() => onOrders()} className="hover:text-[#f84464] cursor-pointer">
+              <button onClick={() => onOrders()} className="hover:text-[#c1440e] cursor-pointer">
                 {t('navMySevas')}
               </button>
-              <a href="/#how" className="hover:text-[#f84464]">
-                {t('navHowItWorks')}
-              </a>
-              <a href="/#faq" className="hover:text-[#f84464]">
-                {t('navFaq')}
-              </a>
             </div>
           </div>
         </div>
       </header>
 
-      {/* ── Main Two-Column Layout (Matching BookMyShow My Account) ── */}
+      {/* ── Main Two-Column Layout ── */}
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row gap-6 items-start">
           {/* ── LEFT COLUMN: "My Account" Menu Card ── */}
-          <aside className="w-full md:w-72 rounded-2xl bg-white p-4 shadow-xs border border-[#e5e9f0] shrink-0">
+          <aside className="w-full md:w-72 rounded-2xl bg-white p-4 shadow-sm border border-[#eadfd1] shrink-0">
             {/* Header: "My Account" + Close Button */}
-            <div className="flex items-center justify-between pb-3 mb-2 border-b border-[#f0f2f5] px-2">
-              <h2 className="text-xl font-bold text-[#222222]">
+            <div className="flex items-center justify-between pb-3 mb-2 border-b border-[#eadfd1] px-2">
+              <h2 className="font-serif text-xl font-bold text-[#34251e]">
                 {language === 'KN' ? 'ನನ್ನ ಖಾತೆ' : 'My Account'}
               </h2>
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="grid h-8 w-8 place-items-center rounded-full text-base font-bold text-[#888888] hover:bg-[#f4f4f5] hover:text-[#222222] transition cursor-pointer"
+                className="grid h-8 w-8 place-items-center rounded-full text-base font-bold text-[#8b7a6d] hover:bg-[#f5ede2] hover:text-[#34251e] transition cursor-pointer"
                 aria-label="Close"
                 title="Back to home"
               >
@@ -377,12 +371,12 @@ const ProfilePage = ({
                 onClick={() => selectTab('profile')}
                 className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 transition cursor-pointer ${
                   activeTab === 'profile'
-                    ? 'bg-[#fef0f2] text-[#f84464] font-bold'
-                    : 'text-[#444444] hover:bg-[#f9fafb]'
+                    ? 'bg-[#fdf2e9] text-[#c1440e] font-bold'
+                    : 'text-[#75685d] hover:bg-[#faf4ec]'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="grid h-6 w-6 place-items-center rounded-full bg-[#fce4e8] text-[#f84464] text-xs">
+                  <span className="grid h-6 w-6 place-items-center rounded-full bg-[#fdf2e9] text-[#c1440e] text-xs">
                     👤
                   </span>
                   <span>{language === 'KN' ? 'ಪ್ರೊಫೈಲ್' : 'Profile'}</span>
@@ -396,20 +390,20 @@ const ProfilePage = ({
                 onClick={() => selectTab('add-devotee')}
                 className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 transition cursor-pointer ${
                   activeTab === 'add-devotee'
-                    ? 'bg-[#fef0f2] text-[#f84464] font-bold'
-                    : 'text-[#444444] hover:bg-[#f9fafb]'
+                    ? 'bg-[#fdf2e9] text-[#c1440e] font-bold'
+                    : 'text-[#75685d] hover:bg-[#faf4ec]'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-base text-[#f84464] font-bold">➕</span>
-                  <span className="font-medium text-[#222222]">
+                  <span className="text-base text-[#c1440e] font-bold">➕</span>
+                  <span className="font-medium text-[#34251e]">
                     {language === 'KN' ? 'ಭಕ್ತರ ವಿವರ ಸೇರಿಸಿ' : 'Add Devotee'}
                   </span>
                 </div>
                 {activeTab === 'add-devotee' ? (
                   <span className="text-xs">▸</span>
                 ) : (
-                  <span className="text-xs text-[#aaaaaa]">›</span>
+                  <span className="text-xs text-[#b5a496]">›</span>
                 )}
               </button>
 
@@ -419,18 +413,18 @@ const ProfilePage = ({
                 onClick={() => selectTab('devotee-list')}
                 className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 transition cursor-pointer ${
                   activeTab === 'devotee-list'
-                    ? 'bg-[#fef0f2] text-[#f84464] font-bold'
-                    : 'text-[#444444] hover:bg-[#f9fafb]'
+                    ? 'bg-[#fdf2e9] text-[#c1440e] font-bold'
+                    : 'text-[#75685d] hover:bg-[#faf4ec]'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-base text-[#666666]">📿</span>
+                  <span className="text-base text-[#8b7a6d]">📿</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-[#222222]">
+                    <span className="font-medium text-[#34251e]">
                       {language === 'KN' ? 'ಭಕ್ತರ ಪಟ್ಟಿ' : 'Devotee List'}
                     </span>
                     {devotees.length > 0 && (
-                      <span className="rounded-full bg-[#f4f4f5] px-2 py-0.5 text-[10px] font-bold text-[#666666]">
+                      <span className="rounded-full bg-[#f5ede2] px-2 py-0.5 text-[10px] font-bold text-[#8b7a6d]">
                         {devotees.length}
                       </span>
                     )}
@@ -439,7 +433,7 @@ const ProfilePage = ({
                 {activeTab === 'devotee-list' ? (
                   <span className="text-xs">▸</span>
                 ) : (
-                  <span className="text-xs text-[#aaaaaa]">›</span>
+                  <span className="text-xs text-[#b5a496]">›</span>
                 )}
               </button>
 
@@ -447,13 +441,13 @@ const ProfilePage = ({
               <button
                 type="button"
                 onClick={() => onOrders()}
-                className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[#444444] hover:bg-[#f9fafb] transition cursor-pointer"
+                className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[#75685d] hover:bg-[#faf4ec] transition cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-base text-[#666666]">📄</span>
+                  <span className="text-base text-[#8b7a6d]">📄</span>
                   <span>{language === 'KN' ? 'ನಿಮ್ಮ ಸೇವೆಗಳು (Your Orders)' : 'Your Orders'}</span>
                 </div>
-                <span className="text-xs text-[#aaaaaa]">›</span>
+                <span className="text-xs text-[#b5a496]">›</span>
               </button>
 
               {/* Your Wishlist */}
@@ -462,18 +456,18 @@ const ProfilePage = ({
                 onClick={() => selectTab('wishlist')}
                 className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 transition cursor-pointer ${
                   activeTab === 'wishlist'
-                    ? 'bg-[#fef0f2] text-[#f84464] font-bold'
-                    : 'text-[#444444] hover:bg-[#f9fafb]'
+                    ? 'bg-[#fdf2e9] text-[#c1440e] font-bold'
+                    : 'text-[#75685d] hover:bg-[#faf4ec]'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-base text-[#666666]">🤍</span>
+                  <span className="text-base text-[#8b7a6d]">🤍</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-[#222222]">
+                    <span className="font-medium text-[#34251e]">
                       {language === 'KN' ? 'ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳು' : 'Your Wishlist'}
                     </span>
                     {currentWishlist.length > 0 && (
-                      <span className="rounded-full bg-[#fde8e8] px-2 py-0.5 text-[10px] font-bold text-[#dc2626]">
+                      <span className="rounded-full bg-[#fdf2e9] px-2 py-0.5 text-[10px] font-bold text-[#c1440e]">
                         {currentWishlist.length}
                       </span>
                     )}
@@ -482,39 +476,61 @@ const ProfilePage = ({
                 {activeTab === 'wishlist' ? (
                   <span className="text-xs">▸</span>
                 ) : (
-                  <span className="text-xs text-[#aaaaaa]">›</span>
+                  <span className="text-xs text-[#b5a496]">›</span>
                 )}
               </button>
+
+              {/* Switch Temple */}
+              {onSwitchTemple && (
+                <button
+                  type="button"
+                  onClick={onSwitchTemple}
+                  className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[#75685d] hover:bg-[#fff9f3] transition cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-base text-[#c1440e]">🛕</span>
+                    <div className="text-left">
+                      <span className="block font-medium text-[#34251e] group-hover:text-[#c1440e] transition">
+                        {language === 'KN' ? 'ದೇವಾಲಯ ಬದಲಾಯಿಸಿ' : 'Switch Temple'}
+                      </span>
+                      <span className="block text-[11px] text-[#8b7a6d]">
+                        {language === 'KN' ? 'ಕ್ಷೇತ್ರ ಬದಲಾವಣೆ' : 'Change active sanctuary'}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-xs text-[#b5a496] group-hover:text-[#c1440e]">›</span>
+                </button>
+              )}
 
               {/* Change Language */}
               <button
                 type="button"
                 onClick={() => setLangModalOpen(true)}
-                className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[#444444] hover:bg-[#f9fafb] transition cursor-pointer"
+                className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[#75685d] hover:bg-[#faf4ec] transition cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-base text-[#c1440e]">🌐</span>
                   <div className="text-left">
-                    <span className="block font-medium text-[#222222]">
+                    <span className="block font-medium text-[#34251e]">
                       {language === 'KN' ? 'ಭಾಷೆ ಬದಲಾಯಿಸಿ' : 'Change Language'}
                     </span>
-                    <span className="block text-[11px] text-[#888888]">
+                    <span className="block text-[11px] text-[#8b7a6d]">
                       {language === 'KN' ? 'ಪ್ರಸ್ತುತ: ಕನ್ನಡ' : 'Current: English'}
                     </span>
                   </div>
                 </div>
-                <span className="text-xs text-[#aaaaaa]">›</span>
+                <span className="text-xs text-[#b5a496]">›</span>
               </button>
 
             </nav>
 
             {/* Logout button at bottom of sidebar */}
             {user && (
-              <div className="mt-6 pt-4 border-t border-[#f0f2f5] px-2">
+              <div className="mt-6 pt-4 border-t border-[#eadfd1] px-2">
                 <button
                   type="button"
                   onClick={onLogout}
-                  className="w-full rounded-xl border border-[#f84464] py-2.5 text-center text-xs font-bold text-[#f84464] hover:bg-[#fff0f3] transition cursor-pointer"
+                  className="w-full rounded-xl border border-[#d94444] py-2.5 text-center text-xs font-bold text-[#d94444] hover:bg-[#fde8e8] transition cursor-pointer"
                 >
                   {language === 'KN' ? 'ನಿರ್ಗಮಿಸಿ (Sign out)' : 'Sign out'}
                 </button>
@@ -522,33 +538,33 @@ const ProfilePage = ({
             )}
           </aside>
 
-          {/* ── RIGHT COLUMN: Profile & Account Details (BookMyShow Style) ── */}
-          <section className="flex-1 w-full rounded-2xl bg-white p-6 sm:p-10 shadow-xs border border-[#e5e9f0]">
+          {/* ── RIGHT COLUMN: Profile & Account Details (Temple Theme) ── */}
+          <section className="flex-1 w-full rounded-2xl bg-white p-6 sm:p-10 shadow-sm border border-[#eadfd1]">
             {activeTab === 'profile' && (
               <form onSubmit={handleSaveChanges}>
                 {/* ── Top Profile Header: Large Avatar + Name ── */}
-                <div className="flex items-center gap-6 pb-8 border-b border-[#f0f2f5]">
-                  {/* Large Avatar Placeholder */}
-                  <div className="grid h-24 w-24 sm:h-28 sm:w-28 place-items-center rounded-full bg-[#f0f2f5] shadow-2xs shrink-0 border border-[#e5e9f0]">
-                    <svg className="h-16 w-16 text-[#8e8e93]" fill="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center gap-6 pb-8 border-b border-[#eadfd1]">
+                  {/* Large Avatar */}
+                  <div className="grid h-24 w-24 sm:h-28 sm:w-28 place-items-center rounded-full bg-gradient-to-br from-[#c1440e] to-[#d4a64a] shadow-lg shrink-0 border-4 border-[#f5ede2]">
+                    <svg className="h-14 w-14 text-white/90" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
                     </svg>
                   </div>
 
                   {/* Name Header */}
                   <div>
-                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#222222]">
+                    <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-[#34251e]">
                       {displayName}
                     </h1>
-                    <p className="mt-1 text-xs sm:text-sm text-[#777777]">
-                      {user ? 'Verified Devotee Account' : 'Guest Account · Add details to complete profile'}
+                    <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
+                      {user ? (language === 'KN' ? 'ಪ್ರಮಾಣೀಕೃತ ಭಕ್ತರ ಖಾತೆ' : 'Verified Devotee Account') : 'Guest Account · Add details to complete profile'}
                     </p>
                   </div>
                 </div>
 
                 {/* ── Section 1: Account Details ── */}
                 <div className="mt-8">
-                  <h3 className="text-lg font-bold text-[#222222]">
+                  <h3 className="font-serif text-lg font-bold text-[#34251e]">
                     {language === 'KN' ? 'ಖಾತೆ ವಿವರಗಳು' : 'Account Details'}
                   </h3>
 
@@ -556,13 +572,13 @@ const ProfilePage = ({
                     {/* Mobile Number */}
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-semibold text-[#555555]">
+                        <label className="text-xs font-semibold text-[#8b7a6d]">
                           {language === 'KN' ? 'ಮೊಬೈಲ್ ಸಂಖ್ಯೆ' : 'Mobile Number'}
                         </label>
                         <button
                           type="button"
                           onClick={() => setIsEditingPhone(!isEditingPhone)}
-                          className="flex items-center gap-1 text-xs font-bold text-[#f84464] hover:underline cursor-pointer"
+                          className="flex items-center gap-1 text-xs font-bold text-[#c1440e] hover:underline cursor-pointer"
                         >
                           <span>✎</span>
                           <span>{isEditingPhone ? 'Cancel' : 'Edit'}</span>
@@ -575,11 +591,11 @@ const ProfilePage = ({
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder="Enter mobile number"
-                          className="w-full rounded-xl border border-[#f84464] bg-white px-4 py-3 text-sm text-[#222222] outline-none shadow-2xs focus:ring-2 focus:ring-[#f84464]/20"
+                          className="w-full rounded-xl border border-[#c1440e] bg-white px-4 py-3 text-sm text-[#34251e] outline-none shadow-2xs focus:ring-2 focus:ring-[#c1440e]/20"
                           autoFocus
                         />
                       ) : (
-                        <div className="w-full rounded-xl border border-[#e5e9f0] bg-[#fafbfc] px-4 py-3 text-sm text-[#666666]">
+                        <div className="w-full rounded-xl border border-[#eadfd1] bg-[#faf4ec] px-4 py-3 text-sm text-[#75685d]">
                           {phone || '+91 98765 43210'}
                         </div>
                       )}
@@ -588,13 +604,13 @@ const ProfilePage = ({
                     {/* Email Address */}
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-semibold text-[#555555]">
+                        <label className="text-xs font-semibold text-[#8b7a6d]">
                           {language === 'KN' ? 'ಇಮೇಲ್ ವಿಳಾಸ' : 'Email Address'}
                         </label>
                         <button
                           type="button"
                           onClick={() => setIsEditingEmail(!isEditingEmail)}
-                          className="flex items-center gap-1 text-xs font-bold text-[#f84464] hover:underline cursor-pointer"
+                          className="flex items-center gap-1 text-xs font-bold text-[#c1440e] hover:underline cursor-pointer"
                         >
                           <span>✎</span>
                           <span>{isEditingEmail ? 'Cancel' : 'Edit'}</span>
@@ -608,11 +624,11 @@ const ProfilePage = ({
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Enter email address"
-                            className="w-full rounded-xl border border-[#f84464] bg-white px-4 py-3 text-sm text-[#222222] outline-none shadow-2xs focus:ring-2 focus:ring-[#f84464]/20 pr-10"
+                            className="w-full rounded-xl border border-[#c1440e] bg-white px-4 py-3 text-sm text-[#34251e] outline-none shadow-2xs focus:ring-2 focus:ring-[#c1440e]/20 pr-10"
                             autoFocus
                           />
                         ) : (
-                          <div className="flex items-center justify-between w-full rounded-xl border border-[#e5e9f0] bg-[#fafbfc] px-4 py-3 text-sm text-[#222222]">
+                          <div className="flex items-center justify-between w-full rounded-xl border border-[#eadfd1] bg-[#faf4ec] px-4 py-3 text-sm text-[#34251e]">
                             <span className="truncate">{email}</span>
                             <span className="text-[#22c55e] font-black text-sm" title="Verified">
                               ✓
@@ -625,43 +641,43 @@ const ProfilePage = ({
                 </div>
 
                 {/* ── Section 2: Personal Details ── */}
-                <div className="mt-10 pt-8 border-t border-[#f0f2f5]">
-                  <h3 className="text-lg font-bold text-[#222222]">
+                <div className="mt-10 pt-8 border-t border-[#eadfd1]">
+                  <h3 className="font-serif text-lg font-bold text-[#34251e]">
                     {language === 'KN' ? 'ವೈಯಕ್ತಿಕ ವಿವರಗಳು' : 'Personal Details'}
                   </h3>
 
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* First Name * */}
                     <div>
-                      <label className="block text-xs font-semibold text-[#555555] mb-1.5">
-                        {language === 'KN' ? 'ಮೊದಲ ಹೆಸರು' : 'First Name'} <span className="text-[#f84464]">*</span>
+                      <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
+                        {language === 'KN' ? 'ಮೊದಲ ಹೆಸರು' : 'First Name'} <span className="text-[#c1440e]">*</span>
                       </label>
                       <input
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         placeholder="Enter first name here"
-                        className="w-full rounded-xl border border-[#e5e9f0] bg-white px-4 py-3 text-sm text-[#222222] outline-none transition focus:border-[#f84464] focus:ring-2 focus:ring-[#f84464]/20"
+                        className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] focus:ring-2 focus:ring-[#c1440e]/20"
                       />
                     </div>
 
                     {/* Last Name * */}
                     <div>
-                      <label className="block text-xs font-semibold text-[#555555] mb-1.5">
-                        {language === 'KN' ? 'ಕೊನೆಯ ಹೆಸರು' : 'Last Name'} <span className="text-[#f84464]">*</span>
+                      <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
+                        {language === 'KN' ? 'ಕೊನೆಯ ಹೆಸರು' : 'Last Name'} <span className="text-[#c1440e]">*</span>
                       </label>
                       <input
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         placeholder="Enter last name here"
-                        className="w-full rounded-xl border border-[#e5e9f0] bg-white px-4 py-3 text-sm text-[#222222] outline-none transition focus:border-[#f84464] focus:ring-2 focus:ring-[#f84464]/20"
+                        className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] focus:ring-2 focus:ring-[#c1440e]/20"
                       />
                     </div>
 
                     {/* Birthday (Optional) */}
                     <div>
-                      <label className="block text-xs font-semibold text-[#555555] mb-1.5">
+                      <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
                         {language === 'KN' ? 'ಜನ್ಮ ದಿನಾಂಕ (ಐಚ್ಛಿಕ)' : 'Birthday (Optional)'}
                       </label>
                       <input
@@ -669,19 +685,19 @@ const ProfilePage = ({
                         value={birthday}
                         onChange={(e) => setBirthday(e.target.value)}
                         placeholder="DD/MM/YYYY"
-                        className="w-full rounded-xl border border-[#e5e9f0] bg-white px-4 py-3 text-sm text-[#222222] outline-none transition focus:border-[#f84464] focus:ring-2 focus:ring-[#f84464]/20"
+                        className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] focus:ring-2 focus:ring-[#c1440e]/20"
                       />
                     </div>
 
                     {/* Identity (Optional) */}
                     <div>
-                      <label className="block text-xs font-semibold text-[#555555] mb-1.5">
+                      <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
                         {language === 'KN' ? 'ಲಿಂಗ / ಗುರುತು (ಐಚ್ಛಿಕ)' : 'Identity (Optional)'}
                       </label>
                       <select
                         value={gender}
                         onChange={(e) => setGender(e.target.value)}
-                        className="w-full rounded-xl border border-[#e5e9f0] bg-white px-4 py-3 text-sm text-[#222222] outline-none transition focus:border-[#f84464] focus:ring-2 focus:ring-[#f84464]/20 cursor-pointer"
+                        className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] focus:ring-2 focus:ring-[#c1440e]/20 cursor-pointer"
                       >
                         <option value="">Select Identity</option>
                         <option value="Male">Male</option>
@@ -696,7 +712,7 @@ const ProfilePage = ({
                   <div className="mt-8 flex justify-end">
                     <button
                       type="submit"
-                      className="rounded-xl bg-[#f84464] px-8 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03152] hover:shadow-md cursor-pointer"
+                      className="rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] px-8 py-3.5 text-sm font-bold text-white shadow-md transition hover:shadow-lg hover:translate-y-[-1px] cursor-pointer"
                     >
                       {language === 'KN' ? 'ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ (Save Changes)' : 'Save Changes'}
                     </button>
@@ -709,21 +725,21 @@ const ProfilePage = ({
             {activeTab === 'add-devotee' && (
               <div>
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#f0f2f5] gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#eadfd1] gap-4">
                   <div className="flex items-center gap-4">
-                    <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-tr from-[#f84464] to-[#ff6b85] text-2xl text-white shadow-sm">
+                    <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-tr from-[#c1440e] to-[#df5619] text-2xl text-white shadow-sm">
                       ➕
                     </span>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#222222]">
+                        <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#34251e]">
                           {language === 'KN' ? 'ಭಕ್ತರ ವಿವರ ಸೇರಿಸಿ' : 'Add Devotee Details'}
                         </h2>
-                        <span className="rounded-full bg-[#fef0f2] px-2.5 py-0.5 text-xs font-bold text-[#f84464]">
+                        <span className="rounded-full bg-[#fdf2e9] px-2.5 py-0.5 text-xs font-bold text-[#c1440e]">
                           Sankalpa
                         </span>
                       </div>
-                      <p className="mt-1 text-xs sm:text-sm text-[#777777]">
+                      <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
                         {language === 'KN'
                           ? 'ಪೂಜಾ ಸಂಕಲ್ಪಕ್ಕಾಗಿ ಕುಟುಂಬ ಸದಸ್ಯರ ಹೆಸರು, ನಕ್ಷತ್ರ ಮತ್ತು ಗೋತ್ರ ಸೇರಿಸಿ'
                           : 'Add family member names, nakshatra & gotra for sacred temple pujas'}
@@ -735,7 +751,7 @@ const ProfilePage = ({
                     <button
                       type="button"
                       onClick={() => selectTab('devotee-list')}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-[#f0f2f5] px-4 py-2 text-xs font-bold text-[#444444] hover:bg-[#e4e7eb] transition cursor-pointer"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-[#f5ede2] px-4 py-2 text-xs font-bold text-[#75685d] hover:bg-[#eadfd1] transition cursor-pointer"
                     >
                       <span>📿</span>
                       <span>
@@ -747,7 +763,7 @@ const ProfilePage = ({
                     <button
                       type="button"
                       onClick={() => selectTab('profile')}
-                      className="flex items-center gap-1.5 rounded-xl border border-[#e5e9f0] px-4 py-2 text-xs font-bold text-[#555555] hover:border-[#f84464] hover:text-[#f84464] transition cursor-pointer"
+                      className="flex items-center gap-1.5 rounded-xl border border-[#eadfd1] px-4 py-2 text-xs font-bold text-[#75685d] hover:border-[#c1440e] hover:text-[#c1440e] transition cursor-pointer"
                     >
                       <span>←</span>
                       <span>{language === 'KN' ? 'ಪ್ರೊಫೈಲ್' : 'Profile'}</span>
@@ -756,7 +772,7 @@ const ProfilePage = ({
                 </div>
 
                 {/* Vedic Sankalpa Explainer Banner */}
-                <div className="mt-6 rounded-2xl border border-[#fed7aa] bg-[#fffaf5] p-4 text-xs text-[#8a6842] leading-relaxed">
+                <div className="mt-6 rounded-2xl border border-[#d4a64a]/30 bg-[#fffaf1] p-4 text-xs text-[#8b7a6d] leading-relaxed">
                   <span className="font-bold text-[#c1440e]">🕉️ {language === 'KN' ? 'ಸಂಕಲ್ಪದ ಮಹತ್ವ:' : 'Sankalpa Importance:'}</span>{' '}
                   {language === 'KN'
                     ? 'ಪೂಜೆಯ ಸಮಯದಲ್ಲಿ ಅರ್ಚಕರು ನಿಮ್ಮ ಮತ್ತು ನಿಮ್ಮ ಕುಟುಂಬ ಸದಸ್ಯರ ಹೆಸರು, ನಕ್ಷತ್ರ ಮತ್ತು ಗೋತ್ರವನ್ನು ಉಚ್ಚರಿಸಿ ದೈವಿಕ ಸಂಕಲ್ಪ ಮಾಡುತ್ತಾರೆ. ಈ ವಿವರಗಳು ಅರ್ಚಕರಿಗೆ ನೇರವಾಗಿ ತಲುಪುತ್ತವೆ.'
@@ -764,18 +780,18 @@ const ProfilePage = ({
                 </div>
 
                 {/* Devotee Form */}
-                <form onSubmit={handleSaveDevotee} className="mt-6 rounded-2xl border border-[#e5e9f0] bg-white p-6 shadow-xs">
-                  <h3 className="text-base font-bold text-[#222222] mb-4 flex items-center gap-2">
-                    <span className="text-[#f84464]">➕</span>
+                <form onSubmit={handleSaveDevotee} className="mt-6 rounded-2xl border border-[#eadfd1] bg-white p-6 shadow-xs">
+                  <h3 className="text-base font-bold text-[#34251e] mb-4 flex items-center gap-2">
+                    <span className="text-[#c1440e]">➕</span>
                     <span>{language === 'KN' ? 'ಹೊಸ ಭಕ್ತರನ್ನು ಸೇರಿಸಿ' : 'Add New Devotee / Family Member'}</span>
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Name */}
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-semibold text-[#555555] mb-1.5">
+                      <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
                         {language === 'KN' ? 'ಭಕ್ತರ ಪೂರ್ಣ ಹೆಸರು (Full Name)' : 'Devotee Full Name'}{' '}
-                        <span className="text-[#f84464]">*</span>
+                        <span className="text-[#c1440e]">*</span>
                       </label>
                       <input
                         type="text"
@@ -785,14 +801,14 @@ const ProfilePage = ({
                           if (devoteeErrors.name) setDevoteeErrors({})
                         }}
                         placeholder={language === 'KN' ? 'ಉದಾ. ಶ್ರೇಯಸ್ ಶರ್ಮ' : 'e.g. Ramesh Kumar'}
-                        className={`w-full rounded-xl border px-4 py-3 text-sm text-[#222222] outline-none transition ${
+                        className={`w-full rounded-xl border px-4 py-3 text-sm text-[#34251e] outline-none transition ${
                           devoteeErrors.name
-                            ? 'border-[#f84464] bg-[#fff5f5]'
-                            : 'border-[#e5e9f0] focus:border-[#f84464] focus:ring-2 focus:ring-[#f84464]/20'
+                            ? 'border-[#d94444] bg-[#fef2f2]'
+                            : 'border-[#eadfd1] focus:border-[#c1440e] focus:ring-2 focus:ring-[#c1440e]/20'
                         }`}
                       />
                       {devoteeErrors.name && (
-                        <p className="mt-1 text-xs text-[#f84464]">
+                        <p className="mt-1 text-xs text-[#d94444]">
                           {language === 'KN' ? 'ಹೆಸರು ಅಗತ್ಯವಿದೆ' : 'Devotee name is required'}
                         </p>
                       )}
@@ -800,13 +816,13 @@ const ProfilePage = ({
 
                     {/* Relationship */}
                     <div>
-                      <label className="block text-xs font-semibold text-[#555555] mb-1.5">
+                      <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
                         {language === 'KN' ? 'ಸಂಬಂಧ (Relationship)' : 'Relationship'}
                       </label>
                       <select
                         value={devoteeForm.relationship}
                         onChange={(e) => setDevoteeForm({ ...devoteeForm, relationship: e.target.value })}
-                        className="w-full rounded-xl border border-[#e5e9f0] bg-white px-4 py-3 text-sm text-[#222222] outline-none transition focus:border-[#f84464] cursor-pointer"
+                        className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] cursor-pointer"
                       >
                         <option value="Self">Self (ಸ್ವತಃ)</option>
                         <option value="Spouse">Spouse (ಪತಿ / ಪತ್ನಿ)</option>
@@ -822,28 +838,28 @@ const ProfilePage = ({
 
                     {/* Gotram */}
                     <div>
-                      <label className="block text-xs font-semibold text-[#555555] mb-1.5">
+                      <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
                         {language === 'KN' ? 'ಗೋತ್ರ (Gotram)' : 'Gotram'}{' '}
-                        <span className="text-[11px] text-[#888888]">({language === 'KN' ? 'ಐಚ್ಛಿಕ' : 'optional'})</span>
+                        <span className="text-[11px] text-[#b5a496]">({language === 'KN' ? 'ಐಚ್ಛಿಕ' : 'optional'})</span>
                       </label>
                       <input
                         type="text"
                         value={devoteeForm.gotram}
                         onChange={(e) => setDevoteeForm({ ...devoteeForm, gotram: e.target.value })}
                         placeholder={language === 'KN' ? 'ಉದಾ. ಕಶ್ಯಪ, ಭಾರದ್ವಾಜ' : 'e.g. Kashyapa, Bharadwaja'}
-                        className="w-full rounded-xl border border-[#e5e9f0] bg-white px-4 py-3 text-sm text-[#222222] outline-none transition focus:border-[#f84464]"
+                        className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e]"
                       />
                     </div>
 
                     {/* Nakshatra */}
                     <div>
-                      <label className="block text-xs font-semibold text-[#555555] mb-1.5">
+                      <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
                         {language === 'KN' ? 'ಜನ್ಮ ನಕ್ಷತ್ರ (Nakshatra)' : 'Nakshatra (Birth Star)'}
                       </label>
                       <select
                         value={devoteeForm.nakshatra}
                         onChange={(e) => setDevoteeForm({ ...devoteeForm, nakshatra: e.target.value })}
-                        className="w-full rounded-xl border border-[#e5e9f0] bg-white px-4 py-3 text-sm text-[#222222] outline-none transition focus:border-[#f84464] cursor-pointer"
+                        className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] cursor-pointer"
                       >
                         <option value="">{language === 'KN' ? '-- ನಕ್ಷತ್ರ ಆಯ್ಕೆಮಾಡಿ --' : '-- Select Nakshatra --'}</option>
                         {nakshatras.map((nak) => (
@@ -856,13 +872,13 @@ const ProfilePage = ({
 
                     {/* Rashi */}
                     <div>
-                      <label className="block text-xs font-semibold text-[#555555] mb-1.5">
+                      <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
                         {language === 'KN' ? 'ರಾಶಿ (Rashi / Moon Sign)' : 'Rashi (Moon Sign)'}
                       </label>
                       <select
                         value={devoteeForm.rashi}
                         onChange={(e) => setDevoteeForm({ ...devoteeForm, rashi: e.target.value })}
-                        className="w-full rounded-xl border border-[#e5e9f0] bg-white px-4 py-3 text-sm text-[#222222] outline-none transition focus:border-[#f84464] cursor-pointer"
+                        className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] cursor-pointer"
                       >
                         <option value="">{language === 'KN' ? '-- ರಾಶಿ ಆಯ್ಕೆಮಾಡಿ --' : '-- Select Rashi --'}</option>
                         {rashis.map((ras) => (
@@ -882,13 +898,13 @@ const ProfilePage = ({
                         setDevoteeForm({ name: '', relationship: 'Self', nakshatra: '', rashi: '', gotram: '' })
                         setDevoteeErrors({})
                       }}
-                      className="rounded-xl border border-[#d5d5d5] px-5 py-3 text-sm font-semibold text-[#555555] hover:bg-[#f7f7f7] transition cursor-pointer"
+                      className="rounded-xl border border-[#d9cabb] px-5 py-3 text-sm font-semibold text-[#75685d] hover:bg-[#f5ede2] transition cursor-pointer"
                     >
                       {language === 'KN' ? 'ಮರುಹೊಂದಿಸಿ (Reset)' : 'Reset'}
                     </button>
                     <button
                       type="submit"
-                      className="rounded-xl bg-[#f84464] px-8 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03152] hover:shadow-md cursor-pointer"
+                      className="rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] px-8 py-3 text-sm font-bold text-white shadow-md transition hover:shadow-lg hover:translate-y-[-1px] cursor-pointer"
                     >
                       {language === 'KN' ? 'ಭಕ್ತರ ವಿವರಗಳನ್ನು ಉಳಿಸಿ' : 'Save Devotee Details'}
                     </button>
@@ -901,21 +917,21 @@ const ProfilePage = ({
             {activeTab === 'devotee-list' && (
               <div>
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#f0f2f5] gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#eadfd1] gap-4">
                   <div className="flex items-center gap-4">
-                    <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-tr from-[#f84464] to-[#ff6b85] text-2xl text-white shadow-sm">
+                    <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-tr from-[#c1440e] to-[#df5619] text-2xl text-white shadow-sm">
                       📿
                     </span>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#222222]">
+                        <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#34251e]">
                           {language === 'KN' ? 'ಭಕ್ತರ ಪಟ್ಟಿ' : 'Devotee List'}
                         </h2>
-                        <span className="rounded-full bg-[#f4f4f5] px-2.5 py-0.5 text-xs font-bold text-[#666666]">
+                        <span className="rounded-full bg-[#f5ede2] px-2.5 py-0.5 text-xs font-bold text-[#8b7a6d]">
                           {devotees.length} {language === 'KN' ? 'ಭಕ್ತರು' : 'Devotees'}
                         </span>
                       </div>
-                      <p className="mt-1 text-xs sm:text-sm text-[#777777]">
+                      <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
                         {language === 'KN'
                           ? 'ಪೂಜಾ ಸಂಕಲ್ಪಕ್ಕಾಗಿ ಉಳಿಸಲಾದ ಕುಟುಂಬದ ಸದಸ್ಯರ ಪಟ್ಟಿ'
                           : 'Family members registered for sacred temple sankalpa'}
@@ -927,12 +943,12 @@ const ProfilePage = ({
                 {/* Devotees List Only */}
                 <div className="mt-8">
                   {devotees.length === 0 ? (
-                    <div className="text-center py-16 rounded-2xl border-2 border-dashed border-[#e5e9f0] bg-[#fafbfc]">
+                    <div className="text-center py-16 rounded-2xl border-2 border-dashed border-[#eadfd1] bg-[#faf4ec]">
                       <span className="text-5xl">📿</span>
-                      <h4 className="mt-4 font-bold text-lg text-[#222222]">
+                      <h4 className="mt-4 font-serif font-bold text-lg text-[#34251e]">
                         {language === 'KN' ? 'ಇನ್ನೂ ಯಾವುದೇ ಭಕ್ತರನ್ನು ಸೇರಿಸಲಾಗಿಲ್ಲ' : 'No devotees in your list yet'}
                       </h4>
-                      <p className="mt-1 text-xs sm:text-sm text-[#777777] max-w-md mx-auto">
+                      <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d] max-w-md mx-auto">
                         {language === 'KN'
                           ? 'ಪೂಜೆಯ ಸಮಯದಲ್ಲಿ ಅರ್ಚಕರು ನಿಮ್ಮ ಕುಟುಂಬದ ಸದಸ್ಯರ ಹೆಸರಿನಲ್ಲಿ ಸಂಕಲ್ಪ ಮಾಡಲು ವಿವರಗಳನ್ನು ಸೇರಿಸಿ.'
                           : 'Add your family members with birth star (nakshatra) and rashi for authentic priest sankalpa during rituals.'}
@@ -940,17 +956,17 @@ const ProfilePage = ({
                       <button
                         type="button"
                         onClick={() => selectTab('add-devotee')}
-                        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#f84464] px-6 py-3 text-xs font-bold text-white shadow-sm hover:bg-[#e03152] transition cursor-pointer"
+                        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] px-6 py-3 text-xs font-bold text-white shadow-md hover:shadow-lg transition cursor-pointer"
                       >
                         <span>➕</span>
                         <span>{language === 'KN' ? 'ಮೊದಲ ಭಕ್ತರನ್ನು ಸೇರಿಸಿ' : 'Add Your First Devotee'}</span>
                       </button>
                     </div>
                   ) : (
-                    <div className="overflow-x-auto rounded-2xl border border-[#e5e9f0] bg-white shadow-2xs">
+                    <div className="overflow-x-auto rounded-2xl border border-[#eadfd1] bg-white shadow-2xs">
                       <table className="w-full text-left border-collapse">
                         <thead>
-                          <tr className="border-b border-[#e5e9f0] bg-[#fafbfc] text-[11px] font-bold uppercase tracking-wider text-[#666666]">
+                          <tr className="border-b border-[#eadfd1] bg-[#faf4ec] text-[11px] font-bold uppercase tracking-wider text-[#8b7a6d]">
                             <th className="py-3.5 px-4 text-center w-12">#</th>
                             <th className="py-3.5 px-4">{language === 'KN' ? 'ಭಕ್ತರ ಹೆಸರು' : 'Devotee Name'}</th>
                             <th className="py-3.5 px-4">{language === 'KN' ? 'ಸಂಬಂಧ' : 'Relationship'}</th>
@@ -960,18 +976,18 @@ const ProfilePage = ({
                             <th className="py-3.5 px-4 text-center w-44">{language === 'KN' ? 'ಕ್ರಿಯೆಗಳು' : 'Actions'}</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#f0f2f5] text-xs text-[#333333]">
+                        <tbody className="divide-y divide-[#eadfd1] text-xs text-[#34251e]">
                           {devotees.map((dev, idx) => {
                             const isEditing = editingDevoteeId === dev.id
                             if (isEditing) {
                               return (
-                                <tr key={dev.id} className="bg-[#fffaf5]">
-                                  <td colSpan={7} className="p-4 sm:p-5 border-l-4 border-l-[#f84464]">
+                                <tr key={dev.id} className="bg-[#fffaf1]">
+                                  <td colSpan={7} className="p-4 sm:p-5 border-l-4 border-l-[#c1440e]">
                                     <form onSubmit={(e) => handleUpdateDevotee(dev.id!, e)} className="space-y-4">
-                                      <div className="flex items-center justify-between pb-2 border-b border-[#f0e6dc]">
+                                      <div className="flex items-center justify-between pb-2 border-b border-[#eadfd1]">
                                         <div className="flex items-center gap-2">
-                                          <span className="text-sm font-bold text-[#f84464]">✏️</span>
-                                          <h4 className="font-bold text-xs sm:text-sm text-[#222222]">
+                                          <span className="text-sm font-bold text-[#c1440e]">✏️</span>
+                                          <h4 className="font-bold text-xs sm:text-sm text-[#34251e]">
                                             {language === 'KN'
                                               ? `${dev.name} ಅವರ ವಿವರಗಳನ್ನು ತಿದ್ದುಪಡಿ ಮಾಡಿ`
                                               : `Edit Details for ${dev.name}`}
@@ -980,7 +996,7 @@ const ProfilePage = ({
                                         <button
                                           type="button"
                                           onClick={cancelEditingDevotee}
-                                          className="text-xs font-bold text-[#777777] hover:text-[#222222] transition cursor-pointer"
+                                          className="text-xs font-bold text-[#8b7a6d] hover:text-[#34251e] transition cursor-pointer"
                                         >
                                           ✕ {language === 'KN' ? 'ರದ್ದುಮಾಡಿ' : 'Cancel'}
                                         </button>
@@ -989,7 +1005,7 @@ const ProfilePage = ({
                                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                                         {/* Name */}
                                         <div className="lg:col-span-1">
-                                          <label className="block text-[10px] font-bold text-[#555555] mb-1">
+                                          <label className="block text-[10px] font-bold text-[#8b7a6d] mb-1">
                                             {language === 'KN' ? 'ಹೆಸರು *' : 'Name *'}
                                           </label>
                                           <input
@@ -999,10 +1015,10 @@ const ProfilePage = ({
                                               setEditDevoteeForm({ ...editDevoteeForm, name: e.target.value })
                                               if (editDevoteeErrors.name) setEditDevoteeErrors({})
                                             }}
-                                            className={`w-full rounded-lg border px-3 py-2 text-xs text-[#222222] outline-none transition bg-white ${
+                                            className={`w-full rounded-lg border px-3 py-2 text-xs text-[#34251e] outline-none transition bg-white ${
                                               editDevoteeErrors.name
-                                                ? 'border-[#f84464] bg-[#fff5f5]'
-                                                : 'border-[#e5e9f0] focus:border-[#f84464]'
+                                                ? 'border-[#d94444] bg-[#fef2f2]'
+                                                : 'border-[#eadfd1] focus:border-[#c1440e]'
                                             }`}
                                             placeholder="Devotee name"
                                           />
@@ -1010,13 +1026,13 @@ const ProfilePage = ({
 
                                         {/* Relationship */}
                                         <div>
-                                          <label className="block text-[10px] font-bold text-[#555555] mb-1">
+                                          <label className="block text-[10px] font-bold text-[#8b7a6d] mb-1">
                                             {language === 'KN' ? 'ಸಂಬಂಧ' : 'Relationship'}
                                           </label>
                                           <select
                                             value={editDevoteeForm.relationship}
                                             onChange={(e) => setEditDevoteeForm({ ...editDevoteeForm, relationship: e.target.value })}
-                                            className="w-full rounded-lg border border-[#e5e9f0] bg-white px-3 py-2 text-xs text-[#222222] outline-none transition focus:border-[#f84464] cursor-pointer"
+                                            className="w-full rounded-lg border border-[#eadfd1] bg-white px-3 py-2 text-xs text-[#34251e] outline-none transition focus:border-[#c1440e] cursor-pointer"
                                           >
                                             <option value="Self">Self (ಸ್ವತಃ)</option>
                                             <option value="Spouse">Spouse (ಪತಿ / ಪತ್ನಿ)</option>
@@ -1032,13 +1048,13 @@ const ProfilePage = ({
 
                                         {/* Nakshatra */}
                                         <div>
-                                          <label className="block text-[10px] font-bold text-[#555555] mb-1">
+                                          <label className="block text-[10px] font-bold text-[#8b7a6d] mb-1">
                                             {language === 'KN' ? 'ನಕ್ಷತ್ರ' : 'Nakshatra'}
                                           </label>
                                           <select
                                             value={editDevoteeForm.nakshatra}
                                             onChange={(e) => setEditDevoteeForm({ ...editDevoteeForm, nakshatra: e.target.value })}
-                                            className="w-full rounded-lg border border-[#e5e9f0] bg-white px-3 py-2 text-xs text-[#222222] outline-none transition focus:border-[#f84464] cursor-pointer"
+                                            className="w-full rounded-lg border border-[#eadfd1] bg-white px-3 py-2 text-xs text-[#34251e] outline-none transition focus:border-[#c1440e] cursor-pointer"
                                           >
                                             <option value="">-- Nakshatra --</option>
                                             {nakshatras.map((nak) => (
@@ -1051,13 +1067,13 @@ const ProfilePage = ({
 
                                         {/* Rashi */}
                                         <div>
-                                          <label className="block text-[10px] font-bold text-[#555555] mb-1">
+                                          <label className="block text-[10px] font-bold text-[#8b7a6d] mb-1">
                                             {language === 'KN' ? 'ರಾಶಿ' : 'Rashi'}
                                           </label>
                                           <select
                                             value={editDevoteeForm.rashi}
                                             onChange={(e) => setEditDevoteeForm({ ...editDevoteeForm, rashi: e.target.value })}
-                                            className="w-full rounded-lg border border-[#e5e9f0] bg-white px-3 py-2 text-xs text-[#222222] outline-none transition focus:border-[#f84464] cursor-pointer"
+                                            className="w-full rounded-lg border border-[#eadfd1] bg-white px-3 py-2 text-xs text-[#34251e] outline-none transition focus:border-[#c1440e] cursor-pointer"
                                           >
                                             <option value="">-- Rashi --</option>
                                             {rashis.map((ras) => (
@@ -1070,7 +1086,7 @@ const ProfilePage = ({
 
                                         {/* Gotram */}
                                         <div>
-                                          <label className="block text-[10px] font-bold text-[#555555] mb-1">
+                                          <label className="block text-[10px] font-bold text-[#8b7a6d] mb-1">
                                             {language === 'KN' ? 'ಗೋತ್ರ' : 'Gotram'}
                                           </label>
                                           <input
@@ -1078,7 +1094,7 @@ const ProfilePage = ({
                                             value={editDevoteeForm.gotram}
                                             onChange={(e) => setEditDevoteeForm({ ...editDevoteeForm, gotram: e.target.value })}
                                             placeholder="e.g. Kashyapa"
-                                            className="w-full rounded-lg border border-[#e5e9f0] bg-white px-3 py-2 text-xs text-[#222222] outline-none transition focus:border-[#f84464]"
+                                            className="w-full rounded-lg border border-[#eadfd1] bg-white px-3 py-2 text-xs text-[#34251e] outline-none transition focus:border-[#c1440e]"
                                           />
                                         </div>
                                       </div>
@@ -1087,13 +1103,13 @@ const ProfilePage = ({
                                         <button
                                           type="button"
                                           onClick={cancelEditingDevotee}
-                                          className="rounded-lg border border-[#d5d5d5] bg-white px-3.5 py-1.5 text-xs font-semibold text-[#555555] hover:bg-[#f0f0f0] transition cursor-pointer"
+                                          className="rounded-lg border border-[#d9cabb] bg-white px-3.5 py-1.5 text-xs font-semibold text-[#75685d] hover:bg-[#f5ede2] transition cursor-pointer"
                                         >
                                           {language === 'KN' ? 'ರದ್ದುಮಾಡಿ' : 'Cancel'}
                                         </button>
                                         <button
                                           type="submit"
-                                          className="rounded-lg bg-[#f84464] px-4 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-[#e03152] transition cursor-pointer"
+                                          className="rounded-lg bg-gradient-to-r from-[#c1440e] to-[#df5619] px-4 py-1.5 text-xs font-bold text-white shadow-2xs hover:shadow-md transition cursor-pointer"
                                         >
                                           {language === 'KN' ? 'ಉಳಿಸಿ' : 'Save Changes'}
                                         </button>
@@ -1105,46 +1121,46 @@ const ProfilePage = ({
                             }
 
                             return (
-                              <tr key={dev.id} className="hover:bg-[#fafbfc] transition">
+                              <tr key={dev.id} className="hover:bg-[#faf4ec] transition">
                                 {/* Index */}
-                                <td className="py-3.5 px-4 text-center font-semibold text-[#777777]">
+                                <td className="py-3.5 px-4 text-center font-semibold text-[#8b7a6d]">
                                   {idx + 1}
                                 </td>
 
                                 {/* Devotee Name */}
                                 <td className="py-3.5 px-4">
                                   <div className="flex items-center gap-2.5">
-                                    <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-to-tr from-[#fff0f2] to-[#fef2f4] border border-[#fed7dc] text-[#f84464] font-bold text-xs shadow-2xs">
+                                    <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-to-tr from-[#fdf2e9] to-[#fff5ee] border border-[#f5cfb5] text-[#c1440e] font-bold text-xs shadow-2xs">
                                       {dev.name.charAt(0).toUpperCase() || '🕉️'}
                                     </div>
-                                    <span className="font-bold text-sm text-[#222222]">{dev.name}</span>
+                                    <span className="font-bold text-sm text-[#34251e]">{dev.name}</span>
                                   </div>
                                 </td>
 
                                 {/* Relationship */}
                                 <td className="py-3.5 px-4">
                                   {dev.relationship ? (
-                                    <span className="inline-block rounded-md bg-[#fef0f2] px-2.5 py-0.5 text-[11px] font-bold text-[#f84464]">
+                                    <span className="inline-block rounded-md bg-[#fdf2e9] px-2.5 py-0.5 text-[11px] font-bold text-[#c1440e]">
                                       {dev.relationship}
                                     </span>
                                   ) : (
-                                    <span className="text-[#999999]">—</span>
+                                    <span className="text-[#b5a496]">—</span>
                                   )}
                                 </td>
 
                                 {/* Nakshatra */}
-                                <td className="py-3.5 px-4 font-medium text-[#444444]">
-                                  {dev.nakshatra || <span className="text-[#999999]">—</span>}
+                                <td className="py-3.5 px-4 font-medium text-[#75685d]">
+                                  {dev.nakshatra || <span className="text-[#b5a496]">—</span>}
                                 </td>
 
                                 {/* Rashi */}
-                                <td className="py-3.5 px-4 font-medium text-[#444444]">
-                                  {dev.rashi || <span className="text-[#999999]">—</span>}
+                                <td className="py-3.5 px-4 font-medium text-[#75685d]">
+                                  {dev.rashi || <span className="text-[#b5a496]">—</span>}
                                 </td>
 
                                 {/* Gotram */}
-                                <td className="py-3.5 px-4 font-medium text-[#444444]">
-                                  {dev.gotram || <span className="text-[#999999]">—</span>}
+                                <td className="py-3.5 px-4 font-medium text-[#75685d]">
+                                  {dev.gotram || <span className="text-[#b5a496]">—</span>}
                                 </td>
 
                                 {/* Actions */}
@@ -1153,7 +1169,7 @@ const ProfilePage = ({
                                     <button
                                       type="button"
                                       onClick={() => startEditingDevotee(dev)}
-                                      className="inline-flex items-center gap-1 rounded-lg border border-[#e5e9f0] bg-white px-2.5 py-1.5 text-xs font-bold text-[#333333] hover:border-[#f84464] hover:text-[#f84464] hover:bg-[#fff9fa] transition cursor-pointer shadow-2xs"
+                                      className="inline-flex items-center gap-1 rounded-lg border border-[#eadfd1] bg-white px-2.5 py-1.5 text-xs font-bold text-[#34251e] hover:border-[#c1440e] hover:text-[#c1440e] hover:bg-[#fff9f3] transition cursor-pointer shadow-2xs"
                                       title="Edit Devotee"
                                     >
                                       <span>✏️</span>
@@ -1176,7 +1192,7 @@ const ProfilePage = ({
                                           )
                                         }
                                       }}
-                                      className="inline-flex items-center gap-1 rounded-lg border border-[#fee2e2] bg-[#fff5f5] px-2.5 py-1.5 text-xs font-bold text-[#dc2626] hover:bg-[#fee2e2] transition cursor-pointer shadow-2xs"
+                                      className="inline-flex items-center gap-1 rounded-lg border border-[#fde8e8] bg-[#fef2f2] px-2.5 py-1.5 text-xs font-bold text-[#d94444] hover:bg-[#fde8e8] transition cursor-pointer shadow-2xs"
                                       title="Delete Devotee"
                                     >
                                       <span>🗑️</span>
@@ -1199,21 +1215,21 @@ const ProfilePage = ({
             {activeTab === 'wishlist' && (
               <div>
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#f0f2f5] gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#eadfd1] gap-4">
                   <div className="flex items-center gap-4">
-                    <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-tr from-[#f84464] to-[#ff6b85] text-2xl text-white shadow-sm">
+                    <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-tr from-[#c1440e] to-[#d4a64a] text-2xl text-white shadow-sm">
                       ❤️
                     </span>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#222222]">
+                        <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#34251e]">
                           {language === 'KN' ? 'ನಿಮ್ಮ ಮೆಚ್ಚಿನ ಸೇವೆಗಳು' : 'Your Wishlist'}
                         </h2>
-                        <span className="rounded-full bg-[#fef0f2] px-2.5 py-0.5 text-xs font-bold text-[#f84464]">
+                        <span className="rounded-full bg-[#fdf2e9] px-2.5 py-0.5 text-xs font-bold text-[#c1440e]">
                           {wishlistedSevas.length} {language === 'KN' ? 'ಸೇವೆಗಳು' : 'Sevas'}
                         </span>
                       </div>
-                      <p className="mt-1 text-xs sm:text-sm text-[#777777]">
+                      <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
                         {language === 'KN'
                           ? 'ನೀವು ಉಳಿಸಿದ ಪವಿತ್ರ ದೇವಾಲಯ ಸೇವೆಗಳು ಮತ್ತು ಪೂಜೆಗಳು'
                           : 'Your saved sacred temple rituals, archanas, and special offerings'}
@@ -1226,14 +1242,14 @@ const ProfilePage = ({
                 <div className="mt-8">
                   {wishlistedSevas.length === 0 ? (
                     /* Empty State */
-                    <div className="text-center py-16 px-4 rounded-2xl border-2 border-dashed border-[#e5e9f0] bg-[#fafbfc]">
+                    <div className="text-center py-16 px-4 rounded-2xl border-2 border-dashed border-[#eadfd1] bg-[#faf4ec]">
                       <span className="text-5xl">🤍</span>
-                      <h4 className="mt-4 font-bold text-lg text-[#222222]">
+                      <h4 className="mt-4 font-serif font-bold text-lg text-[#34251e]">
                         {language === 'KN'
                           ? 'ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳ ಪಟ್ಟಿ ಖಾಲಿಯಾಗಿದೆ'
                           : 'Your Wishlist is Empty'}
                       </h4>
-                      <p className="mt-1.5 text-xs sm:text-sm text-[#777777] max-w-md mx-auto">
+                      <p className="mt-1.5 text-xs sm:text-sm text-[#8b7a6d] max-w-md mx-auto">
                         {language === 'KN'
                           ? 'ನೀವು ಇನ್ನೂ ಯಾವುದೇ ಪವಿತ್ರ ಸೇವೆಗಳನ್ನು ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಿಲ್ಲ. ಲಭ್ಯವಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳನ್ನು ಉಳಿಸಲು ಹೃದಯ ಐಕಾನ್ ಕ್ಲಿಕ್ ಮಾಡಿ.'
                           : 'You haven\'t saved any sacred sevas or temple offerings yet. Explore our available sevas and tap the heart icon to save your favourites.'}
@@ -1241,7 +1257,7 @@ const ProfilePage = ({
                       <button
                         type="button"
                         onClick={() => navigate('/sevas')}
-                        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#f84464] px-6 py-3 text-xs font-bold text-white shadow-sm hover:bg-[#e03152] transition cursor-pointer"
+                        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] px-6 py-3 text-xs font-bold text-white shadow-md hover:shadow-lg transition cursor-pointer"
                       >
                         <span>🪔</span>
                         <span>{language === 'KN' ? 'ಪವಿತ್ರ ಸೇವೆಗಳನ್ನು ಅನ್ವೇಷಿಸಿ' : 'Explore Sacred Sevas'}</span>
@@ -1257,7 +1273,7 @@ const ProfilePage = ({
                         return (
                           <div
                             key={seva.id}
-                            className={`group relative flex flex-col justify-between rounded-2xl border border-[#e5e9f0] bg-white p-4 shadow-2xs hover:shadow-sm transition-all duration-300 ${
+                            className={`group relative flex flex-col justify-between rounded-2xl border border-[#eadfd1] bg-white p-4 shadow-2xs hover:shadow-sm transition-all duration-300 ${
                               isRemoving ? 'opacity-40 scale-[0.98]' : ''
                             }`}
                           >
@@ -1265,11 +1281,11 @@ const ProfilePage = ({
                               <img
                                 src={seva.image}
                                 alt={seva.name}
-                                className="h-24 w-24 shrink-0 rounded-xl object-cover border border-[#f0f2f5]"
+                                className="h-24 w-24 shrink-0 rounded-xl object-cover border border-[#eadfd1]"
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2">
-                                  <h4 className="font-bold text-base text-[#222222] truncate hover:text-[#f84464] transition">
+                                  <h4 className="font-bold text-base text-[#34251e] truncate hover:text-[#c1440e] transition">
                                     {seva.name}
                                   </h4>
                                   <button
@@ -1278,16 +1294,16 @@ const ProfilePage = ({
                                     disabled={isRemoving}
                                     className={`grid h-8 w-8 place-items-center rounded-full border transition-all duration-300 cursor-pointer shrink-0 shadow-2xs hover:scale-110 active:scale-95 ${
                                       isRemoving
-                                        ? 'bg-white border-[#d1d5db] text-[#9ca3af]'
-                                        : 'bg-[#fff1f2] border-[#fecdd3] text-[#e11d48] hover:bg-[#ffe4e6]'
+                                        ? 'bg-white border-[#d9cabb] text-[#b5a496]'
+                                        : 'bg-[#fdf2e9] border-[#f5cfb5] text-[#c1440e] hover:bg-[#fde5d5]'
                                     }`}
                                     title={isRemoving ? 'Removing...' : 'Remove from wishlist'}
                                     aria-label="Remove from wishlist"
                                   >
                                     {isRemoving ? (
-                                      /* White Heart when removing (Meesho style) */
+                                      /* White Heart when removing */
                                       <svg
-                                        className="h-4.5 w-4.5 text-[#9ca3af]"
+                                        className="h-4.5 w-4.5 text-[#b5a496]"
                                         viewBox="0 0 24 24"
                                         stroke="currentColor"
                                         strokeWidth="2"
@@ -1302,7 +1318,7 @@ const ProfilePage = ({
                                     ) : (
                                       /* Full Red Heart */
                                       <svg
-                                        className="h-4.5 w-4.5 fill-[#e11d48] text-[#e11d48]"
+                                        className="h-4.5 w-4.5 fill-[#c1440e] text-[#c1440e]"
                                         viewBox="0 0 24 24"
                                         fill="currentColor"
                                       >
@@ -1311,19 +1327,19 @@ const ProfilePage = ({
                                     )}
                                   </button>
                                 </div>
-                                <p className="mt-1 text-xs text-[#777777] line-clamp-2 leading-relaxed">
+                                <p className="mt-1 text-xs text-[#8b7a6d] line-clamp-2 leading-relaxed">
                                   {seva.description}
                                 </p>
                               </div>
                             </div>
 
-                            <div className="mt-4 pt-3 border-t border-[#f0f2f5] flex items-center justify-between">
+                            <div className="mt-4 pt-3 border-t border-[#eadfd1] flex items-center justify-between">
                               <div>
                                 <span className="font-bold text-base text-[#c1440e]">
                                   {formatPrice(seva.price)}
                                 </span>
                                 {seva.originalPrice && (
-                                  <span className="ml-2 text-xs text-[#888888] line-through">
+                                  <span className="ml-2 text-xs text-[#b5a496] line-through">
                                     {formatPrice(seva.originalPrice)}
                                   </span>
                                 )}
@@ -1344,7 +1360,7 @@ const ProfilePage = ({
                                     'success'
                                   )
                                 }}
-                                className="inline-flex items-center gap-1.5 rounded-xl bg-[#f84464] px-4 py-2 text-xs font-bold text-white shadow-2xs hover:bg-[#e03152] transition cursor-pointer"
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] px-4 py-2 text-xs font-bold text-white shadow-2xs hover:shadow-md transition cursor-pointer"
                               >
                                 <span>🪔</span>
                                 <span>{language === 'KN' ? 'ಸೇವೆ ಕಾಯ್ದಿರಿಸಿ' : 'Book Seva'}</span>

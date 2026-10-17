@@ -25,6 +25,10 @@ export type Seva = {
   popular: boolean
   duration: string
   benefits?: string[]
+  maxQuantity?: number
+  availableSlots?: string[]
+  reminder?: string
+  templeId?: string
 }
 
 export type User = {
@@ -64,7 +68,10 @@ export type CartItem = {
   id: string
   seva: Seva
   quantity: number
+  date?: string
+  slot?: string
   devotee?: Devotee
+  ticketDevotees?: Devotee[]
   savedForLater?: boolean
 }
 

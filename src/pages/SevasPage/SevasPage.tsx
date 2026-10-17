@@ -1,10 +1,12 @@
 import { useMemo, useState, useEffect } from 'react'
 import type { Temple, Seva, CartItem, User, Coupon } from '../../types'
-import { sevas, categories } from '../../data'
+import { sevas, categories, temples } from '../../data'
 import { formatPrice } from '../../utils/helpers'
 import { useLanguage } from '../../contexts/LanguageContext'
 import CalendarModal, { isBeforeToday, isSameDay } from '../../components/CalendarModal/CalendarModal'
 import SideMenuDrawer from '../../components/SideMenuDrawer/SideMenuDrawer'
+import SankalpamModal from '../../components/SankalpamModal/SankalpamModal'
+import type { Devotee, Order } from '../../types'
 
 interface SevasPageProps {
   selectedTemple: Temple | null
@@ -14,15 +16,15 @@ interface SevasPageProps {
   dates: string[]
   selectedDate: string
   setSelectedDate: (value: string) => void
-  addSeva: (seva: Seva, selectedDate: string, onNotice: (msg: string, variant: 'success' | 'error' | 'info' | 'warning') => void) => void
+  addSeva: (seva: Seva, selectedDate: string, slotOrNotice?: any, maybeNotice?: any) => void
   cart: CartItem[]
   subtotal: number
   discount: number
   total: number
-  appliedCoupon: Coupon | null
-  changeQty: (id: string, amount: number) => void
+  appliedCoupon?: Coupon | null
+  changeQty: (id: string, amount: number, onNotice?: any) => void
   removeItem: (id: string) => void
-  onPay: () => void
+  onPay?: () => void
   user: User | null
   logout: () => void
   onOrders: () => void
@@ -38,6 +40,9 @@ interface SevasPageProps {
   onLogin?: () => void
   onRegister?: () => void
   showToast: (msg: string, variant: 'success' | 'error' | 'info' | 'warning') => void
+  devotees?: Devotee[]
+  onAddDevotee?: (devotee: Omit<Devotee, 'id'>) => Devotee
+  onCompleteOrder?: (paymentMethod: string, ticketAllocations: Record<string, Devotee[]>) => Order | null
 }
 
 const StarDisplay = ({ rating }: { rating: number }) => (
@@ -53,6 +58,7 @@ interface DateCardItem {
   dateObj: Date
   isPast: boolean
   isToday: boolean
+  isCustom?: boolean
 }
 
 const SevasPage = ({
@@ -64,10 +70,8 @@ const SevasPage = ({
   cart,
   discount,
   total: cartTotal,
-  appliedCoupon,
   changeQty,
   removeItem,
-  onPay,
   user,
   logout,
   onOrders,
@@ -83,24 +87,28 @@ const SevasPage = ({
   onLogin,
   onRegister,
   showToast,
+  devotees = [],
+  onAddDevotee,
+  onCompleteOrder,
 }: SevasPageProps) => {
   const { language, t, translateTemple, translateSeva, translateCategory, formatDateLocalized } = useLanguage()
 
   const [sideMenuOpen, setSideMenuOpen] = useState(false)
+  const [sankalpamOpen, setSankalpamOpen] = useState(false)
+  const [selectedSlots, setSelectedSlots] = useState<Record<string, string>>({})
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'rating'>('featured')
-  const [cartExpanded, setCartExpanded] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
-  const [customDates, setCustomDates] = useState<Date[]>([])
+  const [customDate, setCustomDate] = useState<Date | null>(null)
 
-  // Generate dynamic date options starting from today (first 7 days)
+  // Generate dynamic date options starting from today (first 4 date cards)
   const dynamicDateCards: DateCardItem[] = useMemo(() => {
     const list: DateCardItem[] = []
     const now = new Date()
     now.setHours(0, 0, 0, 0)
 
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 4; i++) {
       const d = new Date(now)
       d.setDate(now.getDate() + i)
       const label = formatDateLocalized(d)
@@ -110,32 +118,33 @@ const SevasPage = ({
         dateObj: d,
         isPast: isBeforeToday(d),
         isToday: isSameDay(d, now),
+        isCustom: false,
       })
     }
     return list
   }, [formatDateLocalized])
 
-  // Combine dynamic date cards with any custom calendar-picked dates positioned on the right
+  // Combine dynamic 4 date cards with single custom calendar-picked date if chosen
   const allDateCards: DateCardItem[] = useMemo(() => {
     const list: DateCardItem[] = [...dynamicDateCards]
     const now = new Date()
     now.setHours(0, 0, 0, 0)
 
-    customDates.forEach((d) => {
-      // Check if already in dynamicDateCards
-      const existsInDynamic = dynamicDateCards.some((card) => isSameDay(card.dateObj, d))
+    if (customDate) {
+      const existsInDynamic = dynamicDateCards.some((card) => isSameDay(card.dateObj, customDate))
       if (!existsInDynamic) {
         list.push({
-          id: `custom-${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`,
-          label: formatDateLocalized(d),
-          dateObj: d,
-          isPast: isBeforeToday(d),
-          isToday: isSameDay(d, now),
+          id: 'custom-chosen-date-card',
+          label: formatDateLocalized(customDate),
+          dateObj: customDate,
+          isPast: isBeforeToday(customDate),
+          isToday: isSameDay(customDate, now),
+          isCustom: true,
         })
       }
-    })
+    }
     return list
-  }, [dynamicDateCards, customDates, formatDateLocalized])
+  }, [dynamicDateCards, customDate, formatDateLocalized])
 
   // Automatically select today's date if no date is set yet
   useEffect(() => {
@@ -144,17 +153,19 @@ const SevasPage = ({
     }
   }, [selectedDate, dynamicDateCards, setSelectedDate])
 
-  const localizedTemple = selectedTemple ? translateTemple(selectedTemple) : null
+  const activeTemple = selectedTemple || temples[0]
+  const localizedTemple = translateTemple(activeTemple)
 
   const filteredAndSortedSevas = useMemo(() => {
     return sevas
       .map(translateSeva)
       .filter((seva) => {
+        const matchesTemple = !activeTemple || !seva.templeId || seva.templeId === activeTemple.id
         const matchesSearch =
           seva.name.toLowerCase().includes(search.toLowerCase()) ||
           seva.description.toLowerCase().includes(search.toLowerCase())
         const matchesCategory = selectedCategory === 'All' || seva.category === selectedCategory
-        return matchesSearch && matchesCategory
+        return matchesTemple && matchesSearch && matchesCategory
       })
       .sort((a, b) => {
         if (sortBy === 'price-asc') return a.price - b.price
@@ -162,11 +173,12 @@ const SevasPage = ({
         if (sortBy === 'rating') return b.rating - a.rating
         return (b.popular ? 1 : 0) - (a.popular ? 1 : 0)
       })
-  }, [search, selectedCategory, sortBy, translateSeva])
+  }, [activeTemple, search, selectedCategory, sortBy, translateSeva])
 
   const handleAddSeva = (e: React.MouseEvent, seva: Seva) => {
     e.stopPropagation()
-    addSeva(seva, selectedDate, showToast)
+    const chosenSlot = selectedSlots[seva.id] || (seva.availableSlots && seva.availableSlots[0]) || '07:00 AM - Morning Pooja'
+    addSeva(seva, selectedDate, chosenSlot, showToast)
   }
 
   const handleHeartClick = (e: React.MouseEvent, sevaId: string) => {
@@ -208,55 +220,44 @@ const SevasPage = ({
           {user ? (
             <>
               <button
+                type="button"
                 onClick={onOrders}
-                className="rounded-full bg-[#f5ede2] px-4 py-2 text-sm font-bold transition hover:bg-[#ebdcc9] cursor-pointer"
+                className="flex items-center gap-1.5 rounded-full bg-[#f5ede2] hover:bg-[#ebdcc9] px-3.5 py-2 text-xs font-bold text-[#5c4d41] transition cursor-pointer"
               >
-                {t('navMySevas')}
-              </button>
-              <button
-                onClick={onProfile}
-                className="rounded-full bg-[#f5ede2] px-4 py-2 text-sm font-bold transition hover:bg-[#ebdcc9] cursor-pointer"
-              >
-                {t('navProfile')}
-              </button>
-              <button
-                onClick={logout}
-                className="rounded-full border border-[#d8c8b8] px-4 py-2 text-sm font-bold hover:bg-[#fde8e8] hover:text-[#d94444] cursor-pointer"
-              >
-                {t('navLogout')}
+                <span>📿</span>
+                <span>{t('navMySevas')}</span>
+                {ordersCount > 0 && (
+                  <span className="rounded-full bg-[#c1440e] px-1.5 py-0.2 text-[10px] font-bold text-white">
+                    {ordersCount}
+                  </span>
+                )}
               </button>
 
-              {/* Menu Trigger: Profile Icon in Desktop View, Hamburger in Mobile View */}
+              {/* Standard neat User Account / Profile button */}
               <button
                 type="button"
                 onClick={() => setSideMenuOpen(true)}
-                className="group flex items-center justify-center h-10 w-10 rounded-xl border border-[#e0d3c5] bg-white text-[#34251e] shadow-xs transition hover:border-[#c1440e] hover:bg-[#fff9f3] hover:text-[#c1440e] cursor-pointer shrink-0"
+                className="group flex items-center gap-2 rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] pl-1 pr-3 py-1 text-xs font-bold text-[#34251e] shadow-2xs transition cursor-pointer"
                 aria-label="Open profile menu"
                 title={`${user.name} - Profile & Menu`}
               >
-                {/* Desktop View: Profile Icon */}
-                <div className="relative hidden sm:flex items-center justify-center pointer-events-none">
-                  <svg
-                    className="h-5 w-5 text-[#34251e] group-hover:text-[#c1440e] transition-colors"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-[#c1440e] ring-2 ring-white" />
-                </div>
-
-                {/* Mobile View: 3-Line Hamburger Icon */}
-                <span className="flex sm:hidden flex-col gap-1 w-5 items-center justify-center pointer-events-none">
-                  <span className="block h-0.5 w-full bg-[#34251e] rounded-full group-hover:bg-[#c1440e] transition-colors" />
-                  <span className="block h-0.5 w-full bg-[#34251e] rounded-full group-hover:bg-[#c1440e] transition-colors" />
-                  <span className="block h-0.5 w-full bg-[#34251e] rounded-full group-hover:bg-[#c1440e] transition-colors" />
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-tr from-[#c1440e] to-[#df5619] text-[11px] font-bold text-white shadow-2xs">
+                  {user.name.charAt(0).toUpperCase()}
                 </span>
+                <span className="font-semibold text-[#34251e] group-hover:text-[#c1440e] transition-colors max-w-[120px] truncate">
+                  {user.name.split(' ')[0]}
+                </span>
+                <svg
+                  className="h-3.5 w-3.5 text-[#8b7a6d] group-hover:text-[#c1440e] transition-transform group-hover:translate-y-0.5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
               </button>
             </>
           ) : (
@@ -277,6 +278,7 @@ const SevasPage = ({
           )}
         </div>
       </div>
+
 
       {localizedTemple ? (
         <>
@@ -359,11 +361,22 @@ const SevasPage = ({
                     {/* Today Badge on Card */}
                     {card.isToday && (
                       <span
-                        className={`absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-sm ${
+                        className={`absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-sm whitespace-nowrap ${
                           isSelected ? 'bg-[#d4a64a] text-[#34251e]' : 'bg-[#d4a64a] text-white'
                         }`}
                       >
                         {t('todayBadge')}
+                      </span>
+                    )}
+
+                    {/* Custom Chosen Date Badge on Card */}
+                    {card.isCustom && !card.isToday && (
+                      <span
+                        className={`absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-sm whitespace-nowrap ${
+                          isSelected ? 'bg-[#d4a64a] text-[#34251e]' : 'bg-[#c1440e] text-white'
+                        }`}
+                      >
+                        {language === 'KN' ? 'ಆಯ್ಕೆ ದಿನಾಂಕ' : 'Chosen Date'}
                       </span>
                     )}
 
@@ -516,9 +529,48 @@ const SevasPage = ({
                           <p className="mt-2 text-xs leading-5 text-[#75685d] line-clamp-2">
                             {seva.description}
                           </p>
+
+                          {/* Reminder (e.g. priest reminder, whatsapp notifications) */}
+                          {seva.reminder && (
+                            <div className="mt-2.5 flex items-center gap-1.5 rounded-lg bg-[#fff8ee] border border-[#f5cfb5]/70 px-2.5 py-1 text-[11px] text-[#8a6842]">
+                              <span>🔔</span>
+                              <span className="font-medium line-clamp-1">{seva.reminder}</span>
+                            </div>
+                          )}
+
+                          {/* Slot Selector */}
+                          <div className="mt-3">
+                            <div className="flex items-center justify-between text-[11px] font-bold text-[#5c4d41] mb-1">
+                              <span>Select Time Slot:</span>
+                              <span className="text-[10px] text-[#c1440e] font-semibold">Available</span>
+                            </div>
+                            <select
+                              value={
+                                selectedSlots[seva.id] ||
+                                (seva.availableSlots && seva.availableSlots[0]) ||
+                                '07:00 AM - Morning Pooja'
+                              }
+                              onChange={(e) => {
+                                setSelectedSlots((prev) => ({ ...prev, [seva.id]: e.target.value }))
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-full rounded-xl border border-[#d8c8b8] bg-[#fffdfa] px-2.5 py-1.5 text-xs font-semibold text-[#34251e] hover:border-[#c1440e] transition cursor-pointer"
+                            >
+                              {(seva.availableSlots || [
+                                '07:00 AM - Morning Pooja',
+                                '09:30 AM - Sankalpa Batch',
+                                '11:30 AM - Abhishekam',
+                                '06:00 PM - Sandhya Deepotsava',
+                              ]).map((slotOption) => (
+                                <option key={slotOption} value={slotOption}>
+                                  {slotOption}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                         </div>
 
-                        {/* Footer / Price & Quick Add */}
+                        {/* Footer / Price & Stepper or Add button */}
                         <div className="mt-4 border-t border-[#f5ede2] pt-3">
                           <div className="flex items-center justify-between">
                             <div>
@@ -531,16 +583,74 @@ const SevasPage = ({
                                 </span>
                               )}
                             </div>
-                            <button
-                              onClick={(e) => handleAddSeva(e, seva)}
-                              className="rounded-xl bg-[#c1440e] px-3.5 py-1.5 text-xs font-bold text-white shadow transition hover:bg-[#a5370a] cursor-pointer"
-                            >
-                              {t('addBtn')}
-                            </button>
+
+                            {/* Stepper if in cart, or Add button without + sign */}
+                            {(() => {
+                              const chosenSlot =
+                                selectedSlots[seva.id] ||
+                                (seva.availableSlots && seva.availableSlots[0]) ||
+                                '07:00 AM - Morning Pooja'
+                              const itemInCart = cart.find(
+                                (item) => item.seva.id === seva.id && (!item.slot || item.slot === chosenSlot)
+                              )
+                              const maxQty = seva.maxQuantity || 5
+
+                              if (itemInCart) {
+                                const isMax = itemInCart.quantity >= maxQty
+                                return (
+                                  <div className="flex items-center gap-1.5 rounded-xl border border-[#c1440e] bg-[#fffaf5] p-1 shadow-2xs">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        changeQty(itemInCart.id, -1, showToast)
+                                      }}
+                                      className="grid h-7 w-7 place-items-center rounded-lg bg-white text-xs font-bold text-[#c1440e] hover:bg-[#c1440e] hover:text-white transition shadow-2xs cursor-pointer"
+                                      title="Decrease quantity"
+                                    >
+                                      −
+                                    </button>
+                                    <span className="w-6 text-center text-xs font-bold text-[#c1440e]">
+                                      {itemInCart.quantity}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      disabled={isMax}
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        changeQty(itemInCart.id, 1, showToast)
+                                      }}
+                                      className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-bold transition shadow-2xs ${
+                                        isMax
+                                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                          : 'bg-white text-[#c1440e] hover:bg-[#c1440e] hover:text-white cursor-pointer'
+                                      }`}
+                                      title={isMax ? `Max limit (${maxQty}) reached` : 'Increase quantity'}
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                )
+                              }
+
+                              return (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    addSeva(seva, selectedDate, chosenSlot, showToast)
+                                  }}
+                                  className="rounded-xl bg-[#c1440e] px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-[#a5370a] cursor-pointer"
+                                >
+                                  {t('addBtn')}
+                                </button>
+                              )
+                            })()}
                           </div>
                           {seva.requiresDevotee && (
-                            <p className="mt-2 text-[10px] text-[#b0782a]">
-                              ℹ {t('devoteeRequired')}
+                            <p className="mt-2 text-[10px] text-[#b0782a] flex items-center gap-1">
+                              <span>🕉️</span>
+                              <span>{t('devoteeRequired')}</span>
                             </p>
                           )}
                         </div>
@@ -561,103 +671,67 @@ const SevasPage = ({
         </div>
       )}
 
-      {/* ── Floating Modern E-Commerce Cart Drawer Bar ── */}
+      {/* ── Modern Curved Floating Cart Bar ── */}
       {cart.length > 0 && (
-        <aside className="fixed bottom-5 left-5 right-5 z-40 mx-auto max-w-2xl rounded-2xl bg-[#2e1d15] p-4 text-white shadow-2xl transition-all">
+        <aside
+          onClick={() => setSankalpamOpen(true)}
+          className="fixed bottom-6 left-4 right-4 z-40 mx-auto max-w-xl rounded-full bg-gradient-to-r from-[#2c1d15] via-[#3a251b] to-[#2c1d15] px-5 py-3 text-white shadow-2xl border border-[#d4a64a]/40 backdrop-blur-md transition-all hover:scale-[1.01] cursor-pointer"
+        >
           <div className="flex items-center justify-between">
-            <div
-              onClick={() => setCartExpanded(!cartExpanded)}
-              className="flex cursor-pointer items-center gap-3"
-            >
-              <div className="relative grid h-10 w-10 place-items-center rounded-xl bg-[#c1440e] text-lg font-bold">
+            <div className="flex items-center gap-3.5">
+              <div className="relative grid h-10 w-10 place-items-center rounded-full bg-[#c1440e] text-lg font-bold shadow-sm">
                 🛒
-                <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-[#f2c778] text-[10px] font-bold text-[#34251e]">
+                <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-[#f2c778] text-[10px] font-black text-[#34251e]">
                   {cart.reduce((s, i) => s + i.quantity, 0)}
                 </span>
               </div>
               <div>
-                <p className="text-sm font-bold">
-                  {cart.length} {t('cartTitle')}
+                <p className="text-sm font-bold text-[#fbf6f0]">
+                  {cart.length} {t('cartTitle')} · <span className="text-[#f2c778]">{formatPrice(cartTotal)}</span>
                 </p>
-                <p className="text-xs text-[#eadfd1]">
-                  {selectedDate} · {localizedTemple?.name}{' '}
-                  {cartExpanded ? t('hideItems') : t('viewItems')}
+                <p className="text-[11px] text-[#eadfd1]">
+                  {selectedDate} · Tap to view & assign devotees
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="font-serif text-2xl font-bold text-[#f2c778]">
-                  {formatPrice(cartTotal)}
-                </p>
-                {discount > 0 && (
-                  <p className="text-[10px] text-[#5cb85c]">
-                    {t('savedPromo')} {formatPrice(discount)}
-                  </p>
-                )}
-              </div>
+            <div className="flex items-center gap-2">
               <button
-                onClick={onPay}
-                className="rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] px-6 py-2.5 text-sm font-bold text-white shadow-lg transition hover:brightness-110 cursor-pointer"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSankalpamOpen(true)
+                }}
+                className="rounded-full bg-gradient-to-r from-[#c1440e] to-[#df5619] px-5 py-2 text-xs font-bold text-white shadow-md transition hover:brightness-110 cursor-pointer"
               >
-                {t('checkoutBtn')}
+                View Cart →
               </button>
             </div>
           </div>
-
-          {/* Collapsible item list */}
-          {cartExpanded && (
-            <div className="mt-4 max-h-56 space-y-2.5 overflow-y-auto border-t border-white/15 pt-3">
-              {cart.map((item) => {
-                const localizedItemSeva = translateSeva(item.seva)
-                return (
-                  <div key={item.id} className="flex items-center justify-between text-sm">
-                    <div>
-                      <p className="font-semibold">{localizedItemSeva.name}</p>
-                      {item.devotee && (
-                        <p className="text-xs text-[#e0cfbe]">
-                          {t('forDevotee')}: {item.devotee.name} ({item.devotee.nakshatra})
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-sm">
-                        {formatPrice(item.seva.price * item.quantity)}
-                      </span>
-                      <div className="flex items-center gap-1.5 rounded-lg bg-white/10 p-1">
-                        <button
-                          onClick={() => changeQty(item.id, -1)}
-                          className="grid h-5 w-5 place-items-center rounded bg-white/20 text-xs font-bold cursor-pointer"
-                        >
-                          −
-                        </button>
-                        <span className="px-1 text-xs font-bold">{item.quantity}</span>
-                        <button
-                          onClick={() => changeQty(item.id, 1)}
-                          className="grid h-5 w-5 place-items-center rounded bg-white/20 text-xs font-bold cursor-pointer"
-                        >
-                          +
-                        </button>
-                      </div>
-                      <button
-                        onClick={() => removeItem(item.id)}
-                        className="text-xs text-red-400 hover:text-red-300 cursor-pointer"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </div>
-                )
-              })}
-              {appliedCoupon && (
-                <p className="text-xs text-[#5cb85c]">
-                  {t('promoApplied')}: {appliedCoupon.code}
-                </p>
-              )}
-            </div>
-          )}
         </aside>
+      )}
+
+      {/* ── Sankalpam & My Cart Modal ── */}
+      {sankalpamOpen && (
+        <SankalpamModal
+          isOpen={sankalpamOpen}
+          onClose={() => setSankalpamOpen(false)}
+          cart={cart}
+          selectedTemple={selectedTemple}
+          selectedDate={selectedDate}
+          subtotal={cartTotal + discount}
+          discount={discount}
+          total={cartTotal}
+          changeQty={changeQty}
+          removeItem={removeItem}
+          devotees={devotees}
+          onAddDevotee={onAddDevotee || ((d) => ({ ...d, id: `dev-${Date.now()}` }))}
+          onCompleteOrder={onCompleteOrder || (() => ({} as any))}
+          user={user}
+          onLogin={onLogin || (() => {})}
+          showToast={showToast}
+          onNavigateToMySevas={onOrders}
+        />
       )}
 
       {/* ── Calendar Modal ── */}
@@ -665,16 +739,13 @@ const SevasPage = ({
         <CalendarModal
           selectedDate={selectedDate}
           onSelectDate={(newDate, dateObj) => {
-            // Check if the selected date already exists in the initial 7 date cards
+            // Check if the selected date already exists in the initial 4 date cards
             const existsInCards = dynamicDateCards.some((card) => isSameDay(card.dateObj, dateObj))
             if (!existsInCards) {
-              setCustomDates((prev) => {
-                const alreadyInCustom = prev.some((d) => isSameDay(d, dateObj))
-                if (!alreadyInCustom) {
-                  return [...prev, dateObj]
-                }
-                return prev
-              })
+              // Updates the same custom card (e.g. if 28 was picked, then user picks 29, updates the same card)
+              setCustomDate(dateObj)
+            } else {
+              setCustomDate(null)
             }
             setSelectedDate(newDate)
             showToast(`${t('selectedBadge')}: ${newDate}`, 'success')
@@ -698,6 +769,7 @@ const SevasPage = ({
         onLogout={logout}
         onOrders={onOrders}
         onOpenQrPass={onOpenQrPass}
+        onSwitchTemple={switchTemple}
         onLogin={onLogin || (() => {})}
         onRegister={onRegister || (() => {})}
       />

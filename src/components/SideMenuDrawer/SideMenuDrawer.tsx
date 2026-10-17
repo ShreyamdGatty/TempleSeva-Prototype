@@ -16,6 +16,7 @@ export interface SideMenuDrawerProps {
   onLogout: () => void
   onOrders?: () => void
   onOpenQrPass?: () => void
+  onSwitchTemple?: () => void
   onLogin: () => void
   onRegister?: () => void
 }
@@ -30,6 +31,7 @@ const SideMenuDrawer = ({
   onLogout,
   onOrders,
   onOpenQrPass,
+  onSwitchTemple,
   onLogin,
 }: SideMenuDrawerProps) => {
   const navigate = useNavigate()
@@ -167,6 +169,35 @@ const SideMenuDrawer = ({
               </div>
               <span className="text-sm font-bold text-[#b5b5b5] group-hover:translate-x-0.5 transition">›</span>
             </div>
+
+            {/* Switch Temple / Sanctuary */}
+            {onSwitchTemple && (
+              <div
+                onClick={() => {
+                  onClose()
+                  onSwitchTemple()
+                }}
+                className="flex items-center justify-between px-6 py-4 hover:bg-[#fff9f3] transition cursor-pointer group"
+              >
+                <div className="flex items-center gap-4">
+                  <span className="text-[#c1440e] text-lg w-5 text-center">🛕</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
+                        {language === 'KN' ? 'ದೇವಾಲಯ ಬದಲಾಯಿಸಿ (Switch Temple)' : 'Switch Temple'}
+                      </h4>
+                      <span className="rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-2 py-0.2 text-[9px] font-bold text-[#c1440e]">
+                        Sanctuary
+                      </span>
+                    </div>
+                    <p className="text-[11.5px] text-[#777777] mt-0.5">
+                      {language === 'KN' ? 'ಬೇರೆ ಪವಿತ್ರ ಕ್ಷೇತ್ರ ಮತ್ತು ಸೇವೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ' : 'Change active sacred sanctuary & explore offerings'}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-sm font-bold text-[#b5b5b5] group-hover:text-[#c1440e] group-hover:translate-x-0.5 transition">›</span>
+              </div>
+            )}
 
             {/* Your Orders (My Sevas) */}
             <div

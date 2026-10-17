@@ -3,10 +3,10 @@ import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom'
 import './App.css'
 
 // Types
-import type { Temple, Seva, Order, User, Address } from './types'
+import type { Temple, Seva, Order, User, Address, Devotee } from './types'
 
 // Data
-import { dates, STORAGE_TEMPLE } from './data'
+import { dates, STORAGE_TEMPLE, temples } from './data'
 import { readJson } from './utils/storage'
 
 // Contexts
@@ -85,8 +85,8 @@ const AppContent = () => {
   const { devotees, addDevotee, updateDevotee, removeDevotee } = useDevotees(user?.name)
 
   // ── Temple & Booking State (persisted across page navigation) ────
-  const [selectedTemple, setSelectedTemple] = useState<Temple | null>(() =>
-    readJson<Temple | null>(STORAGE_TEMPLE, null)
+  const [selectedTemple, setSelectedTemple] = useState<Temple>(() =>
+    readJson<Temple | null>(STORAGE_TEMPLE, null) || temples[0]
   )
   const [pickerOpen, setPickerOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState('')
@@ -121,34 +121,24 @@ const AppContent = () => {
   const handleLogin = useCallback(
     (account: User) => {
       login(account)
-      const savedTemple = readJson<Temple | null>(STORAGE_TEMPLE, null)
-      if (savedTemple) {
-        setSelectedTemple(savedTemple)
-        setPickerOpen(false)
-        addToast(
-          language === 'KN'
-            ? `ಮರಳಿ ಸ್ವಾಗತ, ${account.name}!`
-            : `Welcome back, ${account.name}!`,
-          'success'
-        )
-      } else {
-        setSelectedTemple(null)
-        setPickerOpen(true)
-        addToast(
-          language === 'KN'
-            ? `ಮರಳಿ ಸ್ವಾಗತ, ${account.name}! ದಯವಿಟ್ಟು ದೇವಾಲಯವನ್ನು ಆರಿಸಿ.`
-            : `Welcome back, ${account.name}! Please choose a sanctuary.`,
-          'success'
-        )
-      }
+      const savedTemple = readJson<Temple | null>(STORAGE_TEMPLE, null) || selectedTemple || temples[0]
+      setSelectedTemple(savedTemple)
+      window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(savedTemple))
+      setPickerOpen(false)
+      addToast(
+        language === 'KN'
+          ? `ಮರಳಿ ಸ್ವಾಗತ, ${account.name}!`
+          : `Welcome back, ${account.name}!`,
+        'success'
+      )
       navigate('/sevas')
     },
-    [login, navigate, addToast, language]
+    [login, selectedTemple, navigate, addToast, language]
   )
 
   const handleLogout = useCallback(() => {
     logout()
-    setSelectedTemple(null)
+    setSelectedTemple(temples[0])
     window.localStorage.removeItem(STORAGE_TEMPLE)
     clearCart()
     addToast(language === 'KN' ? 'ನೀವು ಯಶಸ್ವಿಯಾಗಿ ನಿರ್ಗಮಿಸಿದ್ದೀರಿ.' : 'You have been logged out.', 'info')
@@ -157,10 +147,13 @@ const AppContent = () => {
 
   const selectTemple = useCallback(
     (temple: Temple) => {
+      const isDifferent = !selectedTemple || selectedTemple.id !== temple.id
       setSelectedTemple(temple)
       window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(temple))
-      setSelectedDate('')
-      clearCart()
+      if (isDifferent) {
+        setSelectedDate('')
+        clearCart()
+      }
       setPickerOpen(false)
       const loc = translateTemple(temple)
       addToast(
@@ -169,31 +162,41 @@ const AppContent = () => {
           : `${loc.name} selected. Please pick an auspicious date.`,
         'success'
       )
+      navigate('/sevas')
     },
-    [clearCart, addToast, language, translateTemple]
+    [selectedTemple, clearCart, addToast, language, translateTemple, navigate]
   )
 
   const switchTemple = useCallback(() => {
-    setSelectedTemple(null)
-    window.localStorage.removeItem(STORAGE_TEMPLE)
-    setSelectedDate('')
-    clearCart()
+    // Open picker without resetting current temple or cart so cancel restores everything
     setPickerOpen(true)
-    addToast(
-      language === 'KN'
-        ? 'ದೇವಾಲಯ ಬದಲಾಗಿದೆ. ಸೇವಾ ಬುಟ್ಟಿಯನ್ನು ಮರುಹೊಂದಿಸಲಾಗಿದೆ.'
-        : 'Sanctuary changed. Offering basket reset.',
-      'info'
-    )
-  }, [clearCart, addToast, language])
+  }, [])
 
   const handleCompleteOrder = useCallback(
-    (paymentMethod: string, address?: Address) => {
-      if (!selectedTemple || !selectedDate || cart.length === 0) return
+    (paymentMethod: string, addressOrAllocations?: Address | Record<string, Devotee[]>) => {
+      if (!selectedTemple || !selectedDate || cart.length === 0) return null
+      let address: Address | undefined
+      let allocations: Record<string, Devotee[]> | undefined
+
+      if (addressOrAllocations && 'line1' in addressOrAllocations) {
+        address = addressOrAllocations as Address
+      } else if (addressOrAllocations) {
+        allocations = addressOrAllocations as Record<string, Devotee[]>
+      }
+
+      const finalItems = cart.map((it) => {
+        const assigned = allocations?.[it.id]
+        return {
+          ...it,
+          ticketDevotees: assigned || it.ticketDevotees,
+          devotee: (assigned && assigned[0]) || it.devotee,
+        }
+      })
+
       const order = createOrder(
         selectedTemple,
         selectedDate,
-        cart,
+        finalItems,
         subtotal,
         discount,
         total,
@@ -210,6 +213,7 @@ const AppContent = () => {
           : `Offering booked successfully! Order ID: ${order.id}`,
         'success'
       )
+      return order
     },
     [selectedTemple, selectedDate, cart, subtotal, discount, total, appliedCoupon, createOrder, clearCart, addToast, language]
   )
@@ -251,13 +255,9 @@ const AppContent = () => {
       }
 
       if (user) {
-        const saved = selectedTemple || readJson<Temple | null>(STORAGE_TEMPLE, null)
-        if (saved) {
-          setSelectedTemple(saved)
-          setPickerOpen(false)
-        } else {
-          setPickerOpen(true)
-        }
+        const saved = selectedTemple || readJson<Temple | null>(STORAGE_TEMPLE, null) || temples[0]
+        setSelectedTemple(saved)
+        setPickerOpen(false)
         navigate('/sevas')
       } else {
         setAuthMode('login')
@@ -291,11 +291,13 @@ const AppContent = () => {
               onWishlist={handleNavigateToWishlist}
               onDevoteeDetails={handleNavigateToDevotees}
               onOpenQrPass={() => setQrPassOpen(true)}
+              onSwitchTemple={() => setPickerOpen(true)}
               onLogout={handleLogout}
             >
               <HomePage
                 navigateToSevas={navigateToSevas}
                 onRegister={() => setAuthMode('register')}
+                user={user}
               />
             </MainLayout>
           }
@@ -344,8 +346,10 @@ const AppContent = () => {
                 onToggleWish={toggleWish}
                 onViewSevaDetails={(seva) => setActiveSevaDetail(seva)}
                 showToast={addToast}
+                devotees={devotees}
+                onAddDevotee={addDevotee}
+                onCompleteOrder={handleCompleteOrder}
               />
-              {pickerOpen && <TemplePicker onSelect={selectTemple} onClose={() => setPickerOpen(false)} />}
             </div>
           }
         />
@@ -357,6 +361,8 @@ const AppContent = () => {
             <MySevasPage
               user={user}
               orders={orders}
+              selectedTemple={selectedTemple}
+              switchTemple={switchTemple}
               devotees={devotees}
               onAddDevotee={addDevotee}
               onUpdateDevotee={updateDevotee}
@@ -393,6 +399,7 @@ const AppContent = () => {
               onLogout={handleLogout}
               showToast={addToast}
               onDevoteeDetails={handleNavigateToDevotees}
+              onSwitchTemple={() => setPickerOpen(true)}
               wishlist={wishlist}
               onToggleWishlist={toggleWish}
               onAddToCart={(seva) => addSeva(seva, selectedDate, addToast)}
@@ -513,6 +520,15 @@ const AppContent = () => {
         />
       )}
 
+      {/* Global Sanctuary Picker Modal */}
+      {pickerOpen && (
+        <TemplePicker
+          selectedTemple={selectedTemple}
+          onSelect={selectTemple}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
+
       {/* Global Slide Menu Drawer */}
       <SideMenuDrawer
         isOpen={sideMenuOpen}
@@ -526,6 +542,7 @@ const AppContent = () => {
         onLogout={handleLogout}
         onOrders={handleNavigateToMySevas}
         onOpenQrPass={() => setQrPassOpen(true)}
+        onSwitchTemple={() => setPickerOpen(true)}
         onLogin={() => setAuthMode('login')}
         onRegister={() => setAuthMode('register')}
       />

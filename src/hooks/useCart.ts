@@ -29,24 +29,55 @@ export function useCart() {
   )
 
   const addSeva = useCallback(
-    (seva: Seva, selectedDate: string, onNotice: (msg: string, variant: 'success' | 'error' | 'info' | 'warning') => void) => {
+    (
+      seva: Seva,
+      selectedDate: string,
+      slotOrNotice?: string | ((msg: string, variant: 'success' | 'error' | 'info' | 'warning') => void),
+      maybeNotice?: (msg: string, variant: 'success' | 'error' | 'info' | 'warning') => void
+    ) => {
+      const slot = typeof slotOrNotice === 'string' ? slotOrNotice : (seva.availableSlots && seva.availableSlots[0]) || '07:00 AM - Morning Pooja'
+      const onNotice = typeof slotOrNotice === 'function' ? slotOrNotice : maybeNotice
+
       if (!selectedDate) {
-        onNotice('Choose a date before adding a Seva.', 'warning')
+        if (onNotice) onNotice('Choose a date before adding a Seva.', 'warning')
         return
       }
-      if (seva.requiresDevotee) {
-        setDevoteeSeva(seva)
-        return
-      }
+
+      const maxQty = seva.maxQuantity || 5
+
       setCart((items) => {
-        const existing = items.find((item) => item.id === seva.id)
-        return existing
-          ? items.map((item) =>
-              item.id === seva.id ? { ...item, quantity: item.quantity + 1 } : item
-            )
-          : [...items, { id: seva.id, seva, quantity: 1 }]
+        const existingIndex = items.findIndex(
+          (item) => item.seva.id === seva.id && (!item.slot || item.slot === slot)
+        )
+        if (existingIndex > -1) {
+          const currentQty = items[existingIndex].quantity
+          if (currentQty >= maxQty) {
+            if (onNotice) onNotice(`Maximum booking limit of ${maxQty} reached for this seva.`, 'warning')
+            return items
+          }
+          const updated = [...items]
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            quantity: currentQty + 1,
+            slot: slot || updated[existingIndex].slot,
+            date: selectedDate || updated[existingIndex].date,
+          }
+          if (onNotice) onNotice(`${seva.name} quantity updated (${currentQty + 1})`, 'success')
+          return updated
+        }
+
+        if (onNotice) onNotice(`${seva.name} added to cart`, 'success')
+        return [
+          ...items,
+          {
+            id: `${seva.id}-${Date.now()}`,
+            seva,
+            quantity: 1,
+            date: selectedDate,
+            slot,
+          },
+        ]
       })
-      onNotice(`${seva.name} added to cart`, 'success')
     },
     []
   )
@@ -65,14 +96,34 @@ export function useCart() {
     [devotee, devoteeSeva]
   )
 
-  const changeQty = useCallback((id: string, amount: number) => {
+  const changeQty = useCallback(
+    (id: string, amount: number, onNotice?: (msg: string, variant: 'success' | 'error' | 'info' | 'warning') => void) => {
+      setCart((items) =>
+        items.flatMap((item) => {
+          if (item.id !== id) return [item]
+          const maxQty = item.seva.maxQuantity || 5
+          const nextQty = item.quantity + amount
+          if (amount > 0 && nextQty > maxQty) {
+            if (onNotice) onNotice(`Maximum limit of ${maxQty} reached for ${item.seva.name}.`, 'warning')
+            return [item]
+          }
+          return nextQty > 0 ? [{ ...item, quantity: nextQty }] : []
+        })
+      )
+    },
+    []
+  )
+
+  const updateItemDevotees = useCallback((id: string, ticketDevotees: Devotee[]) => {
     setCart((items) =>
-      items.flatMap((item) =>
+      items.map((item) =>
         item.id === id
-          ? item.quantity + amount > 0
-            ? [{ ...item, quantity: item.quantity + amount }]
-            : []
-          : [item]
+          ? {
+              ...item,
+              ticketDevotees,
+              devotee: ticketDevotees[0] || item.devotee,
+            }
+          : item
       )
     )
   }, [])
@@ -134,7 +185,7 @@ export function useCart() {
     cart, savedForLater, subtotal, discount, total, itemCount,
     devoteeSeva, setDevoteeSeva, devotee, setDevotee,
     appliedCoupon, couponError,
-    addSeva, addDevoteeSeva, changeQty, removeItem,
+    addSeva, addDevoteeSeva, changeQty, removeItem, updateItemDevotees,
     saveForLater, moveToCart, removeSaved,
     applyCoupon, removeCoupon, clearCart,
   }

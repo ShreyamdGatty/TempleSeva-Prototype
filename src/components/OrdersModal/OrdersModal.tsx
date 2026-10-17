@@ -13,7 +13,7 @@ interface OrdersModalProps {
 
 const OrdersModal = ({ orders, onClose, onCancel, onReorder }: OrdersModalProps) => {
   const { t, translateTemple, translateSeva } = useLanguage()
-  const [filter, setFilter] = useState<'all' | 'Confirmed' | 'Completed' | 'Cancelled'>('all')
+  const [filter, setFilter] = useState<'all' | 'Confirmed' | 'In Progress' | 'Completed' | 'Cancelled'>('all')
   const [trackingOrder, setTrackingOrder] = useState<Order | null>(null)
 
   const filtered = filter === 'all' ? orders : orders.filter((o) => o.status === filter)
@@ -111,13 +111,21 @@ const OrdersModal = ({ orders, onClose, onCancel, onReorder }: OrdersModalProps)
 
         {/* Filters */}
         <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
-          {(['all', 'Confirmed', 'Completed', 'Cancelled'] as const).map((f) => (
+          {(['all', 'Confirmed', 'In Progress', 'Completed', 'Cancelled'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-bold transition cursor-pointer ${filter === f ? 'bg-[#34251e] text-white' : 'bg-[#f5ede2] text-[#674f40] hover:bg-[#ebdcc9]'}`}
             >
-              {f === 'all' ? t('filterAll') : f === 'Confirmed' ? t('filterConfirmed') : f === 'Completed' ? t('filterCompleted') : t('filterCancelled')}
+              {f === 'all'
+                ? t('filterAll')
+                : f === 'Confirmed'
+                ? t('filterConfirmed')
+                : f === 'In Progress'
+                ? (t('filterInProgress') || 'In Progress')
+                : f === 'Completed'
+                ? t('filterCompleted')
+                : t('filterCancelled')}
             </button>
           ))}
         </div>
@@ -154,7 +162,11 @@ const OrdersModal = ({ orders, onClose, onCancel, onReorder }: OrdersModalProps)
                       <button onClick={() => setTrackingOrder(order)} className="rounded-lg bg-[#f5ede2] px-3 py-1.5 text-xs font-bold cursor-pointer hover:bg-[#ebdcc9]">
                         {t('trackBtn')}
                       </button>
-                      {order.status !== 'Cancelled' && (
+                      {order.status === 'Cancelled' ? (
+                        <button onClick={() => onReorder(order)} className="rounded-lg bg-gradient-to-r from-[#c1440e] to-[#df5619] px-3 py-1.5 text-xs font-bold text-white cursor-pointer hover:brightness-110">
+                          {t('retryBtn') || 'Retry Booking'}
+                        </button>
+                      ) : (
                         <button onClick={() => onReorder(order)} className="rounded-lg bg-[#c1440e] px-3 py-1.5 text-xs font-bold text-white cursor-pointer hover:bg-[#a5370a]">
                           {t('reorderBtn')}
                         </button>

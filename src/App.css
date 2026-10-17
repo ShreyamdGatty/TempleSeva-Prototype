@@ -373,3 +373,43 @@ main > section:first-child h1 {
   60% { transform: scale(1.2); }
   100% { transform: scale(1); opacity: 1; }
 }
+
+/* Authentic Temple Tearing Receipt Styling */
+.tearing-receipt {
+  position: relative;
+  background-color: #fffdfa;
+  background-image: radial-gradient(#ece1d2 0.75px, transparent 0.75px);
+  background-size: 14px 14px;
+  border: 1px solid #e3d5c4;
+  box-shadow: 0 4px 18px -2px rgba(60, 42, 33, 0.08), 0 2px 6px -1px rgba(60, 42, 33, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tearing-receipt:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px -4px rgba(60, 42, 33, 0.12), 0 4px 10px -2px rgba(60, 42, 33, 0.06);
+}
+
+.tearing-receipt::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #c1440e, #d4a64a, #c1440e);
+}
+
+.receipt-stamp {
+  transform: rotate(-9deg);
+  border: 2px dashed currentColor;
+  border-radius: 8px;
+  display: inline-block;
+  padding: 3px 8px;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 10px;
+}
+
