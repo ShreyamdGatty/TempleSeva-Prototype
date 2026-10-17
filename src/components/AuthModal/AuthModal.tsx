@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { User } from '../../types'
-import { STORAGE_USER } from '../../data'
+import { STORAGE_USER, STORAGE_TEMPLE } from '../../data'
 import { passwordStrength, strengthLabels, strengthColors } from '../../utils/helpers'
 import { useLanguage } from '../../contexts/LanguageContext'
 
@@ -57,9 +57,13 @@ const AuthModal = ({ mode, registeredUser, onRegister, onLogin, onClose, onSwitc
       return
     }
     window.localStorage.setItem(STORAGE_USER, JSON.stringify(user))
-    setSuccess(language === 'KN' ? 'ಖಾತೆ ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲ್ಪಟ್ಟಿದೆ! ದಯವಿಟ್ಟು ಲಾಗಿನ್ ಆಗಿ.' : 'Account created successfully! Please log in.')
+    window.sessionStorage.setItem('temple-seva.isNewUserRegistered', 'true')
+    window.localStorage.removeItem(STORAGE_TEMPLE)
+    setSuccess(language === 'KN' ? 'ಖಾತೆ ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲ್ಪಟ್ಟಿದೆ! ಲಾಗಿನ್ ಆಗುತ್ತಿದೆ...' : 'Account created successfully! Logging you in...')
     onRegister(user)
-    setTimeout(() => onSwitchMode('login'), 1500)
+    setTimeout(() => {
+      onLogin(user)
+    }, 1000)
   }
 
   const handleForgotPassword = () => {

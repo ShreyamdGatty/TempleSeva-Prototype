@@ -121,19 +121,36 @@ const AppContent = () => {
   const handleLogin = useCallback(
     (account: User) => {
       login(account)
-      const savedTemple = readJson<Temple | null>(STORAGE_TEMPLE, null) || selectedTemple || temples[0]
-      setSelectedTemple(savedTemple)
-      window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(savedTemple))
-      setPickerOpen(false)
-      addToast(
-        language === 'KN'
-          ? `ಮರಳಿ ಸ್ವಾಗತ, ${account.name}!`
-          : `Welcome back, ${account.name}!`,
-        'success'
-      )
-      navigate('/sevas')
+      setAuthMode(null)
+
+      const isNewRegistration = window.sessionStorage.getItem('temple-seva.isNewUserRegistered') === 'true'
+      const hasStoredTemple = !!window.localStorage.getItem(STORAGE_TEMPLE)
+
+      // If new user registered or no temple previously chosen, prompt them with the Temple modal
+      if (isNewRegistration || !hasStoredTemple) {
+        window.sessionStorage.removeItem('temple-seva.isNewUserRegistered')
+        setPickerOpen(true)
+        addToast(
+          language === 'KN'
+            ? `ಸ್ವಾಗತ, ${account.name}! ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪವಿತ್ರ ದೇವಾಲಯವನ್ನು ಆರಿಸಿ.`
+            : `Welcome, ${account.name}! Please select your sacred temple to continue.`,
+          'success'
+        )
+      } else {
+        const savedTemple = readJson<Temple | null>(STORAGE_TEMPLE, null) || selectedTemple || temples[0]
+        setSelectedTemple(savedTemple)
+        window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(savedTemple))
+        setPickerOpen(false)
+        addToast(
+          language === 'KN'
+            ? `ಮರಳಿ ಸ್ವಾಗತ, ${account.name}!`
+            : `Welcome back, ${account.name}!`,
+          'success'
+        )
+        navigate('/sevas')
+      }
     },
-    [login, selectedTemple, navigate, addToast, language]
+    [login, selectedTemple, navigate, addToast, language, setAuthMode]
   )
 
   const handleLogout = useCallback(() => {
