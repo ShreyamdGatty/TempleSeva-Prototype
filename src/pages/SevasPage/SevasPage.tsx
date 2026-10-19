@@ -48,12 +48,6 @@ interface SevasPageProps {
   updateCartDate?: (date: string) => void
 }
 
-const StarDisplay = ({ rating }: { rating: number }) => (
-  <span className="flex items-center text-xs text-[#d4a64a]">
-    {'★'.repeat(Math.round(rating))}
-    <span className="opacity-30">{'★'.repeat(5 - Math.round(rating))}</span>
-  </span>
-)
 
 interface DateCardItem {
   id: string
@@ -329,12 +323,14 @@ const SevasPage = ({
               <span>🏠</span>
               <span>{t('navHome')}</span>
             </button>
-            <button
-              onClick={switchTemple}
-              className="rounded-full border border-[#d8c8b8] bg-white px-4 py-2 text-sm font-bold transition hover:border-[#c1440e] cursor-pointer"
-            >
-              {t('switchTemple')}
-            </button>
+            {user && (
+              <button
+                onClick={switchTemple}
+                className="rounded-full border border-[#d8c8b8] bg-white px-4 py-2 text-sm font-bold transition hover:border-[#c1440e] cursor-pointer"
+              >
+                {t('switchTemple')}
+              </button>
+            )}
           {user ? (
             <>
               <button
@@ -636,14 +632,6 @@ const SevasPage = ({
                           <h4 className="mt-2 font-serif text-lg font-bold leading-tight text-[#34251e] group-hover:text-[#c1440e]">
                             {seva.name}
                           </h4>
-
-                          <div className="mt-1.5 flex items-center gap-1.5">
-                            <StarDisplay rating={seva.rating} />
-                            <span className="text-xs font-bold text-[#34251e]">{seva.rating}</span>
-                            <span className="text-[11px] text-[#8b7a6d]">
-                              ({seva.reviewCount})
-                            </span>
-                          </div>
 
                           <p className="mt-2 text-xs leading-5 text-[#75685d] line-clamp-2">
                             {seva.description}

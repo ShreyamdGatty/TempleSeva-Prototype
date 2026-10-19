@@ -294,7 +294,7 @@ const PaymentQrModal = ({
         )}
 
         {displayedOrder ? (
-          /* ── The Digital QR Code Card ── */
+          /* ── The Payment QR Code Card ── */
           <div
             className={`mt-4 rounded-3xl p-5 text-center transition-all duration-300 relative overflow-hidden ${
               isDeactiveView

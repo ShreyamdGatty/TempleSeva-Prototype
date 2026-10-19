@@ -256,9 +256,19 @@ const AppContent = () => {
   )
 
   const switchTemple = useCallback(() => {
+    if (!user) {
+      addToast(
+        language === 'KN'
+          ? 'ದೇವಾಲಯವನ್ನು ಬದಲಾಯಿಸಲು ದಯವಿಟ್ಟು ಮೊದಲು ಲಾಗಿನ್ ಅಥವಾ ನೋಂದಣಿ ಮಾಡಿ.'
+          : 'Please login or register first to switch sanctuary.',
+        'info'
+      )
+      setAuthMode('login')
+      return
+    }
     // Open picker without resetting current temple or cart so cancel restores everything
     setPickerOpen(true)
-  }, [])
+  }, [user, addToast, language, setAuthMode])
 
   const handleCompleteOrder = useCallback(
     (paymentMethod: string, addressOrAllocations?: Address | Record<string, Devotee[]>) => {
@@ -331,12 +341,18 @@ const AppContent = () => {
   const navigateToSevas = useCallback(
     (temple?: Temple) => {
       if (temple) {
-        setSelectedTemple(temple)
-        window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(temple))
-        setPickerOpen(false)
         if (user) {
+          setSelectedTemple(temple)
+          window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(temple))
+          setPickerOpen(false)
           navigate('/sevas')
         } else {
+          addToast(
+            language === 'KN'
+              ? 'ದೇವಾಲಯವನ್ನು ಆಯ್ಕೆಮಾಡಲು ದಯವಿಟ್ಟು ಮೊದಲು ಲಾಗಿನ್ ಅಥವಾ ನೋಂದಣಿ ಮಾಡಿ.'
+              : 'Please login or register first to select and switch sanctuary.',
+            'info'
+          )
           setAuthMode('login')
         }
         return
@@ -348,10 +364,16 @@ const AppContent = () => {
         setPickerOpen(false)
         navigate('/sevas')
       } else {
+        addToast(
+          language === 'KN'
+            ? 'ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ದಯವಿಟ್ಟು ಮೊದಲು ಲಾಗಿನ್ ಅಥವಾ ನೋಂದಣಿ ಮಾಡಿ.'
+            : 'Please login or register first to explore sevas.',
+          'info'
+        )
         setAuthMode('login')
       }
     },
-    [user, selectedTemple, navigate, setAuthMode]
+    [user, selectedTemple, navigate, setAuthMode, addToast, language]
   )
 
   const totalSpent = orders
@@ -379,7 +401,7 @@ const AppContent = () => {
               onWishlist={handleNavigateToWishlist}
               onDevoteeDetails={handleNavigateToDevotees}
               onOpenQrPass={() => setQrPassOpen(true)}
-              onSwitchTemple={() => setPickerOpen(true)}
+              onSwitchTemple={user ? switchTemple : undefined}
               onLogout={handleLogout}
             >
               <HomePage

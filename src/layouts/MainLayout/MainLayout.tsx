@@ -117,8 +117,8 @@ const MainLayout = ({
 
           {/* Right Action Bar */}
           <div className="flex items-center gap-2.5 shrink-0">
-            {/* Switch / Select Temple Pill */}
-            {onSwitchTemple && (
+            {/* Switch / Select Temple Pill - only visible after successful login */}
+            {user && onSwitchTemple && (
               <button
                 type="button"
                 onClick={onSwitchTemple}

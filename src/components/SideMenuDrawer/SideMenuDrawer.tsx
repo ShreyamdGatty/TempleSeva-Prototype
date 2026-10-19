@@ -316,67 +316,57 @@ const SideMenuDrawer = ({
               </div>
             )}
 
-            {/* Change Language Card */}
-            <div className="mx-5 my-2 rounded-2xl border border-[#eadfd1] bg-[#fffcf6] p-3 shadow-2xs">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <span className="grid h-7 w-7 place-items-center rounded-full bg-[#fdf2e9] text-[#c1440e] shadow-2xs">
-                    <svg
-                      className="h-4 w-4 text-[#c1440e]"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="2" y1="12" x2="22" y2="12" />
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
-                  </span>
-                  <div>
-                    <h4 className="text-xs font-bold text-[#34251e]">
-                      {language === 'KN' ? 'ವೆಬ್‌ಸೈಟ್ ಭಾಷೆ' : 'Website Language'}
-                    </h4>
-                    <p className="text-[11px] text-[#8b7a6d]">
-                      {language === 'KN' ? 'ಪ್ರಸ್ತುತ: ಕನ್ನಡ' : 'Current: English'}
-                    </p>
-                  </div>
-                </div>
-                <span className="rounded-md bg-[#fdf2e9] border border-[#f5cfb5] px-2 py-0.5 text-[10px] font-bold text-[#c1440e]">
-                  {language === 'KN' ? 'ಕನ್ನಡ' : 'EN'}
+            {/* Change Language Row */}
+            <div className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition group border-t border-[#f2f2f2]">
+              <div className="flex items-center gap-4">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-[#fdf2e9] text-[#c1440e] shrink-0">
+                  <svg
+                    className="h-4.5 w-4.5 text-[#c1440e]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                  </svg>
                 </span>
+                <div>
+                  <h4 className="text-sm font-semibold text-[#222222]">
+                    {language === 'KN' ? 'ಭಾಷೆ ಬದಲಾಯಿಸಿ' : 'Change Language'}
+                  </h4>
+                  <p className="text-[11.5px] text-[#777777] mt-0.5">
+                    {language === 'KN' ? 'ಪ್ರಸ್ತುತ: ಕನ್ನಡ' : 'Current: English'}
+                  </p>
+                </div>
               </div>
 
-              {/* Dual-Rectangle Segmented Selector in Theme Color */}
-              <div className="mt-2.5 grid grid-cols-2 gap-1.5 rounded-xl bg-[#f5ede2] p-1">
+              {/* Two Rectangle Boxes in Theme Color */}
+              <div className="flex items-center gap-1.5 rounded-xl bg-[#f5ede2] p-1 border border-[#eadfd1] shrink-0">
                 <button
                   type="button"
                   onClick={() => setLanguage('EN')}
-                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     language === 'EN'
                       ? 'bg-gradient-to-r from-[#c1440e] to-[#df5619] text-white shadow-xs'
-                      : 'text-[#674f40] hover:text-[#c1440e] hover:bg-white/60'
+                      : 'text-[#674f40] hover:text-[#c1440e] hover:bg-white/70'
                   }`}
                 >
-                  <span className="text-sm">🇬🇧</span>
-                  <span>English</span>
-                  {language === 'EN' && <span className="text-[10px]">✓</span>}
+                  English
                 </button>
-
                 <button
                   type="button"
                   onClick={() => setLanguage('KN')}
-                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     language === 'KN'
                       ? 'bg-gradient-to-r from-[#c1440e] to-[#df5619] text-white shadow-xs'
-                      : 'text-[#674f40] hover:text-[#c1440e] hover:bg-white/60'
+                      : 'text-[#674f40] hover:text-[#c1440e] hover:bg-white/70'
                   }`}
                 >
-                  <span className="text-sm">🇮🇳</span>
-                  <span>ಕನ್ನಡ</span>
-                  {language === 'KN' && <span className="text-[10px]">✓</span>}
+                  ಕನ್ನಡ
                 </button>
               </div>
             </div>

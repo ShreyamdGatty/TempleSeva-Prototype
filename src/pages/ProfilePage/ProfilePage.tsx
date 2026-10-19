@@ -251,19 +251,20 @@ const ProfilePage = ({
 
   const handleSaveChanges = (e: React.FormEvent) => {
     e.preventDefault()
-    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim() || user?.name || 'Guest'
+    if (!firstName.trim()) {
+      showToast(language === 'KN' ? 'ಮೊದಲ ಹೆಸರು ಕಡ್ಡಾಯವಾಗಿದೆ' : 'First Name is mandatory', 'error')
+      return
+    }
+    const fullName = lastName.trim() ? `${firstName.trim()} ${lastName.trim()}` : firstName.trim()
 
     onUpdateUser({
       name: fullName,
       firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      phone: phone.trim() || undefined,
+      lastName: lastName.trim() || undefined,
+      phone: user?.phone || phone.trim() || undefined,
       email: email.trim(),
-      birthday: birthday.trim() || undefined,
-      gender: gender || undefined,
     })
 
-    setIsEditingPhone(false)
     setIsEditingEmail(false)
     showToast(language === 'KN' ? 'ಪ್ರೊಫೈಲ್ ಯಶಸ್ವಿಯಾಗಿ ಉಳಿಸಲಾಗಿದೆ!' : 'Changes saved successfully!', 'success')
   }
@@ -301,47 +302,40 @@ const ProfilePage = ({
             {/* Language Dropdown (Globe Icon Only) */}
             <LanguageDropdown />
 
-            {/* User Profile Pill */}
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#34251e]">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-[#c1440e] to-[#d4a64a] text-white text-[10px] font-bold">
-                {displayName.charAt(0).toUpperCase()}
-              </span>
-              <span className="hidden sm:inline">Hi, {displayName}</span>
-            </div>
-
-            {/* Menu Trigger: Only shown after login is successful */}
-            {user && (
+            {/* User Profile Menu Trigger: Clicking Hi, {displayName} opens the profile menu */}
+            {user ? (
               <button
                 type="button"
                 onClick={onOpenSideMenu}
-                className="group flex items-center justify-center h-10 w-10 rounded-xl border border-[#e0d3c5] bg-white text-[#34251e] shadow-xs transition hover:border-[#c1440e] hover:bg-[#fff9f3] hover:text-[#c1440e] cursor-pointer shrink-0"
+                className="group flex items-center gap-2 rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] pl-1 pr-3 py-1 text-xs font-semibold text-[#34251e] shadow-2xs transition hover:shadow-xs cursor-pointer shrink-0"
                 aria-label="Open profile menu"
                 title={`${displayName} - Profile & Menu`}
               >
-                {/* Desktop View: Profile Icon */}
-                <div className="relative hidden sm:flex items-center justify-center pointer-events-none">
-                  <svg
-                    className="h-5 w-5 text-[#34251e] group-hover:text-[#c1440e] transition-colors"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-[#c1440e] ring-2 ring-white" />
-                </div>
-
-                {/* Mobile View: 3-Line Hamburger Icon */}
-                <span className="flex sm:hidden flex-col gap-1 w-5 items-center justify-center pointer-events-none">
-                  <span className="block h-0.5 w-full bg-[#34251e] rounded-full group-hover:bg-[#c1440e] transition-colors" />
-                  <span className="block h-0.5 w-full bg-[#34251e] rounded-full group-hover:bg-[#c1440e] transition-colors" />
-                  <span className="block h-0.5 w-full bg-[#34251e] rounded-full group-hover:bg-[#c1440e] transition-colors" />
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-[#c1440e] to-[#d4a64a] text-white text-[10px] font-bold shadow-2xs">
+                  {displayName.charAt(0).toUpperCase()}
                 </span>
+                <span className="font-semibold text-[#34251e] group-hover:text-[#c1440e] transition-colors">
+                  Hi, {displayName}
+                </span>
+                <svg
+                  className="h-3.5 w-3.5 text-[#8b7a6d] group-hover:text-[#c1440e] transition-transform group-hover:translate-y-0.5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
               </button>
+            ) : (
+              <div className="flex items-center gap-2 text-xs font-semibold text-[#34251e]">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-[#c1440e] to-[#d4a64a] text-white text-[10px] font-bold">
+                  {displayName.charAt(0).toUpperCase()}
+                </span>
+                <span className="hidden sm:inline">Hi, {displayName}</span>
+              </div>
             )}
           </div>
         </div>
@@ -385,27 +379,6 @@ const ProfilePage = ({
               </button>
             </div>
 
-            {/* Active Sanctuary Indicator */}
-            <div className="mb-3 rounded-xl border border-[#eadfd1] bg-[#faf4ec] p-2.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-base">🛕</span>
-                  <div className="text-left leading-tight">
-                    <p className="text-[9px] uppercase font-bold text-[#8b7a6d]">Active Sanctuary</p>
-                    <p className="font-bold text-xs text-[#c1440e] truncate max-w-[140px]">{localizedActiveTemple.name}</p>
-                  </div>
-                </div>
-                {onSwitchTemple && (
-                  <button
-                    type="button"
-                    onClick={onSwitchTemple}
-                    className="rounded-lg bg-white border border-[#eadfd1] px-2 py-1 text-[10px] font-bold text-[#c1440e] hover:bg-[#fff9f3] transition cursor-pointer shadow-2xs"
-                  >
-                    {language === 'KN' ? 'ಬದಲಾಯಿಸಿ' : 'Switch'}
-                  </button>
-                )}
-              </div>
-            </div>
 
             {/* Menu Items */}
             <nav className="space-y-1 text-sm font-medium">
@@ -531,7 +504,7 @@ const ProfilePage = ({
                 )}
               </button>
 
-              {/* Digital QR Pass */}
+              {/* Payment QR Pass */}
               {onOpenQrPass && (
                 <button
                   type="button"
@@ -541,7 +514,7 @@ const ProfilePage = ({
                   <div className="flex items-center gap-3">
                     <span className="text-base text-[#8b7a6d]">📱</span>
                     <div className="flex items-center gap-2">
-                      <span>{language === 'KN' ? 'ಡಿಜಿಟಲ್ ಕ್ಯೂಆರ್ ಪಾಸ್' : 'Digital QR Pass'}</span>
+                      <span>{language === 'KN' ? 'ಪಾವತಿ ಕ್ಯೂಆರ್ ಪಾಸ್ (QR Pass)' : 'Payment QR Pass'}</span>
                       {propOrders.filter((o) => o.status === 'Confirmed' || o.status === 'In Progress').length > 0 && (
                         <span className="rounded-full bg-[#e9f5ed] px-2 py-0.5 text-[10px] font-bold text-[#28724d]">
                           {propOrders.filter((o) => o.status === 'Confirmed' || o.status === 'In Progress').length} Active
@@ -575,7 +548,7 @@ const ProfilePage = ({
                 </button>
               )}
 
-              {/* Creative Change Language Selector */}
+              {/* Change Language Row */}
               <div className="rounded-xl border border-[#eadfd1] bg-[#fffcf6] p-3 shadow-2xs">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -594,49 +567,36 @@ const ProfilePage = ({
                         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                       </svg>
                     </span>
-                    <div>
-                      <span className="block text-xs font-bold text-[#34251e]">
-                        {language === 'KN' ? 'ವೆಬ್‌ಸೈಟ್ ಭಾಷೆ' : 'Website Language'}
-                      </span>
-                      <span className="block text-[11px] text-[#8b7a6d]">
-                        {language === 'KN' ? 'ಆಯ್ಕೆಮಾಡಿದ ಭಾಷೆ: ಕನ್ನಡ' : 'Selected: English'}
-                      </span>
-                    </div>
+                    <span className="text-xs font-bold text-[#34251e]">
+                      {language === 'KN' ? 'ಭಾಷೆ' : 'Language'}
+                    </span>
                   </div>
-                  <span className="rounded-md bg-[#fdf2e9] border border-[#f5cfb5] px-2 py-0.5 text-[10px] font-bold text-[#c1440e]">
-                    {language === 'KN' ? 'ಕನ್ನಡ' : 'EN'}
-                  </span>
-                </div>
 
-                {/* Creative Dual-Rectangle Selector */}
-                <div className="mt-2.5 grid grid-cols-2 gap-1.5 rounded-lg bg-[#f5ede2] p-1">
-                  <button
-                    type="button"
-                    onClick={() => setLanguage('EN')}
-                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                      language === 'EN'
-                        ? 'bg-gradient-to-r from-[#c1440e] to-[#df5619] text-white shadow-xs'
-                        : 'text-[#674f40] hover:text-[#c1440e] hover:bg-white/60'
-                    }`}
-                  >
-                    <span className="text-sm">🇬🇧</span>
-                    <span>English</span>
-                    {language === 'EN' && <span className="text-[10px]">✓</span>}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setLanguage('KN')}
-                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                      language === 'KN'
-                        ? 'bg-gradient-to-r from-[#c1440e] to-[#df5619] text-white shadow-xs'
-                        : 'text-[#674f40] hover:text-[#c1440e] hover:bg-white/60'
-                    }`}
-                  >
-                    <span className="text-sm">🇮🇳</span>
-                    <span>ಕನ್ನಡ</span>
-                    {language === 'KN' && <span className="text-[10px]">✓</span>}
-                  </button>
+                  {/* Two Rectangle Boxes in Theme Color */}
+                  <div className="flex items-center gap-1 rounded-lg bg-[#f5ede2] p-0.5 border border-[#eadfd1]">
+                    <button
+                      type="button"
+                      onClick={() => setLanguage('EN')}
+                      className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                        language === 'EN'
+                          ? 'bg-gradient-to-r from-[#c1440e] to-[#df5619] text-white shadow-xs'
+                          : 'text-[#674f40] hover:text-[#c1440e]'
+                      }`}
+                    >
+                      English
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLanguage('KN')}
+                      className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                        language === 'KN'
+                          ? 'bg-gradient-to-r from-[#c1440e] to-[#df5619] text-white shadow-xs'
+                          : 'text-[#674f40] hover:text-[#c1440e]'
+                      }`}
+                    >
+                      ಕನ್ನಡ
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -674,9 +634,20 @@ const ProfilePage = ({
                     <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-[#34251e]">
                       {displayName}
                     </h1>
-                    <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
-                      {user ? (language === 'KN' ? 'ಪ್ರಮಾಣೀಕೃತ ಭಕ್ತರ ಖಾತೆ' : 'Verified Devotee Account') : 'Guest Account · Add details to complete profile'}
-                    </p>
+                    {user ? (
+                      <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-[#f0fdf4] border border-[#bbf7d0] px-3 py-0.5 text-xs font-semibold text-[#16a34a] shadow-2xs">
+                        <svg className="h-3.5 w-3.5 text-[#16a34a] shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="font-semibold text-[#16a34a]">
+                          {language === 'KN' ? 'ದೃಢೀಕರಿಸಲಾಗಿದೆ' : 'Verified'}
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
+                        Guest Account · Add details to complete profile
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -687,36 +658,18 @@ const ProfilePage = ({
                   </h3>
 
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Mobile Number */}
+                    {/* Mobile Number (Non-editable) */}
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
+                      <div className="mb-1.5">
                         <label className="text-xs font-semibold text-[#8b7a6d]">
                           {language === 'KN' ? 'ಮೊಬೈಲ್ ಸಂಖ್ಯೆ' : 'Mobile Number'}
                         </label>
-                        <button
-                          type="button"
-                          onClick={() => setIsEditingPhone(!isEditingPhone)}
-                          className="flex items-center gap-1 text-xs font-bold text-[#c1440e] hover:underline cursor-pointer"
-                        >
-                          <span>✎</span>
-                          <span>{isEditingPhone ? 'Cancel' : 'Edit'}</span>
-                        </button>
                       </div>
 
-                      {isEditingPhone ? (
-                        <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="Enter mobile number"
-                          className="w-full rounded-xl border border-[#c1440e] bg-white px-4 py-3 text-sm text-[#34251e] outline-none shadow-2xs focus:ring-2 focus:ring-[#c1440e]/20"
-                          autoFocus
-                        />
-                      ) : (
-                        <div className="w-full rounded-xl border border-[#eadfd1] bg-[#faf4ec] px-4 py-3 text-sm text-[#75685d]">
-                          {phone || '+91 98765 43210'}
-                        </div>
-                      )}
+                      <div className="flex items-center justify-between w-full rounded-xl border border-[#eadfd1] bg-[#faf4ec] px-4 py-3 text-sm text-[#5c4d41] font-medium">
+                        <span>{phone || user?.phone || '+91 98765 43210'}</span>
+                        <span className="text-[#8b7a6d] text-xs">🔒</span>
+                      </div>
                     </div>
 
                     {/* Email Address */}
@@ -765,64 +718,66 @@ const ProfilePage = ({
                   </h3>
 
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* First Name * */}
+                    {/* First Name * (Mandatory) */}
                     <div>
                       <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
                         {language === 'KN' ? 'ಮೊದಲ ಹೆಸರು' : 'First Name'} <span className="text-[#c1440e]">*</span>
                       </label>
                       <input
                         type="text"
+                        required
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Enter first name here"
+                        placeholder={language === 'KN' ? 'ಮೊದಲ ಹೆಸರು ನಮೂದಿಸಿ' : 'Enter first name'}
                         className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] focus:ring-2 focus:ring-[#c1440e]/20"
                       />
                     </div>
 
-                    {/* Last Name * */}
+                    {/* Second Name / Last Name (Not Mandatory) */}
                     <div>
                       <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
-                        {language === 'KN' ? 'ಕೊನೆಯ ಹೆಸರು' : 'Last Name'} <span className="text-[#c1440e]">*</span>
+                        {language === 'KN' ? 'ಎರಡನೇ ಹೆಸರು / ಕೊನೆಯ ಹೆಸರು (ಐಚ್ಛಿಕ)' : 'Second Name / Last Name (Optional)'}
                       </label>
                       <input
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Enter last name here"
+                        placeholder={language === 'KN' ? 'ಎರಡನೇ ಹೆಸರು ನಮೂದಿಸಿ' : 'Enter second name (optional)'}
                         className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] focus:ring-2 focus:ring-[#c1440e]/20"
                       />
                     </div>
 
-                    {/* Birthday (Optional) */}
-                    <div>
-                      <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
-                        {language === 'KN' ? 'ಜನ್ಮ ದಿನಾಂಕ (ಐಚ್ಛಿಕ)' : 'Birthday (Optional)'}
-                      </label>
-                      <input
-                        type="text"
-                        value={birthday}
-                        onChange={(e) => setBirthday(e.target.value)}
-                        placeholder="DD/MM/YYYY"
-                        className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] focus:ring-2 focus:ring-[#c1440e]/20"
-                      />
-                    </div>
+                    {/* Devotees Added Count Card */}
+                    <div className="md:col-span-2 rounded-2xl border border-[#eadfd1] bg-[#fffaf1] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                      <div className="flex items-center gap-3">
+                        <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#fdf2e9] text-[#c1440e] text-lg font-bold shadow-2xs">
+                          📿
+                        </span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-sm font-bold text-[#34251e]">
+                              {language === 'KN' ? 'ಸೇರಿಸಲಾದ ಭಕ್ತರು' : 'Devotees Added'}
+                            </h4>
+                            <span className="rounded-full bg-[#c1440e] text-white px-2.5 py-0.5 text-xs font-bold shadow-2xs">
+                              {devotees.length}
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#8b7a6d] mt-0.5">
+                            {language === 'KN'
+                              ? `ನಿಮ್ಮ ಖಾತೆಗೆ ${devotees.length} ಭಕ್ತರ ವಿವರಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.`
+                              : `Total of ${devotees.length} devotee profile(s) linked to your account.`}
+                          </p>
+                        </div>
+                      </div>
 
-                    {/* Identity (Optional) */}
-                    <div>
-                      <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
-                        {language === 'KN' ? 'ಲಿಂಗ / ಗುರುತು (ಐಚ್ಛಿಕ)' : 'Identity (Optional)'}
-                      </label>
-                      <select
-                        value={gender}
-                        onChange={(e) => setGender(e.target.value)}
-                        className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] focus:ring-2 focus:ring-[#c1440e]/20 cursor-pointer"
+                      <button
+                        type="button"
+                        onClick={() => selectTab('devotee-list')}
+                        className="inline-flex items-center gap-1.5 self-start sm:self-auto rounded-xl bg-white border border-[#eadfd1] px-3.5 py-2 text-xs font-bold text-[#c1440e] hover:bg-[#fff9f3] transition cursor-pointer shadow-2xs"
                       >
-                        <option value="">Select Identity</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                        <option value="Prefer not to say">Prefer not to say</option>
-                      </select>
+                        <span>{language === 'KN' ? 'ಭಕ್ತರ ಪಟ್ಟಿ ವೀಕ್ಷಿಸಿ' : 'View Devotee List'}</span>
+                        <span>›</span>
+                      </button>
                     </div>
                   </div>
 
@@ -853,42 +808,16 @@ const ProfilePage = ({
                         <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#34251e]">
                           {language === 'KN' ? 'ಭಕ್ತರ ವಿವರ ಸೇರಿಸಿ' : 'Add Devotee Details'}
                         </h2>
-                        <span className="rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-2.5 py-0.5 text-xs font-bold text-[#c1440e]">
-                          🛕 {localizedActiveTemple.name}
-                        </span>
                         <span className="rounded-full bg-[#f5ede2] px-2.5 py-0.5 text-xs font-bold text-[#8b7a6d]">
                           Sankalpa
                         </span>
                       </div>
                       <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
                         {language === 'KN'
-                          ? `${localizedActiveTemple.name} ಪೂಜಾ ಸಂಕಲ್ಪಕ್ಕಾಗಿ ಕುಟುಂಬ ಸದಸ್ಯರ ಹೆಸರು, ನಕ್ಷತ್ರ ಮತ್ತು ಗೋತ್ರ ಸೇರಿಸಿ`
-                          : `Add family member names, nakshatra & gotra for ${localizedActiveTemple.name} sacred pujas`}
+                          ? 'ಪೂಜಾ ಸಂಕಲ್ಪಕ್ಕಾಗಿ ಕುಟುಂಬ ಸದಸ್ಯರ ಹೆಸರು, ನಕ್ಷತ್ರ ಮತ್ತು ಗೋತ್ರ ಸೇರಿಸಿ'
+                          : 'Add family member names, nakshatra & gotra for sacred pujas'}
                       </p>
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => selectTab('devotee-list')}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-[#f5ede2] px-4 py-2 text-xs font-bold text-[#75685d] hover:bg-[#eadfd1] transition cursor-pointer"
-                    >
-                      <span>📿</span>
-                      <span>
-                        {language === 'KN'
-                          ? `ಭಕ್ತರ ಪಟ್ಟಿ (${devotees.length})`
-                          : `View Devotee List (${devotees.length})`}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => selectTab('profile')}
-                      className="flex items-center gap-1.5 rounded-xl border border-[#eadfd1] px-4 py-2 text-xs font-bold text-[#75685d] hover:border-[#c1440e] hover:text-[#c1440e] transition cursor-pointer"
-                    >
-                      <span>←</span>
-                      <span>{language === 'KN' ? 'ಪ್ರೊಫೈಲ್' : 'Profile'}</span>
-                    </button>
                   </div>
                 </div>
 
@@ -907,9 +836,9 @@ const ProfilePage = ({
                     <span>{language === 'KN' ? 'ಹೊಸ ಭಕ್ತರನ್ನು ಸೇರಿಸಿ' : 'Add New Devotee / Family Member'}</span>
                   </h3>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* Name */}
-                    <div className="sm:col-span-2">
+                    <div className="sm:col-span-2 lg:col-span-3">
                       <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
                         {language === 'KN' ? 'ಭಕ್ತರ ಪೂರ್ಣ ಹೆಸರು (Full Name)' : 'Devotee Full Name'}{' '}
                         <span className="text-[#c1440e]">*</span>
@@ -933,28 +862,6 @@ const ProfilePage = ({
                           {language === 'KN' ? 'ಹೆಸರು ಅಗತ್ಯವಿದೆ' : 'Devotee name is required'}
                         </p>
                       )}
-                    </div>
-
-                    {/* Relationship */}
-                    <div>
-                      <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
-                        {language === 'KN' ? 'ಸಂಬಂಧ (Relationship)' : 'Relationship'}
-                      </label>
-                      <select
-                        value={devoteeForm.relationship}
-                        onChange={(e) => setDevoteeForm({ ...devoteeForm, relationship: e.target.value })}
-                        className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] cursor-pointer"
-                      >
-                        <option value="Self">Self (ಸ್ವತಃ)</option>
-                        <option value="Spouse">Spouse (ಪತಿ / ಪತ್ನಿ)</option>
-                        <option value="Son">Son (ಮಗ)</option>
-                        <option value="Daughter">Daughter (ಮಗಳು)</option>
-                        <option value="Father">Father (ತಂದೆ)</option>
-                        <option value="Mother">Mother (ತಾಯಿ)</option>
-                        <option value="Brother">Brother (ಸಹೋದರ)</option>
-                        <option value="Sister">Sister (ಸಹೋದರಿ)</option>
-                        <option value="Other">Other (ಇತರರು)</option>
-                      </select>
                     </div>
 
                     {/* Gotram */}
@@ -1048,40 +955,16 @@ const ProfilePage = ({
                         <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#34251e]">
                           {language === 'KN' ? 'ಭಕ್ತರ ಪಟ್ಟಿ' : 'Devotee List'}
                         </h2>
-                        <span className="rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-2.5 py-0.5 text-xs font-bold text-[#c1440e]">
-                          🛕 {localizedActiveTemple.name}
-                        </span>
                         <span className="rounded-full bg-[#f5ede2] px-2.5 py-0.5 text-xs font-bold text-[#8b7a6d]">
                           {devotees.length} {language === 'KN' ? 'ಭಕ್ತರು' : 'Devotees'}
                         </span>
                       </div>
                       <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
                         {language === 'KN'
-                          ? `${localizedActiveTemple.name} ಪೂಜಾ ಸಂಕಲ್ಪಕ್ಕಾಗಿ ಉಳಿಸಲಾದ ಕುಟುಂಬದ ಸದಸ್ಯರ ಪಟ್ಟಿ`
-                          : `Family members registered for ${localizedActiveTemple.name} sacred sankalpa`}
+                          ? 'ಪೂಜಾ ಸಂಕಲ್ಪಕ್ಕಾಗಿ ಉಳಿಸಲಾದ ಕುಟುಂಬದ ಸದಸ್ಯರ ಪಟ್ಟಿ'
+                          : 'Family members registered for sacred sankalpa'}
                       </p>
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {onSwitchTemple && (
-                      <button
-                        type="button"
-                        onClick={onSwitchTemple}
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-[#eadfd1] bg-white px-3.5 py-2 text-xs font-bold text-[#c1440e] hover:bg-[#fff9f3] transition cursor-pointer shadow-2xs"
-                      >
-                        <span>🛕</span>
-                        <span>{language === 'KN' ? 'ಕ್ಷೇತ್ರ ಬದಲಾಯಿಸಿ' : 'Switch Sanctuary'}</span>
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => selectTab('add-devotee')}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] px-4 py-2 text-xs font-bold text-white shadow-xs hover:brightness-110 transition cursor-pointer"
-                    >
-                      <span>➕</span>
-                      <span>{language === 'KN' ? 'ಭಕ್ತರನ್ನು ಸೇರಿಸಿ' : 'Add Devotee'}</span>
-                    </button>
                   </div>
                 </div>
 
@@ -1114,7 +997,6 @@ const ProfilePage = ({
                           <tr className="border-b border-[#eadfd1] bg-[#faf4ec] text-[11px] font-bold uppercase tracking-wider text-[#8b7a6d]">
                             <th className="py-3.5 px-4 text-center w-12">#</th>
                             <th className="py-3.5 px-4">{language === 'KN' ? 'ಭಕ್ತರ ಹೆಸರು' : 'Devotee Name'}</th>
-                            <th className="py-3.5 px-4">{language === 'KN' ? 'ಸಂಬಂಧ' : 'Relationship'}</th>
                             <th className="py-3.5 px-4">{language === 'KN' ? 'ಜನ್ಮ ನಕ್ಷತ್ರ' : 'Nakshatra'}</th>
                             <th className="py-3.5 px-4">{language === 'KN' ? 'ರಾಶಿ' : 'Rashi'}</th>
                             <th className="py-3.5 px-4">{language === 'KN' ? 'ಗೋತ್ರ' : 'Gotram'}</th>
@@ -1127,7 +1009,7 @@ const ProfilePage = ({
                             if (isEditing) {
                               return (
                                 <tr key={dev.id} className="bg-[#fffaf1]">
-                                  <td colSpan={7} className="p-4 sm:p-5 border-l-4 border-l-[#c1440e]">
+                                  <td colSpan={6} className="p-4 sm:p-5 border-l-4 border-l-[#c1440e]">
                                     <form onSubmit={(e) => handleUpdateDevotee(dev.id!, e)} className="space-y-4">
                                       <div className="flex items-center justify-between pb-2 border-b border-[#eadfd1]">
                                         <div className="flex items-center gap-2">
@@ -1147,7 +1029,7 @@ const ProfilePage = ({
                                         </button>
                                       </div>
 
-                                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                         {/* Name */}
                                         <div className="lg:col-span-1">
                                           <label className="block text-[10px] font-bold text-[#8b7a6d] mb-1">
@@ -1167,28 +1049,6 @@ const ProfilePage = ({
                                             }`}
                                             placeholder="Devotee name"
                                           />
-                                        </div>
-
-                                        {/* Relationship */}
-                                        <div>
-                                          <label className="block text-[10px] font-bold text-[#8b7a6d] mb-1">
-                                            {language === 'KN' ? 'ಸಂಬಂಧ' : 'Relationship'}
-                                          </label>
-                                          <select
-                                            value={editDevoteeForm.relationship}
-                                            onChange={(e) => setEditDevoteeForm({ ...editDevoteeForm, relationship: e.target.value })}
-                                            className="w-full rounded-lg border border-[#eadfd1] bg-white px-3 py-2 text-xs text-[#34251e] outline-none transition focus:border-[#c1440e] cursor-pointer"
-                                          >
-                                            <option value="Self">Self (ಸ್ವತಃ)</option>
-                                            <option value="Spouse">Spouse (ಪತಿ / ಪತ್ನಿ)</option>
-                                            <option value="Son">Son (ಮಗ)</option>
-                                            <option value="Daughter">Daughter (ಮಗಳು)</option>
-                                            <option value="Father">Father (ತಂದೆ)</option>
-                                            <option value="Mother">Mother (ತಾಯಿ)</option>
-                                            <option value="Brother">Brother (ಸಹೋದರ)</option>
-                                            <option value="Sister">Sister (ಸಹೋದರಿ)</option>
-                                            <option value="Other">Other (ಇತರರು)</option>
-                                          </select>
                                         </div>
 
                                         {/* Nakshatra */}
@@ -1282,16 +1142,6 @@ const ProfilePage = ({
                                   </div>
                                 </td>
 
-                                {/* Relationship */}
-                                <td className="py-3.5 px-4">
-                                  {dev.relationship ? (
-                                    <span className="inline-block rounded-md bg-[#fdf2e9] px-2.5 py-0.5 text-[11px] font-bold text-[#c1440e]">
-                                      {dev.relationship}
-                                    </span>
-                                  ) : (
-                                    <span className="text-[#b5a496]">—</span>
-                                  )}
-                                </td>
 
                                 {/* Nakshatra */}
                                 <td className="py-3.5 px-4 font-medium text-[#75685d]">
@@ -1370,31 +1220,14 @@ const ProfilePage = ({
                         <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#34251e]">
                           {language === 'KN' ? 'ನಿಮ್ಮ ಮೆಚ್ಚಿನ ಸೇವೆಗಳು' : 'Your Wishlist'}
                         </h2>
-                        <span className="rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-2.5 py-0.5 text-xs font-bold text-[#c1440e]">
-                          🛕 {localizedActiveTemple.name}
-                        </span>
-                        <span className="rounded-full bg-[#f5ede2] px-2.5 py-0.5 text-xs font-bold text-[#8b7a6d]">
-                          {wishlistedSevas.length} {language === 'KN' ? 'ಸೇವೆಗಳು' : 'Sevas'}
-                        </span>
                       </div>
                       <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
                         {language === 'KN'
-                          ? `${localizedActiveTemple.name} ಕ್ಷೇತ್ರಕ್ಕಾಗಿ ನೀವು ಉಳಿಸಿದ ಪವಿತ್ರ ಸೇವೆಗಳು`
-                          : `Saved ritual offerings and pujas for ${localizedActiveTemple.name}`}
+                          ? 'ಉಳಿಸಿದ ಪವಿತ್ರ ಸೇವೆಗಳು ಮತ್ತು ಪೂಜೆಗಳು'
+                          : 'Saved ritual offerings and pujas'}
                       </p>
                     </div>
                   </div>
-
-                  {onSwitchTemple && (
-                    <button
-                      type="button"
-                      onClick={onSwitchTemple}
-                      className="self-start sm:self-auto inline-flex items-center gap-1.5 rounded-xl border border-[#eadfd1] bg-white px-3.5 py-2 text-xs font-bold text-[#c1440e] hover:bg-[#fff9f3] transition cursor-pointer shadow-2xs"
-                    >
-                      <span>🛕</span>
-                      <span>{language === 'KN' ? 'ಕ್ಷೇತ್ರ ಬದಲಾಯಿಸಿ' : 'Switch Sanctuary'}</span>
-                    </button>
-                  )}
                 </div>
 
                 {/* Content */}
@@ -1405,13 +1238,13 @@ const ProfilePage = ({
                       <span className="text-5xl">🤍</span>
                       <h4 className="mt-4 font-serif font-bold text-lg text-[#34251e]">
                         {language === 'KN'
-                          ? `${localizedActiveTemple.name} ಮೆಚ್ಚಿನವುಗಳ ಪಟ್ಟಿ ಖಾಲಿಯಾಗಿದೆ`
-                          : `No Saved Sevas for ${localizedActiveTemple.name}`}
+                          ? 'ಮೆಚ್ಚಿನವುಗಳ ಪಟ್ಟಿ ಖಾಲಿಯಾಗಿದೆ'
+                          : 'No Saved Sevas'}
                       </h4>
                       <p className="mt-1.5 text-xs sm:text-sm text-[#8b7a6d] max-w-md mx-auto">
                         {language === 'KN'
-                          ? `ನೀವು ${localizedActiveTemple.name} ಕ್ಷೇತ್ರಕ್ಕೆ ಯಾವುದೇ ಸೇವೆಗಳನ್ನು ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಿಲ್ಲ. ಲಭ್ಯವಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳನ್ನು ಉಳಿಸಲು ಹೃದಯ ಐಕಾನ್ ಕ್ಲಿಕ್ ಮಾಡಿ.`
-                          : `You haven't saved any offerings for ${localizedActiveTemple.name} yet. Explore available sevas and tap the heart icon to add to this temple's wishlist.`}
+                          ? 'ನೀವು ಯಾವುದೇ ಸೇವೆಗಳನ್ನು ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಿಲ್ಲ. ಲಭ್ಯವಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳನ್ನು ಉಳಿಸಲು ಹೃದಯ ಐಕಾನ್ ಕ್ಲಿಕ್ ಮಾಡಿ.'
+                          : "You haven't saved any offerings yet. Explore available sevas and tap the heart icon to add to your wishlist."}
                       </p>
                       <button
                         type="button"
