@@ -4,6 +4,7 @@ import type { Order, User, Devotee, Temple } from '../../types'
 import { temples } from '../../data'
 import { formatPrice } from '../../utils/helpers'
 import { useLanguage } from '../../contexts/LanguageContext'
+import LanguageDropdown from '../../components/LanguageDropdown/LanguageDropdown'
 
 interface MySevasPageProps {
   user: User | null
@@ -37,6 +38,8 @@ const MySevasPage = ({
   user,
   orders,
   selectedTemple,
+  switchTemple,
+  onOpenQrPass,
   onCancelOrder,
   onReorder,
   onOpenSideMenu,
@@ -99,31 +102,34 @@ const MySevasPage = ({
               </span>
             </button>
 
-            {/* Back link */}
+            {/* Home link */}
             <button
               onClick={() => navigate('/')}
-              className="hidden sm:flex items-center gap-1.5 rounded-full border border-[#eadfd1] bg-white px-3.5 py-1.5 text-xs font-bold text-[#674f40] transition hover:border-[#c1440e] hover:text-[#c1440e] cursor-pointer"
+              className="flex items-center gap-1.5 rounded-full border border-[#eadfd1] bg-white px-3.5 py-1.5 text-xs font-bold text-[#674f40] transition hover:border-[#c1440e] hover:text-[#c1440e] cursor-pointer"
             >
-              <span>←</span>
-              <span>{t('backToHome')}</span>
+              <span>🏠</span>
+              <span>{t('navHome')}</span>
             </button>
           </div>
 
           {/* Right Action Icons */}
           <div className="flex items-center gap-2.5">
             {/* Wishlist quick link */}
-            <button
-              onClick={onWishlist}
-              className="relative hidden sm:grid h-9 w-9 place-items-center rounded-full border border-[#e0d3c5] bg-white text-sm transition hover:border-[#c1440e] cursor-pointer shrink-0"
-              title={t('navFavorites')}
-            >
-              🤍
-              {wishlistCount > 0 && (
-                <span className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-[#c1440e] text-[9px] font-bold text-white">
-                  {wishlistCount}
-                </span>
-              )}
-            </button>
+            {onWishlist && (
+              <button
+                type="button"
+                onClick={onWishlist}
+                className="relative flex items-center justify-center rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] p-2 text-xs font-semibold text-[#5c4d41] hover:text-[#c1440e] shadow-2xs transition cursor-pointer"
+                title={language === 'KN' ? 'ಮೆಚ್ಚಿನವುಗಳು' : 'Wishlist'}
+              >
+                <span>❤️</span>
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 grid h-4 min-w-[16px] place-items-center rounded-full bg-[#c1440e] px-1 text-[10px] font-bold text-white shadow-xs">
+                    {wishlistCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* Book More Sevas CTA */}
             <button
@@ -134,16 +140,8 @@ const MySevasPage = ({
               <span>{t('backToSevas')}</span>
             </button>
 
-            {/* Language toggle */}
-            <button
-              type="button"
-              onClick={toggleLanguage}
-              className="flex items-center gap-1.5 rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] px-3 py-1.5 text-xs font-semibold text-[#5c4d41] hover:text-[#c1440e] shadow-2xs transition cursor-pointer shrink-0"
-              title={language === 'EN' ? 'Switch to ಕನ್ನಡ' : 'Switch to English'}
-            >
-              <span className="text-sm">🌐</span>
-              <span className="font-bold">{language === 'EN' ? 'English' : 'ಕನ್ನಡ'}</span>
-            </button>
+            {/* Language Dropdown (Globe Icon Only) */}
+            <LanguageDropdown />
 
             {/* User Account / Profile Menu Button */}
             {user ? (
@@ -190,9 +188,31 @@ const MySevasPage = ({
         {/* Page Hero Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#eadfd1] pb-6">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#f5ede2] px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#c1440e]">
-              <span className="pulse-beacon" />
-              <span>{localizedActiveTemple.name}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#f5ede2] px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#c1440e]">
+                <span className="pulse-beacon" />
+                <span>{localizedActiveTemple.name}</span>
+              </div>
+              {switchTemple && (
+                <button
+                  type="button"
+                  onClick={switchTemple}
+                  className="inline-flex items-center gap-1 rounded-full border border-[#eadfd1] bg-white px-3 py-1 text-xs font-bold text-[#c1440e] hover:bg-[#fff9f3] transition cursor-pointer shadow-2xs"
+                >
+                  <span>🛕</span>
+                  <span>{language === 'KN' ? 'ಕ್ಷೇತ್ರ ಬದಲಾಯಿಸಿ' : 'Switch Sanctuary'}</span>
+                </button>
+              )}
+              {onOpenQrPass && (
+                <button
+                  type="button"
+                  onClick={onOpenQrPass}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#bbf7d0] bg-[#f0fdf4] px-3 py-1 text-xs font-bold text-[#16a34a] hover:bg-[#dcfce7] transition cursor-pointer shadow-2xs"
+                >
+                  <span>📱</span>
+                  <span>{language === 'KN' ? 'ದರ್ಶನ ಕ್ಯೂಆರ್ ಪಾಸ್' : 'Temple QR Pass'}</span>
+                </button>
+              )}
             </div>
             <h1 className="mt-3 font-serif text-3xl sm:text-4xl font-bold text-[#34251e]">
               {localizedActiveTemple.name} — {t('mySevasFullTitle')}

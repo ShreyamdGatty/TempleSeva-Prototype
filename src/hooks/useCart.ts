@@ -180,12 +180,24 @@ export function useCart() {
     setCouponError('')
   }, [])
 
+  const updateCartDate = useCallback((newDate: string) => {
+    if (!newDate) return
+    setCart((items) => {
+      const needsUpdate = items.some((item) => item.date !== newDate)
+      if (!needsUpdate) return items
+      return items.map((item) => ({
+        ...item,
+        date: newDate,
+      }))
+    })
+  }, [])
+
   return {
     cart, savedForLater, subtotal, discount, total, itemCount,
     devoteeSeva, setDevoteeSeva, devotee, setDevotee,
     appliedCoupon, couponError,
     addSeva, addDevoteeSeva, changeQty, removeItem, updateItemDevotees,
     saveForLater, moveToCart, removeSaved,
-    applyCoupon, removeCoupon, clearCart,
+    applyCoupon, removeCoupon, clearCart, updateCartDate,
   }
 }

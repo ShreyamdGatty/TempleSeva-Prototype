@@ -113,6 +113,23 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       } else if (id === 'rudra-abhishekam') {
         name = t('s_rudra_name')
         description = t('s_rudra_desc')
+      } else if (language === 'KN') {
+        if (id === 'meenakshi-pushpanjali') {
+          name = 'ಸಹಸ್ರನಾಮ ಅರ್ಚನೆ ಮತ್ತು ಪುಷ್ಪಾಂಜಲಿ'
+          description = '೧೦೦೮ ತಾಜಾ ಮಲ್ಲಿಗೆ ಮತ್ತು ಕಮಲದ ಹೂವುಗಳ ಸಮರ್ಪಣೆಯೊಂದಿಗೆ ಸಹಸ್ರನಾಮ ಪಠಣ.'
+        } else if (id === 'meenakshi-chandi-homam') {
+          name = 'ಚಂಡಿ ಹೋಮ ಮತ್ತು ನವಾಕ್ಷರಿ ಮಹಾಯಾಗ'
+          description = 'ಆರೋಗ್ಯ, ಜಯ ಮತ್ತು ಸಂಕಷ್ಟ ನಿವಾರಣೆಗಾಗಿ ಪವಿತ್ರ ಮಹಾಯಾಗ ಹೋಮ.'
+        } else if (id === 'meenakshi-golden-palanquin') {
+          name = 'ತಂಗ ಪಲ್ಲಕ್ಕಿ (ಚಿನ್ನದ ಪಲ್ಲಕ್ಕಿ) ಸೇವೆ'
+          description = 'ದೇವಸ್ಥಾನದ ಪ್ರಾಕಾರದಲ್ಲಿ ಚಿನ್ನದ ಪಲ್ಲಕ್ಕಿಯ ಭವ್ಯ ಸಂಜೆ ಮೆರವಣಿಗೆ.'
+        } else if (id === 'meenakshi-navagraha-pooja') {
+          name = 'ನವಗ್ರಹ ಶಾಂತಿ ಪೂಜೆ'
+          description = 'ನವಗ್ರಹ ದೋಷ ನಿವಾರಣೆ ಮತ್ತು ಶುಭ ಫಲಗಳಿಗಾಗಿ ವಿಶೇಷ ಪೂಜೆ.'
+        } else if (id === 'meenakshi-annadhanam') {
+          name = 'ಮಹಾ ಅನ್ನದಾನ ಸೇವೆ'
+          description = 'ಮೀನಾಕ್ಷಿ ಅಮ್ಮನವರ ದರ್ಶನಕ್ಕೆ ಬರುವ ಭಕ್ತರಿಗೆ ಪವಿತ್ರ ಪ್ರಸಾದ ಭೋಜನ ಸಮರ್ಪಣೆ.'
+        }
       }
 
       return { ...seva, name, description }

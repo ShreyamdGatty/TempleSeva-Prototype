@@ -1,48 +1,87 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { STORAGE_DEVOTEES } from '../data'
 import { readJson } from '../utils/storage'
 import type { Devotee } from '../types'
 
-export function useDevotees(initialUserName?: string) {
-  const [devotees, setDevotees] = useState<Devotee[]>(() => {
+function getInitialSampleDevotees(initialUserName?: string): Devotee[] {
+  return [
+    {
+      id: 'dev-meen-1',
+      templeId: 'meenakshi',
+      name: initialUserName || 'Srinivasan Iyer',
+      nakshatra: 'Rohini',
+      rashi: 'Vrishabha (Taurus)',
+      gotram: 'Kashyapa',
+      relationship: 'Self',
+    },
+    {
+      id: 'dev-tiru-1',
+      templeId: 'venkateswara',
+      name: initialUserName || 'Ananya Sharma',
+      nakshatra: 'Ashwini',
+      rashi: 'Mesha (Aries)',
+      gotram: 'Bharadwaja',
+      relationship: 'Self',
+    },
+    {
+      id: 'dev-kash-1',
+      templeId: 'kashi',
+      name: initialUserName || 'Vijay Anand',
+      nakshatra: 'Uttara Phalguni',
+      rashi: 'Kanya (Virgo)',
+      gotram: 'Vashishta',
+      relationship: 'Self',
+    },
+  ]
+}
+
+export function useDevotees(initialUserName?: string, activeTempleId: string = 'meenakshi') {
+  const [allDevotees, setAllDevotees] = useState<Devotee[]>(() => {
     const saved = readJson<Devotee[]>(STORAGE_DEVOTEES, [])
-    if (saved && saved.length > 0) return saved
-    if (initialUserName) {
-      const initialDevotee: Devotee = {
-        id: `dev-${Date.now()}`,
-        name: initialUserName,
-        nakshatra: 'Rohini',
-        rashi: 'Vrishabha (Taurus)',
-        gotram: 'Kashyapa',
-        relationship: 'Self',
-      }
-      return [initialDevotee]
+    if (saved && saved.length > 0) {
+      // Ensure existing devotees have templeId (defaulting legacy ones to meenakshi)
+      const hasTempleIds = saved.some((d) => !!d.templeId)
+      if (hasTempleIds) return saved
+      const migrated = saved.map((d) => ({ ...d, templeId: d.templeId || 'meenakshi' }))
+      window.localStorage.setItem(STORAGE_DEVOTEES, JSON.stringify(migrated))
+      return migrated
     }
-    return []
+    const initial = getInitialSampleDevotees(initialUserName)
+    window.localStorage.setItem(STORAGE_DEVOTEES, JSON.stringify(initial))
+    return initial
   })
 
   // Synchronize with localStorage
   useEffect(() => {
-    if (devotees.length > 0) {
-      window.localStorage.setItem(STORAGE_DEVOTEES, JSON.stringify(devotees))
+    if (allDevotees.length > 0) {
+      window.localStorage.setItem(STORAGE_DEVOTEES, JSON.stringify(allDevotees))
     }
-  }, [devotees])
+  }, [allDevotees])
 
-  const addDevotee = useCallback((data: Omit<Devotee, 'id'>) => {
-    const newDevotee: Devotee = {
-      ...data,
-      id: `dev-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    }
-    setDevotees((prev) => {
-      const next = [...prev, newDevotee]
-      window.localStorage.setItem(STORAGE_DEVOTEES, JSON.stringify(next))
-      return next
-    })
-    return newDevotee
-  }, [])
+  // Filter devotees for the active temple only
+  const devotees = useMemo(() => {
+    return allDevotees.filter((d) => !d.templeId || d.templeId === activeTempleId)
+  }, [allDevotees, activeTempleId])
+
+  const addDevotee = useCallback(
+    (data: Omit<Devotee, 'id'>) => {
+      const newDevotee: Devotee = {
+        ...data,
+        templeId: data.templeId || activeTempleId || 'meenakshi',
+        id: `dev-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      }
+      setAllDevotees((prev) => {
+        const next = [...prev, newDevotee]
+        window.localStorage.setItem(STORAGE_DEVOTEES, JSON.stringify(next))
+        return next
+      })
+      return newDevotee
+    },
+    [activeTempleId]
+  )
 
   const updateDevotee = useCallback((id: string, updated: Partial<Devotee>) => {
-    setDevotees((prev) => {
+    setAllDevotees((prev) => {
       const next = prev.map((d) => (d.id === id ? { ...d, ...updated } : d))
       window.localStorage.setItem(STORAGE_DEVOTEES, JSON.stringify(next))
       return next
@@ -50,7 +89,7 @@ export function useDevotees(initialUserName?: string) {
   }, [])
 
   const removeDevotee = useCallback((id: string) => {
-    setDevotees((prev) => {
+    setAllDevotees((prev) => {
       const next = prev.filter((d) => d.id !== id)
       window.localStorage.setItem(STORAGE_DEVOTEES, JSON.stringify(next))
       return next
@@ -59,8 +98,10 @@ export function useDevotees(initialUserName?: string) {
 
   return {
     devotees,
+    allDevotees,
     addDevotee,
     updateDevotee,
     removeDevotee,
   }
 }
+

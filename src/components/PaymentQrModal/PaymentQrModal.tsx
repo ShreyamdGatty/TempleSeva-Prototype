@@ -5,6 +5,7 @@ import { useLanguage } from '../../contexts/LanguageContext'
 
 interface PaymentQrModalProps {
   orders: Order[]
+  selectedTemple?: import('../../types').Temple
   onClose: () => void
   onNavigateToSevas?: () => void
   onToast?: (msg: string, variant: 'success' | 'error' | 'info' | 'warning') => void
@@ -122,6 +123,7 @@ export const SacredQrCodeSvg = ({
 
 const PaymentQrModal = ({
   orders,
+  selectedTemple,
   onClose,
   onNavigateToSevas,
   onToast,
@@ -131,14 +133,20 @@ const PaymentQrModal = ({
   // Tab State: 'active' (Theme colour) vs 'received' (Light gray disabled)
   const [activeTab, setActiveTab] = useState<'active' | 'received'>('active')
 
-  // Categorize orders
+  // Filter orders specifically for the active temple
+  const templeOrders = useMemo(() => {
+    if (!selectedTemple) return orders
+    return orders.filter((o) => o.temple.id === selectedTemple.id)
+  }, [orders, selectedTemple])
+
+  // Categorize orders for this temple
   const activeOrders = useMemo(() => {
-    return orders.filter((o) => o.status === 'Confirmed' || o.status === 'In Progress')
-  }, [orders])
+    return templeOrders.filter((o) => o.status === 'Confirmed' || o.status === 'In Progress')
+  }, [templeOrders])
 
   const receivedOrders = useMemo(() => {
-    return orders.filter((o) => o.status === 'Completed' || o.status === 'Cancelled')
-  }, [orders])
+    return templeOrders.filter((o) => o.status === 'Completed' || o.status === 'Cancelled')
+  }, [templeOrders])
 
   // Selected indices
   const [activeSelectIdx, setActiveSelectIdx] = useState(0)
@@ -151,6 +159,12 @@ const PaymentQrModal = ({
 
   const isDeactiveView = activeTab === 'received'
   const displayedOrder = isDeactiveView ? currentReceivedOrder : currentActiveOrder
+
+  const templeDisplayName = selectedTemple
+    ? translateTemple(selectedTemple).name
+    : displayedOrder
+    ? translateTemple(displayedOrder.temple).name
+    : 'Sacred Sanctuary'
 
   const handleDownload = () => {
     if (onToast) {
@@ -195,7 +209,7 @@ const PaymentQrModal = ({
                   : 'bg-[#fdf2e9] text-[#c1440e] border border-[#f5cfb5]'
               }`}
             >
-              {isDeactiveView ? 'Received / Deactivated Pass' : 'Active Sanctum Entry Pass'}
+              {templeDisplayName}
             </span>
           </div>
           <h2 className="mt-1 font-serif text-2xl font-bold text-[#34251e]">
@@ -203,8 +217,8 @@ const PaymentQrModal = ({
           </h2>
           <p className="text-xs text-[#8b7a6d]">
             {isDeactiveView
-              ? 'Concluded and received ritual bookings (Archana completed / Prasadam dispatched)'
-              : 'Active scannable passes valid for temple entrance and live priest sankalpa'}
+              ? `Archived ritual counterfoils for ${templeDisplayName}`
+              : `Active entry passes and sanctum tokens for ${templeDisplayName}`}
           </p>
         </div>
 
@@ -254,7 +268,7 @@ const PaymentQrModal = ({
             >
               {activeOrders.map((ord, idx) => (
                 <option key={ord.id} value={idx}>
-                  {ord.id} — {translateTemple(ord.temple).name} ({ord.date})
+                  {ord.id} — ({ord.date})
                 </option>
               ))}
             </select>
@@ -272,119 +286,127 @@ const PaymentQrModal = ({
             >
               {receivedOrders.map((ord, idx) => (
                 <option key={ord.id} value={idx}>
-                  {ord.id} — {translateTemple(ord.temple).name} ({ord.status})
+                  {ord.id} — ({ord.status})
                 </option>
               ))}
             </select>
           </div>
         )}
 
-        {/* ── The Digital QR Code Card ── */}
-        <div
-          className={`mt-4 rounded-3xl p-5 text-center transition-all duration-300 relative overflow-hidden ${
-            isDeactiveView
-              ? 'border-2 border-[#e5e7eb] bg-[#f9fafb]'
-              : 'border-2 border-[#e6dacb] bg-white shadow-md'
-          }`}
-        >
-          {/* Status Badge */}
-          <div className="mb-3 flex items-center justify-between">
-            <span
-              className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                isDeactiveView
-                  ? 'bg-[#f3f4f6] text-[#6b7280] border border-[#d1d5db]'
-                  : 'bg-[#e9f5ed] text-[#28724d] border border-[#b2e5c8]'
-              }`}
-            >
-              {isDeactiveView ? '⚪ DEACTIVATED' : '🟢 ACTIVE ENTRY PASS'}
-            </span>
-            <span className="font-mono text-xs font-bold text-[#8b7a6d]">
-              ID: {displayedOrder ? displayedOrder.id : isDeactiveView ? 'TS-COMPLETED-SAMPLE' : 'TS-ACTIVE-SAMPLE'}
-            </span>
-          </div>
-
-          {/* Scannable SVG QR Code:
-              - Active: Theme colour (#c1440e)
-              - Deactive: Disabled light gray (#9ca3af)
-          */}
-          <SacredQrCodeSvg
-            code={displayedOrder ? displayedOrder.id : isDeactiveView ? 'TS-DEACTIVE-99' : 'TS-ACTIVE-99'}
-            variant={isDeactiveView ? 'deactive' : 'active'}
-          />
-
-          <p className="mt-2.5 text-[11px] font-semibold text-[#8b7a6d]">
-            {isDeactiveView
-              ? '⚪ Ritual Concluded · Prasadam Received / Dispatched'
-              : '⚡ Scan for Temple Sanctum Entry & Priest Sankalpa'}
-          </p>
-
-          {/* Pass Metadata Details */}
+        {displayedOrder ? (
+          /* ── The Digital QR Code Card ── */
           <div
-            className={`mt-4 rounded-2xl p-3.5 text-left text-xs space-y-1.5 ${
-              isDeactiveView ? 'bg-[#f3f4f6] border border-[#e5e7eb]' : 'bg-[#faf6f0] border border-[#eee2d3]'
+            className={`mt-4 rounded-3xl p-5 text-center transition-all duration-300 relative overflow-hidden ${
+              isDeactiveView
+                ? 'border-2 border-[#e5e7eb] bg-[#f9fafb]'
+                : 'border-2 border-[#e6dacb] bg-white shadow-md'
             }`}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-[#8b7a6d]">Temple:</span>
-              <span className="font-bold text-[#34251e]">
-                {displayedOrder
-                  ? translateTemple(displayedOrder.temple).name
-                  : isDeactiveView
-                  ? 'Kashi Vishwanath'
-                  : 'Shree Meenakshi Temple'}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-[#8b7a6d]">Date:</span>
-              <span className="font-bold text-[#34251e]">
-                {displayedOrder ? displayedOrder.date : 'Today'}
-              </span>
-            </div>
-
-            {displayedOrder && displayedOrder.items.length > 0 && (
-              <div className="flex items-start justify-between">
-                <span className="text-[#8b7a6d]">Offerings:</span>
-                <span className="font-bold text-right truncate max-w-[220px] text-[#34251e]">
-                  {displayedOrder.items.map((i) => `${translateSeva(i.seva).name} × ${i.quantity}`).join(', ')}
-                </span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between pt-1.5 border-t border-[#e2d5c5]">
-              <span className="font-semibold text-[#8b7a6d]">Total Consecration:</span>
+            {/* Status Badge */}
+            <div className="mb-3 flex items-center justify-between">
               <span
-                className={`font-serif text-sm font-bold ${
-                  isDeactiveView ? 'text-[#6b7280]' : 'text-[#c1440e]'
+                className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                  isDeactiveView
+                    ? 'bg-[#f3f4f6] text-[#6b7280] border border-[#d1d5db]'
+                    : 'bg-[#e9f5ed] text-[#28724d] border border-[#b2e5c8]'
                 }`}
               >
-                {displayedOrder ? formatPrice(displayedOrder.total) : '₹1,001'}
+                {isDeactiveView ? '⚪ DEACTIVATED' : '🟢 ACTIVE ENTRY PASS'}
+              </span>
+              <span className="font-mono text-xs font-bold text-[#8b7a6d]">
+                ID: {displayedOrder.id}
               </span>
             </div>
+
+            {/* Scannable SVG QR Code */}
+            <SacredQrCodeSvg
+              code={`${displayedOrder.id}|${displayedOrder.temple.id}|${displayedOrder.date}|${displayedOrder.status}`}
+              variant={isDeactiveView ? 'deactive' : 'active'}
+            />
+
+            <p className="mt-2.5 text-[11px] font-semibold text-[#8b7a6d]">
+              {isDeactiveView
+                ? '⚪ Ritual Concluded · Prasadam Received / Dispatched'
+                : '⚡ Scan for Temple Sanctum Entry & Priest Sankalpa'}
+            </p>
+
+            {/* Pass Metadata Details */}
+            <div
+              className={`mt-4 rounded-2xl p-3.5 text-left text-xs space-y-1.5 ${
+                isDeactiveView ? 'bg-[#f3f4f6] border border-[#e5e7eb]' : 'bg-[#faf6f0] border border-[#eee2d3]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[#8b7a6d]">Temple:</span>
+                <span className="font-bold text-[#34251e]">
+                  {translateTemple(displayedOrder.temple).name}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-[#8b7a6d]">Date:</span>
+                <span className="font-bold text-[#34251e]">{displayedOrder.date}</span>
+              </div>
+
+              {displayedOrder.items && displayedOrder.items.length > 0 && (
+                <div className="flex items-start justify-between">
+                  <span className="text-[#8b7a6d]">Offerings:</span>
+                  <span className="font-bold text-right truncate max-w-[220px] text-[#34251e]">
+                    {displayedOrder.items.map((i) => `${translateSeva(i.seva).name} × ${i.quantity}`).join(', ')}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-1.5 border-t border-[#e2d5c5]">
+                <span className="font-semibold text-[#8b7a6d]">Total Consecration:</span>
+                <span
+                  className={`font-serif text-sm font-bold ${
+                    isDeactiveView ? 'text-[#6b7280]' : 'text-[#c1440e]'
+                  }`}
+                >
+                  {formatPrice(displayedOrder.total)}
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          /* ── Empty State for Temple ── */
+          <div className="mt-4 rounded-3xl p-8 text-center border-2 border-dashed border-[#eadfd1] bg-[#fffcf7]">
+            <span className="text-4xl">🛕</span>
+            <h3 className="mt-3 font-serif text-lg font-bold text-[#34251e]">
+              {isDeactiveView ? 'No Concluded Passes' : 'No Active Passes'}
+            </h3>
+            <p className="mt-1.5 text-xs text-[#8b7a6d] max-w-xs mx-auto leading-relaxed">
+              No {isDeactiveView ? 'concluded' : 'active'} booking passes found for{' '}
+              <strong>{templeDisplayName}</strong>.
+            </p>
+            {onNavigateToSevas && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose()
+                  onNavigateToSevas()
+                }}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#c1440e] to-[#df5619] px-4 py-2 text-xs font-bold text-white shadow-xs hover:brightness-110 cursor-pointer"
+              >
+                <span>🪔</span>
+                <span>Explore {templeDisplayName} Sevas</span>
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Bottom Actions */}
         <div className="mt-5 flex gap-2">
-          {!displayedOrder && onNavigateToSevas && (
+          {displayedOrder && (
             <button
-              onClick={() => {
-                onClose()
-                onNavigateToSevas()
-              }}
-              className="btn-primary flex-1 py-2.5 text-xs font-bold cursor-pointer"
+              type="button"
+              onClick={handleDownload}
+              className="flex-1 rounded-xl border border-[#d8c8b8] bg-[#fdfbf7] py-2.5 text-xs font-bold text-[#674f40] transition hover:bg-[#f5ede2] cursor-pointer"
             >
-              {language === 'KN' ? 'ಸೇವೆ ಕಾಯ್ದಿರಿಸಿ' : 'Book a Seva'}
+              📥 {isDeactiveView ? 'Save Receipt' : t('qrSaveBtn') || 'Save Pass'}
             </button>
           )}
-
-          <button
-            type="button"
-            onClick={handleDownload}
-            className="flex-1 rounded-xl border border-[#d8c8b8] bg-[#fdfbf7] py-2.5 text-xs font-bold text-[#674f40] transition hover:bg-[#f5ede2] cursor-pointer"
-          >
-            📥 {isDeactiveView ? 'Save Receipt' : t('qrSaveBtn') || 'Save Pass'}
-          </button>
 
           <button
             type="button"

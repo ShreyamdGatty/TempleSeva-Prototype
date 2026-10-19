@@ -320,7 +320,7 @@ const SankalpamModal = ({
                           {/* Date and Slot */}
                           <div className="flex items-center gap-3 text-xs text-[#75685d] flex-wrap">
                             <span className="flex items-center gap-1 font-medium text-[#c1440e]">
-                              📅 {item.date || selectedDate}
+                              📅 {selectedDate || item.date}
                             </span>
                             <span className="flex items-center gap-1 font-medium bg-[#faf5ef] px-2 py-0.5 rounded-md text-[#34251e]">
                               ⏰ {item.slot || '07:00 AM - Morning Pooja'}
@@ -444,8 +444,8 @@ const SankalpamModal = ({
                 >
                   <span>
                     {hasDevoteeSeva
-                      ? (language === 'KN' ? 'ಭಕ್ತರನ್ನು ನಿಯೋಜಿಸಿ →' : 'Assign Devotee →')
-                      : (language === 'KN' ? 'ಪಾವತಿಗೆ ಮುಂದುವರಿಯಿರಿ →' : 'Proceed to Pay →')}
+                      ? (language === 'KN' ? 'ಭಕ್ತರನ್ನು ನಿಯೋಜಿಸಿ →' : 'Assign Devotee (For Required Sevas) →')
+                      : (language === 'KN' ? 'ಪಾವತಿಗೆ ಮುಂದುವರಿಯಿರಿ (ಭಕ್ತರ ಅಗತ್ಯವಿಲ್ಲ) →' : 'Proceed to Pay (No Devotee Needed) →')}
                   </span>
                 </button>
               </div>
@@ -472,7 +472,7 @@ const SankalpamModal = ({
                     🕉️ {language === 'KN' ? 'ಪವಿತ್ರ ಸಂಕಲ್ಪ ವಿವರಗಳು' : 'Sacred Sankalpa Assignment'}
                   </h2>
                   <p className="text-xs text-[#8b7a6d]">
-                    {language === 'KN' ? 'ಪ್ರತಿ ಸೇವಾ ಟಿಕೆಟ್‌ಗೆ ಕುಟುಂಬ ಸದಸ್ಯರನ್ನು ನಿಯೋಜಿಸಿ' : 'Assign family members to each seva ticket for individualized priest rituals.'}
+                    {language === 'KN' ? 'ಅಗತ್ಯವಿರುವ ಸೇವೆಗಳಿಗೆ ಮಾತ್ರ ಭಕ್ತರನ್ನು ನಿಯೋಜಿಸಿ' : 'Assign family members only for sevas requiring personal Vedic sankalpa.'}
                   </p>
                 </div>
               </div>
@@ -484,6 +484,21 @@ const SankalpamModal = ({
               >
                 ×
               </button>
+            </div>
+
+            {/* Devotee Requirement Guidance Banner */}
+            <div className="mt-4 rounded-2xl border border-[#ebdcc9] bg-[#fffaf5] p-3.5 text-xs text-[#6e5849] flex items-start gap-2.5">
+              <span className="text-base text-[#c1440e] shrink-0">ℹ️</span>
+              <div>
+                <p className="font-bold text-[#34251e]">
+                  {language === 'KN' ? 'ಕೆಲವು ಸೇವೆಗಳಿಗೆ ಮಾತ್ರ ಭಕ್ತರ ವಿವರ ಅಗತ್ಯ' : 'Devotee assignment is only needed for specific sevas'}
+                </p>
+                <p className="mt-0.5 text-[11px] text-[#75685d] leading-relaxed">
+                  {language === 'KN'
+                    ? 'ಅಭಿಷೇಕ, ಅರ್ಚನೆ ಮತ್ತು ಹೋಮಗಳಿಗೆ ವೈಯಕ್ತಿಕ ಸಂಕಲ್ಪಕ್ಕಾಗಿ ಭಕ್ತರ ಹೆಸರು, ಗೋತ್ರ ಅಗತ್ಯ. ದೀಪಾರಾಧನೆ, ಆರತಿ ದರ್ಶನ ಮತ್ತು ಅನ್ನದಾನ ಮುಂತಾದ ಮುಕ್ತ ಸೇವೆಗಳಿಗೆ ಭಕ್ತರ ವಿವರ ಅಗತ್ಯವಿಲ್ಲ.'
+                    : 'Personal rituals (Abhishekam, Archana, Homam) require devotee details for gotram chanting. General offerings (Deepam, Aarti Darshan, Anna Prasadam) do not require assigning a devotee.'}
+                </p>
+              </div>
             </div>
 
             {/* 1. Cart Summary (Top) */}
@@ -764,7 +779,7 @@ const SankalpamModal = ({
                                 </h4>
                               </div>
                               <p className="mt-1 text-xs text-[#75685d]">
-                                Slot: <span className="font-medium text-[#34251e]">{item.slot || '07:00 AM - Morning Pooja'}</span> · {item.date || selectedDate}
+                                Slot: <span className="font-medium text-[#34251e]">{item.slot || '07:00 AM - Morning Pooja'}</span> · {selectedDate || item.date}
                               </p>
                             </div>
 
@@ -841,7 +856,7 @@ const SankalpamModal = ({
                               </span>
                             </div>
                             <p className="text-[11px] text-[#166534]">
-                              Slot: <span className="font-semibold">{item.slot || '07:00 AM - Morning Pooja'}</span> · {item.date || selectedDate} — Directly offered by temple archakas.
+                              Slot: <span className="font-semibold">{item.slot || '07:00 AM - Morning Pooja'}</span> · {selectedDate || item.date} — Directly offered by temple archakas.
                             </p>
                           </div>
                           <span className="font-serif font-bold text-[#166534] shrink-0 text-sm">

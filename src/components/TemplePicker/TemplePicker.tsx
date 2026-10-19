@@ -7,6 +7,7 @@ interface TemplePickerProps {
   selectedTemple?: Temple | null
   onSelect: (temple: Temple) => void
   onClose?: () => void
+  isNewUserSelection?: boolean
 }
 
 /**
@@ -154,6 +155,7 @@ const TemplePicker = ({
   selectedTemple,
   onSelect,
   onClose,
+  isNewUserSelection,
 }: TemplePickerProps) => {
   const { language, translateTemple } = useLanguage()
   const [searchQuery, setSearchQuery] = useState('')
@@ -201,13 +203,23 @@ const TemplePicker = ({
         {/* Top Header Bar */}
         <div className="flex items-center justify-between pb-3 border-b border-gray-100">
           <div>
+            {isNewUserSelection && (
+              <span className="inline-flex items-center gap-1.5 mb-1.5 text-[11px] font-bold uppercase tracking-wider text-[#c1440e] bg-[#fdf2e9] px-2.5 py-0.5 rounded-full border border-[#f5cfb5]">
+                <span className="text-xs">✨</span>
+                {language === 'KN' ? 'ಹೊಸ ಭಕ್ತರ ಸ್ವಾಗತ — ದೇವಾಲಯವನ್ನು ಆರಿಸಿ' : 'New Devotee Welcome — Choose Your Temple'}
+              </span>
+            )}
             <h2 className="font-serif text-xl sm:text-2xl font-bold text-gray-900">
               {language === 'KN' ? 'ದೇವಾಲಯವನ್ನು ಆರಿಸಿ' : 'Select Temple'}
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              {language === 'KN'
-                ? 'ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಪುಣ್ಯಕ್ಷೇತ್ರವನ್ನು ಆಯ್ಕೆಮಾಡಿ'
-                : 'Choose a sacred sanctuary to view its offerings'}
+              {isNewUserSelection
+                ? (language === 'KN'
+                    ? 'ನಿಮ್ಮ ಖಾತೆ ಸಿದ್ಧವಾಗಿದೆ! ಸೇವೆಗಳನ್ನು ಆರಂಭಿಸಲು ದೇವಾಲಯವನ್ನು ಆರಿಸಿ.'
+                    : 'Your account is ready! Choose a sacred sanctuary to begin booking sevas.')
+                : (language === 'KN'
+                    ? 'ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಪುಣ್ಯಕ್ಷೇತ್ರವನ್ನು ಆಯ್ಕೆಮಾಡಿ'
+                    : 'Choose a sacred sanctuary to view its offerings')}
             </p>
           </div>
 

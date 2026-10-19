@@ -6,7 +6,7 @@ import { nakshatras, rashis, sevas } from '../../data'
 import { useDevotees } from '../../hooks/useDevotees'
 import { useWishlist } from '../../hooks/useWishlist'
 import { formatPrice } from '../../utils/helpers'
-import LanguageModal from '../../components/LanguageModal/LanguageModal'
+import LanguageDropdown from '../../components/LanguageDropdown/LanguageDropdown'
 
 interface ProfilePageProps {
   user: User | null
@@ -23,6 +23,12 @@ interface ProfilePageProps {
   wishlist?: string[]
   onToggleWishlist?: (sevaId: string) => void
   onAddToCart?: (seva: Seva) => void
+  selectedTemple?: import('../../types').Temple
+  orders?: import('../../types').Order[]
+  devotees?: Devotee[]
+  onAddDevotee?: (data: Omit<Devotee, 'id'>) => Devotee
+  onUpdateDevotee?: (id: string, updated: Partial<Devotee>) => void
+  onRemoveDevotee?: (id: string) => void
 }
 
 const ProfilePage = ({
@@ -31,6 +37,7 @@ const ProfilePage = ({
   onUpdateUser,
   onWishlist: _onWishlist,
   onOrders,
+  onOpenQrPass,
   onOpenSideMenu,
   onLogout,
   showToast,
@@ -38,15 +45,22 @@ const ProfilePage = ({
   wishlist: propWishlist,
   onToggleWishlist,
   onAddToCart,
+  selectedTemple,
+  orders: propOrders = [],
+  devotees: propDevotees,
+  onAddDevotee: propAddDevotee,
+  onUpdateDevotee: propUpdateDevotee,
+  onRemoveDevotee: propRemoveDevotee,
 }: ProfilePageProps) => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { language, toggleLanguage: _toggleLanguage, t, translateSeva } = useLanguage()
+  const { language, setLanguage, toggleLanguage, t, translateSeva, translateTemple } = useLanguage()
 
-  // State for Language Change Confirmation Modal (from sidebar Language button)
-  const [langModalOpen, setLangModalOpen] = useState(false)
+  // Active temple scoping
+  const activeTemple = selectedTemple || { id: 'meenakshi', name: 'Shree Meenakshi Temple', location: 'Madurai, Tamil Nadu', image: '/temple-hero.webp', description: '' }
+  const localizedActiveTemple = translateTemple(activeTemple)
 
-  // Wishlist state and handlers (fallback to useWishlist hook if not passed via props)
+  // Wishlist state and handlers (scoped to the currently selected temple)
   const fallbackWishlist = useWishlist()
   const currentWishlist = propWishlist !== undefined ? propWishlist : fallbackWishlist.wishlist
   const handleToggleWish = (sevaId: string) => {
@@ -56,7 +70,7 @@ const ProfilePage = ({
       fallbackWishlist.toggle(sevaId)
     }
   }
-  const wishlistedSevas = sevas.filter((s) => currentWishlist.includes(s.id))
+  const wishlistedSevas = sevas.filter((s) => currentWishlist.includes(s.id) && s.templeId === activeTemple.id)
 
   // State to track sevas currently being removed (to display white heart before removal)
   const [removingWishlistIds, setRemovingWishlistIds] = useState<string[]>([])
@@ -113,8 +127,12 @@ const ProfilePage = ({
     }
   }, [location.search, location.state])
 
-  // Devotee management via useDevotees hook
-  const { devotees, addDevotee, updateDevotee, removeDevotee } = useDevotees(user?.name)
+  // Devotee management via props or scoped hook for active temple
+  const fallbackDevotees = useDevotees(user?.name, activeTemple.id)
+  const devotees = propDevotees !== undefined ? propDevotees : fallbackDevotees.devotees
+  const addDevotee = propAddDevotee || fallbackDevotees.addDevotee
+  const updateDevotee = propUpdateDevotee || fallbackDevotees.updateDevotee
+  const removeDevotee = propRemoveDevotee || fallbackDevotees.removeDevotee
   const [devoteeForm, setDevoteeForm] = useState({
     name: '',
     relationship: 'Self',
@@ -162,6 +180,7 @@ const ProfilePage = ({
 
     updateDevotee(id, {
       name: editDevoteeForm.name.trim(),
+      templeId: activeTemple.id,
       relationship: editDevoteeForm.relationship,
       nakshatra: editDevoteeForm.nakshatra || '',
       rashi: editDevoteeForm.rashi || '',
@@ -188,6 +207,7 @@ const ProfilePage = ({
 
     addDevotee({
       name: devoteeForm.name.trim(),
+      templeId: activeTemple.id,
       relationship: devoteeForm.relationship,
       nakshatra: devoteeForm.nakshatra || '',
       rashi: devoteeForm.rashi || '',
@@ -278,6 +298,8 @@ const ProfilePage = ({
 
           {/* Right Header Navigation */}
           <div className="flex items-center gap-3">
+            {/* Language Dropdown (Globe Icon Only) */}
+            <LanguageDropdown />
 
             {/* User Profile Pill */}
             <div className="flex items-center gap-2 text-xs font-semibold text-[#34251e]">
@@ -357,10 +379,32 @@ const ProfilePage = ({
                 onClick={() => navigate('/')}
                 className="grid h-8 w-8 place-items-center rounded-full text-base font-bold text-[#8b7a6d] hover:bg-[#f5ede2] hover:text-[#34251e] transition cursor-pointer"
                 aria-label="Close"
-                title="Back to home"
+                title="Home"
               >
                 ✕
               </button>
+            </div>
+
+            {/* Active Sanctuary Indicator */}
+            <div className="mb-3 rounded-xl border border-[#eadfd1] bg-[#faf4ec] p-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🛕</span>
+                  <div className="text-left leading-tight">
+                    <p className="text-[9px] uppercase font-bold text-[#8b7a6d]">Active Sanctuary</p>
+                    <p className="font-bold text-xs text-[#c1440e] truncate max-w-[140px]">{localizedActiveTemple.name}</p>
+                  </div>
+                </div>
+                {onSwitchTemple && (
+                  <button
+                    type="button"
+                    onClick={onSwitchTemple}
+                    className="rounded-lg bg-white border border-[#eadfd1] px-2 py-1 text-[10px] font-bold text-[#c1440e] hover:bg-[#fff9f3] transition cursor-pointer shadow-2xs"
+                  >
+                    {language === 'KN' ? 'ಬದಲಾಯಿಸಿ' : 'Switch'}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Menu Items */}
@@ -445,7 +489,14 @@ const ProfilePage = ({
               >
                 <div className="flex items-center gap-3">
                   <span className="text-base text-[#8b7a6d]">📄</span>
-                  <span>{language === 'KN' ? 'ನಿಮ್ಮ ಸೇವೆಗಳು (Your Orders)' : 'Your Orders'}</span>
+                  <div className="flex items-center gap-2">
+                    <span>{language === 'KN' ? 'ನಿಮ್ಮ ಸೇವೆಗಳು (Your Orders)' : 'Your Orders'}</span>
+                    {propOrders.length > 0 && (
+                      <span className="rounded-full bg-[#e9f5ed] px-2 py-0.5 text-[10px] font-bold text-[#28724d]">
+                        {propOrders.length}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <span className="text-xs text-[#b5a496]">›</span>
               </button>
@@ -466,9 +517,9 @@ const ProfilePage = ({
                     <span className="font-medium text-[#34251e]">
                       {language === 'KN' ? 'ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳು' : 'Your Wishlist'}
                     </span>
-                    {currentWishlist.length > 0 && (
+                    {wishlistedSevas.length > 0 && (
                       <span className="rounded-full bg-[#fdf2e9] px-2 py-0.5 text-[10px] font-bold text-[#c1440e]">
-                        {currentWishlist.length}
+                        {wishlistedSevas.length}
                       </span>
                     )}
                   </div>
@@ -479,6 +530,28 @@ const ProfilePage = ({
                   <span className="text-xs text-[#b5a496]">›</span>
                 )}
               </button>
+
+              {/* Digital QR Pass */}
+              {onOpenQrPass && (
+                <button
+                  type="button"
+                  onClick={onOpenQrPass}
+                  className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[#75685d] hover:bg-[#faf4ec] transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-base text-[#8b7a6d]">📱</span>
+                    <div className="flex items-center gap-2">
+                      <span>{language === 'KN' ? 'ಡಿಜಿಟಲ್ ಕ್ಯೂಆರ್ ಪಾಸ್' : 'Digital QR Pass'}</span>
+                      {propOrders.filter((o) => o.status === 'Confirmed' || o.status === 'In Progress').length > 0 && (
+                        <span className="rounded-full bg-[#e9f5ed] px-2 py-0.5 text-[10px] font-bold text-[#28724d]">
+                          {propOrders.filter((o) => o.status === 'Confirmed' || o.status === 'In Progress').length} Active
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-xs text-[#b5a496]">›</span>
+                </button>
+              )}
 
               {/* Switch Temple */}
               {onSwitchTemple && (
@@ -502,25 +575,70 @@ const ProfilePage = ({
                 </button>
               )}
 
-              {/* Change Language */}
-              <button
-                type="button"
-                onClick={() => setLangModalOpen(true)}
-                className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[#75685d] hover:bg-[#faf4ec] transition cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-base text-[#c1440e]">🌐</span>
-                  <div className="text-left">
-                    <span className="block font-medium text-[#34251e]">
-                      {language === 'KN' ? 'ಭಾಷೆ ಬದಲಾಯಿಸಿ' : 'Change Language'}
+              {/* Creative Change Language Selector */}
+              <div className="rounded-xl border border-[#eadfd1] bg-[#fffcf6] p-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="grid h-7 w-7 place-items-center rounded-full bg-[#fdf2e9] text-[#c1440e] shadow-2xs">
+                      <svg
+                        className="h-4 w-4 text-[#c1440e]"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="2" y1="12" x2="22" y2="12" />
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                      </svg>
                     </span>
-                    <span className="block text-[11px] text-[#8b7a6d]">
-                      {language === 'KN' ? 'ಪ್ರಸ್ತುತ: ಕನ್ನಡ' : 'Current: English'}
-                    </span>
+                    <div>
+                      <span className="block text-xs font-bold text-[#34251e]">
+                        {language === 'KN' ? 'ವೆಬ್‌ಸೈಟ್ ಭಾಷೆ' : 'Website Language'}
+                      </span>
+                      <span className="block text-[11px] text-[#8b7a6d]">
+                        {language === 'KN' ? 'ಆಯ್ಕೆಮಾಡಿದ ಭಾಷೆ: ಕನ್ನಡ' : 'Selected: English'}
+                      </span>
+                    </div>
                   </div>
+                  <span className="rounded-md bg-[#fdf2e9] border border-[#f5cfb5] px-2 py-0.5 text-[10px] font-bold text-[#c1440e]">
+                    {language === 'KN' ? 'ಕನ್ನಡ' : 'EN'}
+                  </span>
                 </div>
-                <span className="text-xs text-[#b5a496]">›</span>
-              </button>
+
+                {/* Creative Dual-Rectangle Selector */}
+                <div className="mt-2.5 grid grid-cols-2 gap-1.5 rounded-lg bg-[#f5ede2] p-1">
+                  <button
+                    type="button"
+                    onClick={() => setLanguage('EN')}
+                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      language === 'EN'
+                        ? 'bg-gradient-to-r from-[#c1440e] to-[#df5619] text-white shadow-xs'
+                        : 'text-[#674f40] hover:text-[#c1440e] hover:bg-white/60'
+                    }`}
+                  >
+                    <span className="text-sm">🇬🇧</span>
+                    <span>English</span>
+                    {language === 'EN' && <span className="text-[10px]">✓</span>}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setLanguage('KN')}
+                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      language === 'KN'
+                        ? 'bg-gradient-to-r from-[#c1440e] to-[#df5619] text-white shadow-xs'
+                        : 'text-[#674f40] hover:text-[#c1440e] hover:bg-white/60'
+                    }`}
+                  >
+                    <span className="text-sm">🇮🇳</span>
+                    <span>ಕನ್ನಡ</span>
+                    {language === 'KN' && <span className="text-[10px]">✓</span>}
+                  </button>
+                </div>
+              </div>
 
             </nav>
 
@@ -731,18 +849,21 @@ const ProfilePage = ({
                       ➕
                     </span>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#34251e]">
                           {language === 'KN' ? 'ಭಕ್ತರ ವಿವರ ಸೇರಿಸಿ' : 'Add Devotee Details'}
                         </h2>
-                        <span className="rounded-full bg-[#fdf2e9] px-2.5 py-0.5 text-xs font-bold text-[#c1440e]">
+                        <span className="rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-2.5 py-0.5 text-xs font-bold text-[#c1440e]">
+                          🛕 {localizedActiveTemple.name}
+                        </span>
+                        <span className="rounded-full bg-[#f5ede2] px-2.5 py-0.5 text-xs font-bold text-[#8b7a6d]">
                           Sankalpa
                         </span>
                       </div>
                       <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
                         {language === 'KN'
-                          ? 'ಪೂಜಾ ಸಂಕಲ್ಪಕ್ಕಾಗಿ ಕುಟುಂಬ ಸದಸ್ಯರ ಹೆಸರು, ನಕ್ಷತ್ರ ಮತ್ತು ಗೋತ್ರ ಸೇರಿಸಿ'
-                          : 'Add family member names, nakshatra & gotra for sacred temple pujas'}
+                          ? `${localizedActiveTemple.name} ಪೂಜಾ ಸಂಕಲ್ಪಕ್ಕಾಗಿ ಕುಟುಂಬ ಸದಸ್ಯರ ಹೆಸರು, ನಕ್ಷತ್ರ ಮತ್ತು ಗೋತ್ರ ಸೇರಿಸಿ`
+                          : `Add family member names, nakshatra & gotra for ${localizedActiveTemple.name} sacred pujas`}
                       </p>
                     </div>
                   </div>
@@ -923,20 +1044,44 @@ const ProfilePage = ({
                       📿
                     </span>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#34251e]">
                           {language === 'KN' ? 'ಭಕ್ತರ ಪಟ್ಟಿ' : 'Devotee List'}
                         </h2>
+                        <span className="rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-2.5 py-0.5 text-xs font-bold text-[#c1440e]">
+                          🛕 {localizedActiveTemple.name}
+                        </span>
                         <span className="rounded-full bg-[#f5ede2] px-2.5 py-0.5 text-xs font-bold text-[#8b7a6d]">
                           {devotees.length} {language === 'KN' ? 'ಭಕ್ತರು' : 'Devotees'}
                         </span>
                       </div>
                       <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
                         {language === 'KN'
-                          ? 'ಪೂಜಾ ಸಂಕಲ್ಪಕ್ಕಾಗಿ ಉಳಿಸಲಾದ ಕುಟುಂಬದ ಸದಸ್ಯರ ಪಟ್ಟಿ'
-                          : 'Family members registered for sacred temple sankalpa'}
+                          ? `${localizedActiveTemple.name} ಪೂಜಾ ಸಂಕಲ್ಪಕ್ಕಾಗಿ ಉಳಿಸಲಾದ ಕುಟುಂಬದ ಸದಸ್ಯರ ಪಟ್ಟಿ`
+                          : `Family members registered for ${localizedActiveTemple.name} sacred sankalpa`}
                       </p>
                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {onSwitchTemple && (
+                      <button
+                        type="button"
+                        onClick={onSwitchTemple}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-[#eadfd1] bg-white px-3.5 py-2 text-xs font-bold text-[#c1440e] hover:bg-[#fff9f3] transition cursor-pointer shadow-2xs"
+                      >
+                        <span>🛕</span>
+                        <span>{language === 'KN' ? 'ಕ್ಷೇತ್ರ ಬದಲಾಯಿಸಿ' : 'Switch Sanctuary'}</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => selectTab('add-devotee')}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] px-4 py-2 text-xs font-bold text-white shadow-xs hover:brightness-110 transition cursor-pointer"
+                    >
+                      <span>➕</span>
+                      <span>{language === 'KN' ? 'ಭಕ್ತರನ್ನು ಸೇರಿಸಿ' : 'Add Devotee'}</span>
+                    </button>
                   </div>
                 </div>
 
@@ -1221,21 +1366,35 @@ const ProfilePage = ({
                       ❤️
                     </span>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#34251e]">
                           {language === 'KN' ? 'ನಿಮ್ಮ ಮೆಚ್ಚಿನ ಸೇವೆಗಳು' : 'Your Wishlist'}
                         </h2>
-                        <span className="rounded-full bg-[#fdf2e9] px-2.5 py-0.5 text-xs font-bold text-[#c1440e]">
+                        <span className="rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-2.5 py-0.5 text-xs font-bold text-[#c1440e]">
+                          🛕 {localizedActiveTemple.name}
+                        </span>
+                        <span className="rounded-full bg-[#f5ede2] px-2.5 py-0.5 text-xs font-bold text-[#8b7a6d]">
                           {wishlistedSevas.length} {language === 'KN' ? 'ಸೇವೆಗಳು' : 'Sevas'}
                         </span>
                       </div>
                       <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
                         {language === 'KN'
-                          ? 'ನೀವು ಉಳಿಸಿದ ಪವಿತ್ರ ದೇವಾಲಯ ಸೇವೆಗಳು ಮತ್ತು ಪೂಜೆಗಳು'
-                          : 'Your saved sacred temple rituals, archanas, and special offerings'}
+                          ? `${localizedActiveTemple.name} ಕ್ಷೇತ್ರಕ್ಕಾಗಿ ನೀವು ಉಳಿಸಿದ ಪವಿತ್ರ ಸೇವೆಗಳು`
+                          : `Saved ritual offerings and pujas for ${localizedActiveTemple.name}`}
                       </p>
                     </div>
                   </div>
+
+                  {onSwitchTemple && (
+                    <button
+                      type="button"
+                      onClick={onSwitchTemple}
+                      className="self-start sm:self-auto inline-flex items-center gap-1.5 rounded-xl border border-[#eadfd1] bg-white px-3.5 py-2 text-xs font-bold text-[#c1440e] hover:bg-[#fff9f3] transition cursor-pointer shadow-2xs"
+                    >
+                      <span>🛕</span>
+                      <span>{language === 'KN' ? 'ಕ್ಷೇತ್ರ ಬದಲಾಯಿಸಿ' : 'Switch Sanctuary'}</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Content */}
@@ -1246,13 +1405,13 @@ const ProfilePage = ({
                       <span className="text-5xl">🤍</span>
                       <h4 className="mt-4 font-serif font-bold text-lg text-[#34251e]">
                         {language === 'KN'
-                          ? 'ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳ ಪಟ್ಟಿ ಖಾಲಿಯಾಗಿದೆ'
-                          : 'Your Wishlist is Empty'}
+                          ? `${localizedActiveTemple.name} ಮೆಚ್ಚಿನವುಗಳ ಪಟ್ಟಿ ಖಾಲಿಯಾಗಿದೆ`
+                          : `No Saved Sevas for ${localizedActiveTemple.name}`}
                       </h4>
                       <p className="mt-1.5 text-xs sm:text-sm text-[#8b7a6d] max-w-md mx-auto">
                         {language === 'KN'
-                          ? 'ನೀವು ಇನ್ನೂ ಯಾವುದೇ ಪವಿತ್ರ ಸೇವೆಗಳನ್ನು ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಿಲ್ಲ. ಲಭ್ಯವಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳನ್ನು ಉಳಿಸಲು ಹೃದಯ ಐಕಾನ್ ಕ್ಲಿಕ್ ಮಾಡಿ.'
-                          : 'You haven\'t saved any sacred sevas or temple offerings yet. Explore our available sevas and tap the heart icon to save your favourites.'}
+                          ? `ನೀವು ${localizedActiveTemple.name} ಕ್ಷೇತ್ರಕ್ಕೆ ಯಾವುದೇ ಸೇವೆಗಳನ್ನು ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಿಲ್ಲ. ಲಭ್ಯವಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳನ್ನು ಉಳಿಸಲು ಹೃದಯ ಐಕಾನ್ ಕ್ಲಿಕ್ ಮಾಡಿ.`
+                          : `You haven't saved any offerings for ${localizedActiveTemple.name} yet. Explore available sevas and tap the heart icon to add to this temple's wishlist.`}
                       </p>
                       <button
                         type="button"
@@ -1260,7 +1419,7 @@ const ProfilePage = ({
                         className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] px-6 py-3 text-xs font-bold text-white shadow-md hover:shadow-lg transition cursor-pointer"
                       >
                         <span>🪔</span>
-                        <span>{language === 'KN' ? 'ಪವಿತ್ರ ಸೇವೆಗಳನ್ನು ಅನ್ವೇಷಿಸಿ' : 'Explore Sacred Sevas'}</span>
+                        <span>{language === 'KN' ? `${localizedActiveTemple.name} ಸೇವೆಗಳನ್ನು ಅನ್ವೇಷಿಸಿ` : `Explore ${localizedActiveTemple.name} Sevas`}</span>
                       </button>
                     </div>
                   ) : (
@@ -1282,6 +1441,9 @@ const ProfilePage = ({
                                 src={seva.image}
                                 alt={seva.name}
                                 className="h-24 w-24 shrink-0 rounded-xl object-cover border border-[#eadfd1]"
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLImageElement).src = '/temple-hero.webp'
+                                }}
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2">
@@ -1372,11 +1534,7 @@ const ProfilePage = ({
         </div>
       </main>
 
-      {/* ── Language Switch Confirmation Modal ── */}
-      <LanguageModal
-        isOpen={langModalOpen}
-        onClose={() => setLangModalOpen(false)}
-      />
+
     </div>
   )
 }

@@ -58,12 +58,17 @@ const AuthModal = ({ mode, registeredUser, onRegister, onLogin, onClose, onSwitc
     }
     window.localStorage.setItem(STORAGE_USER, JSON.stringify(user))
     window.sessionStorage.setItem('temple-seva.isNewUserRegistered', 'true')
+    window.localStorage.setItem('temple-seva.mustSelectTemple', 'true')
     window.localStorage.removeItem(STORAGE_TEMPLE)
-    setSuccess(language === 'KN' ? 'ಖಾತೆ ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲ್ಪಟ್ಟಿದೆ! ಲಾಗಿನ್ ಆಗುತ್ತಿದೆ...' : 'Account created successfully! Logging you in...')
     onRegister(user)
-    setTimeout(() => {
-      onLogin(user)
-    }, 1000)
+    setSuccess(
+      language === 'KN'
+        ? 'ಖಾತೆ ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲ್ಪಟ್ಟಿದೆ! ದಯವಿಟ್ಟು ಲಾಗಿನ್ ಆಗಿ.'
+        : 'Account created successfully! Please log in with your credentials to continue.'
+    )
+    setPassword('')
+    setConfirmPw('')
+    onSwitchMode('login')
   }
 
   const handleForgotPassword = () => {

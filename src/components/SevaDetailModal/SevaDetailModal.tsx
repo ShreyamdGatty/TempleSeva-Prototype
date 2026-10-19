@@ -36,7 +36,14 @@ const SevaDetailModal = ({ seva: rawSeva, isWished, onToggleWish, onAdd, onClose
       >
         {/* Hero Image */}
         <div className="relative -mx-8 -mt-8 mb-6">
-          <img src={seva.image} alt={seva.name} className="h-56 w-full rounded-t-3xl object-cover" />
+          <img
+            src={seva.image}
+            alt={seva.name}
+            className="h-56 w-full rounded-t-3xl object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = '/temple-hero.webp'
+            }}
+          />
           <div className="absolute inset-0 rounded-t-3xl bg-gradient-to-t from-black/50 to-transparent" />
           <button onClick={onClose} className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-lg shadow backdrop-blur cursor-pointer" aria-label="Close">×</button>
           <button onClick={onToggleWish} className="absolute left-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-lg shadow backdrop-blur cursor-pointer" title="Favorite">
@@ -114,13 +121,22 @@ const SevaDetailModal = ({ seva: rawSeva, isWished, onToggleWish, onAdd, onClose
               </div>
             )}
 
-            {seva.requiresDevotee && (
-              <div className="mt-5 rounded-xl border border-[#e6a23c]/30 bg-[#fef3e2] p-4 text-sm text-[#9a6700]">
-                <strong>ℹ {t('devoteeRequired')}</strong>
-                <p className="mt-1 opacity-80">
+            {seva.requiresDevotee ? (
+              <div className="mt-5 rounded-xl border border-[#c1440e]/30 bg-[#fef6f0] p-4 text-sm text-[#c1440e]">
+                <strong>🕉️ {language === 'KN' ? 'ಸಂಕಲ್ಪಕ್ಕೆ ಭಕ್ತರ ವಿವರ ಅಗತ್ಯ' : 'Devotee Assignment Required for Sankalpa'}</strong>
+                <p className="mt-1 text-xs opacity-90 text-[#674f40]">
                   {language === 'KN'
-                    ? 'ಈ ಸೇವೆಯನ್ನು ಬುಟ್ಟಿಗೆ ಸೇರಿಸುವಾಗ ನಿಮ್ಮ ಹೆಸರು, ನಕ್ಷತ್ರ ಮತ್ತು ರಾಶಿಯನ್ನು ಕೇಳಲಾಗುತ್ತದೆ.'
-                    : 'Name, Nakshatra, and Rashi will be asked when you add this Seva to your cart.'}
+                    ? 'ಈ ಸೇವೆಗಾಗಿ ಪುರೋಹಿತರು ನಿಮ್ಮ ಹೆಸರು, ಗೋತ್ರ ಮತ್ತು ನಕ್ಷತ್ರದ ಸಂಕಲ್ಪವನ್ನು ಮಾಡುತ್ತಾರೆ.'
+                    : 'Priests will chant your Name, Gotram, and Nakshatra during the personalized Vedic sankalpa.'}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-5 rounded-xl border border-emerald-500/25 bg-emerald-50/70 p-4 text-sm text-emerald-800">
+                <strong>✓ {language === 'KN' ? 'ಭಕ್ತರ ವಿವರಗಳ ಅಗತ್ಯವಿಲ್ಲ (ಮುಕ್ತ ಸೇವೆ)' : 'No Devotee Assignment Needed'}</strong>
+                <p className="mt-1 text-xs opacity-90 text-emerald-900">
+                  {language === 'KN'
+                    ? 'ಇದು ಸಾರ್ವತ್ರಿಕ ಸಮರ್ಪಣೆ / ದಾನ ಸೇವೆಯಾಗಿದೆ. ಯಾವುದೇ ವೈಯಕ್ತಿಕ ಗೋತ್ರ ಅಥವಾ ನಕ್ಷತ್ರದ ಅಗತ್ಯವಿಲ್ಲ.'
+                    : 'This is a universal temple offering / prasadam daan. No individual gotram, nakshatra, or family member allocation is needed.'}
                 </p>
               </div>
             )}

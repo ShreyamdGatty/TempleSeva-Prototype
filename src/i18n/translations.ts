@@ -8,6 +8,7 @@ export const translations = {
     trustedDevotion: 'A trusted space for devotion',
 
     // Nav
+    navHome: 'Home',
     navAbout: 'About Us',
     navTemples: 'Temples',
     navHowItWorks: 'How It Works',
@@ -369,6 +370,7 @@ export const translations = {
     trustedDevotion: 'ಭಕ್ತಿಯ ವಿಶ್ವಾಸಾರ್ಹ ತಾಣ',
 
     // Nav
+    navHome: 'ಹೋಮ್',
     navAbout: 'ನಮ್ಮ ಬಗ್ಗೆ',
     navTemples: 'ದೇವಾಲಯಗಳು',
     navHowItWorks: 'ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ',

@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import type { Temple, Seva, CartItem, User, Coupon } from '../../types'
 import { sevas, categories, temples } from '../../data'
 import { formatPrice } from '../../utils/helpers'
@@ -7,6 +7,7 @@ import { useLanguage } from '../../contexts/LanguageContext'
 import CalendarModal, { isBeforeToday, isSameDay } from '../../components/CalendarModal/CalendarModal'
 import SideMenuDrawer from '../../components/SideMenuDrawer/SideMenuDrawer'
 import SankalpamModal from '../../components/SankalpamModal/SankalpamModal'
+import LanguageDropdown from '../../components/LanguageDropdown/LanguageDropdown'
 import type { Devotee, Order } from '../../types'
 
 interface SevasPageProps {
@@ -44,6 +45,7 @@ interface SevasPageProps {
   devotees?: Devotee[]
   onAddDevotee?: (devotee: Omit<Devotee, 'id'>) => Devotee
   onCompleteOrder?: (paymentMethod: string, ticketAllocations: Record<string, Devotee[]>) => Order | null
+  updateCartDate?: (date: string) => void
 }
 
 const StarDisplay = ({ rating }: { rating: number }) => (
@@ -91,8 +93,10 @@ const SevasPage = ({
   devotees = [],
   onAddDevotee,
   onCompleteOrder,
+  updateCartDate,
 }: SevasPageProps) => {
-  const { language, t, translateTemple, translateSeva, translateCategory, formatDateLocalized } = useLanguage()
+  const { language, toggleLanguage, t, translateTemple, translateSeva, translateCategory, formatDateLocalized } = useLanguage()
+  const navigate = useNavigate()
 
   const [sideMenuOpen, setSideMenuOpen] = useState(false)
   const [sankalpamOpen, setSankalpamOpen] = useState(false)
@@ -198,35 +202,139 @@ const SevasPage = ({
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
-      {/* ── Top Header Navigation ── */}
-      <div className="flex flex-col justify-between gap-5 border-b border-[#eadfd1] pb-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[.2em] text-[#c1440e]">
-            {t('sevaStudioHeader')}
-          </p>
-          <h1 className="mt-2 font-serif text-4xl sm:text-5xl">{t('sevaStudioTitle')}</h1>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={switchTemple}
-            className="rounded-full border border-[#d8c8b8] bg-white px-4 py-2 text-sm font-bold transition hover:border-[#c1440e] cursor-pointer"
-          >
-            {t('switchTemple')}
-          </button>
-          <button
-            onClick={onWishlist}
-            className="relative flex items-center gap-1.5 rounded-full border border-[#d8c8b8] bg-[#fffdfa] px-4 py-2 text-sm font-bold text-[#34251e] shadow-xs transition hover:border-[#c1440e] hover:bg-[#fdf7f2] cursor-pointer"
-            title={t('navFavorites')}
-          >
-            <span className="text-base text-[#c1440e]">🤍</span>
-            <span>{t('navFavorites')}</span>
-            {wishlistCount > 0 && (
-              <span className="ml-1 grid h-5 min-w-[20px] place-items-center rounded-full bg-[#c1440e] px-1.5 text-xs font-bold text-white shadow-xs">
-                {wishlistCount}
+    <>
+      {/* ── Top Header Navigation Bar ── */}
+      <header className="sticky top-0 z-30 border-b border-[#eadfd1] bg-[#fffcf6]/95 backdrop-blur-md transition-all shadow-2xs">
+        <div className="mx-auto flex h-[74px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          {/* Logo & Navigation */}
+          <div className="flex items-center gap-4 sm:gap-6">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2.5 text-left shrink-0 cursor-pointer"
+            >
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-[#c1440e] to-[#df5619] font-serif text-xl font-bold text-white shadow-md">
+                ॐ
               </span>
+              <span className="font-serif text-2xl font-bold tracking-tight whitespace-nowrap">
+                {language === 'KN' ? (
+                  <>
+                    ಟೆಂಪಲ್<span className="text-[#c1440e]">ಸೇವಾ</span>
+                  </>
+                ) : (
+                  <>
+                    Temple<span className="text-[#c1440e]">Seva</span>
+                  </>
+                )}
+              </span>
+            </button>
+
+            {/* Home link */}
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-1.5 rounded-full border border-[#eadfd1] bg-white px-3.5 py-1.5 text-xs font-bold text-[#674f40] transition hover:border-[#c1440e] hover:text-[#c1440e] cursor-pointer"
+              title="Home"
+            >
+              <span>🏠</span>
+              <span>{t('navHome')}</span>
+            </button>
+          </div>
+
+          {/* Right Action Icons & Controls */}
+          <div className="flex items-center gap-2.5">
+            {/* Switch Sanctuary Pill */}
+            <button
+              onClick={switchTemple}
+              className="hidden sm:flex items-center gap-1.5 rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] px-3 py-1.5 text-xs font-semibold text-[#5c4d41] hover:text-[#c1440e] shadow-2xs transition cursor-pointer"
+            >
+              <span className="text-[#c1440e]">🛕</span>
+              <span>{t('switchTemple')}</span>
+            </button>
+
+            {/* Language Dropdown (Globe Icon Only) */}
+            <LanguageDropdown />
+
+            {user ? (
+              <>
+                <button
+                  type="button"
+                  onClick={onOrders}
+                  className="flex items-center gap-1.5 rounded-full bg-[#f5ede2] hover:bg-[#ebdcc9] px-3.5 py-1.5 text-xs font-bold text-[#5c4d41] transition cursor-pointer"
+                >
+                  <span>📿</span>
+                  <span className="hidden sm:inline">{t('navMySevas')}</span>
+                </button>
+
+                {/* Standard neat User Account / Profile button */}
+                <button
+                  type="button"
+                  onClick={() => setSideMenuOpen(true)}
+                  className="group flex items-center gap-2 rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] pl-1 pr-3 py-1 text-xs font-bold text-[#34251e] shadow-2xs transition cursor-pointer"
+                  aria-label="Open profile menu"
+                  title={`${user.name} - Profile & Menu`}
+                >
+                  <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-tr from-[#c1440e] to-[#df5619] text-[11px] font-bold text-white shadow-2xs">
+                    {user.name.charAt(0).toUpperCase()}
+                  </span>
+                  <span className="font-semibold text-[#34251e] group-hover:text-[#c1440e] transition-colors max-w-[120px] truncate">
+                    {user.name.split(' ')[0]}
+                  </span>
+                  <svg
+                    className="h-3.5 w-3.5 text-[#8b7a6d] group-hover:text-[#c1440e] transition-transform group-hover:translate-y-0.5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onLogin}
+                  className="rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition hover:text-[#c1440e] cursor-pointer"
+                >
+                  {t('navLogin')}
+                </button>
+                <button
+                  onClick={onRegister}
+                  className="rounded-full bg-gradient-to-r from-[#c1440e] to-[#df5619] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm whitespace-nowrap transition hover:shadow-md cursor-pointer"
+                >
+                  {t('navRegister')}
+                </button>
+              </div>
             )}
-          </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
+        {/* ── Top Header Navigation ── */}
+        <div className="flex flex-col justify-between gap-5 border-b border-[#eadfd1] pb-6 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[.2em] text-[#c1440e]">
+              {t('sevaStudioHeader')}
+            </p>
+            <h1 className="mt-2 font-serif text-4xl sm:text-5xl">{t('sevaStudioTitle')}</h1>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="flex items-center gap-1.5 rounded-full border border-[#eadfd1] bg-white px-3.5 py-2 text-xs font-bold text-[#5c4d41] transition hover:border-[#c1440e] hover:text-[#c1440e] cursor-pointer"
+            >
+              <span>🏠</span>
+              <span>{t('navHome')}</span>
+            </button>
+            <button
+              onClick={switchTemple}
+              className="rounded-full border border-[#d8c8b8] bg-white px-4 py-2 text-sm font-bold transition hover:border-[#c1440e] cursor-pointer"
+            >
+              {t('switchTemple')}
+            </button>
           {user ? (
             <>
               <button
@@ -236,11 +344,6 @@ const SevasPage = ({
               >
                 <span>📿</span>
                 <span>{t('navMySevas')}</span>
-                {ordersCount > 0 && (
-                  <span className="rounded-full bg-[#c1440e] px-1.5 py-0.2 text-[10px] font-bold text-white">
-                    {ordersCount}
-                  </span>
-                )}
               </button>
 
               {/* Standard neat User Account / Profile button */}
@@ -359,7 +462,10 @@ const SevasPage = ({
                     key={card.id}
                     type="button"
                     disabled={card.isPast}
-                    onClick={() => setSelectedDate(card.label)}
+                    onClick={() => {
+                      setSelectedDate(card.label)
+                      if (updateCartDate) updateCartDate(card.label)
+                    }}
                     className={`relative min-w-[92px] rounded-2xl border p-3 text-center transition-all cursor-pointer ${
                       card.isPast
                         ? 'cursor-not-allowed border-[#e3d7ca] bg-[#f9f5f0] text-[#a8998c] opacity-40 line-through'
@@ -492,6 +598,9 @@ const SevasPage = ({
                           src={seva.image}
                           alt={seva.name}
                           className="h-44 w-full object-cover transition duration-300 group-hover:scale-105"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/temple-hero.webp'
+                          }}
                         />
                         <button
                           onClick={(e) => handleHeartClick(e, seva.id)}
@@ -657,12 +766,20 @@ const SevasPage = ({
                               )
                             })()}
                           </div>
-                          {seva.requiresDevotee && (
-                            <p className="mt-2 text-[10px] text-[#b0782a] flex items-center gap-1">
-                              <span>🕉️</span>
-                              <span>{t('devoteeRequired')}</span>
-                            </p>
-                          )}
+
+                          <div className="mt-2.5 pt-2 border-t border-[#f5ede2]">
+                            {seva.requiresDevotee ? (
+                              <p className="text-[11px] font-bold text-[#c1440e] flex items-center gap-1.5">
+                                <span>🕉️</span>
+                                <span>{language === 'KN' ? 'ಸಂಕಲ್ಪಕ್ಕೆ ಭಕ್ತರ ವಿವರ ಅಗತ್ಯ' : 'Devotee Required for Sankalpa'}</span>
+                              </p>
+                            ) : (
+                              <p className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1.5">
+                                <span className="font-bold">✓</span>
+                                <span>{language === 'KN' ? 'ಭಕ್ತರ ಅಗತ್ಯವಿಲ್ಲ (ಮುಕ್ತ ಸೇವೆ)' : 'Devotee Not Needed (Open Offering)'}</span>
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </article>
@@ -758,6 +875,7 @@ const SevasPage = ({
               setCustomDate(null)
             }
             setSelectedDate(newDate)
+            if (updateCartDate) updateCartDate(newDate)
             showToast(`${t('selectedBadge')}: ${newDate}`, 'success')
           }}
           onClose={() => setCalendarOpen(false)}
@@ -783,7 +901,8 @@ const SevasPage = ({
         onLogin={onLogin || (() => {})}
         onRegister={onRegister || (() => {})}
       />
-    </main>
+      </main>
+    </>
   )
 }
 

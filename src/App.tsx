@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom'
 import './App.css'
 
@@ -6,7 +6,7 @@ import './App.css'
 import type { Temple, Seva, Order, User, Address, Devotee } from './types'
 
 // Data
-import { dates, STORAGE_TEMPLE, temples } from './data'
+import { dates, STORAGE_TEMPLE, temples, sevas } from './data'
 import { readJson } from './utils/storage'
 
 // Contexts
@@ -51,6 +51,16 @@ const AppContent = () => {
   // ── Auth ──────────────────────────────────────────────
   const { user, registeredUser, authMode, setAuthMode, login, logout, register, updateUser } = useAuth()
 
+  // ── Temple & Booking State (persisted across page navigation) ────
+  const [selectedTemple, setSelectedTemple] = useState<Temple>(() =>
+    readJson<Temple | null>(STORAGE_TEMPLE, null) || temples[0]
+  )
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [isNewUserJustRegistered, setIsNewUserJustRegistered] = useState(false)
+  const [isNewUserSelection, setIsNewUserSelection] = useState(false)
+  const [selectedDate, setSelectedDate] = useState('')
+  const [profileOpen, setProfileOpen] = useState(false)
+
   // ── Cart ──────────────────────────────────────────────
   const {
     cart,
@@ -70,27 +80,40 @@ const AppContent = () => {
     applyCoupon,
     removeCoupon,
     clearCart,
+    updateCartDate,
   } = useCart()
 
   // ── Orders ────────────────────────────────────────────
   const { orders, ordersOpen, setOrdersOpen, createOrder, cancelOrder } = useOrders()
 
+  // ── Temple-Scoped Orders ──────────────────────────────
+  const templeOrders = useMemo(() => {
+    return orders.filter((o) => o.temple?.id === selectedTemple.id)
+  }, [orders, selectedTemple.id])
+
   // ── Wishlist ──────────────────────────────────────────
   const { wishlist, toggle: toggleWish, isWished } = useWishlist()
+
+  // ── Temple-Scoped Wishlist ────────────────────────────
+  const templeWishlist = useMemo(() => {
+    return wishlist.filter((sevaId) => {
+      const seva = sevas.find((s) => s.id === sevaId)
+      return seva && seva.templeId === selectedTemple.id
+    })
+  }, [wishlist, selectedTemple.id])
 
   // ── Addresses ─────────────────────────────────────────
   const { addresses, defaultAddress, addAddress, removeAddress, setDefault: setDefaultAddress } = useAddresses()
 
-  // ── Devotees (Family Sankalpa Profiles) ────────────────
-  const { devotees, addDevotee, updateDevotee, removeDevotee } = useDevotees(user?.name)
+  // ── Devotees (Scoped specifically for the active temple) ──
+  const { devotees, addDevotee, updateDevotee, removeDevotee } = useDevotees(user?.name, selectedTemple.id)
 
-  // ── Temple & Booking State (persisted across page navigation) ────
-  const [selectedTemple, setSelectedTemple] = useState<Temple>(() =>
-    readJson<Temple | null>(STORAGE_TEMPLE, null) || temples[0]
-  )
-  const [pickerOpen, setPickerOpen] = useState(false)
-  const [selectedDate, setSelectedDate] = useState('')
-  const [profileOpen, setProfileOpen] = useState(false)
+  // Automatically synchronize dates of items in cart whenever selectedDate changes
+  useEffect(() => {
+    if (selectedDate && cart.length > 0) {
+      updateCartDate(selectedDate)
+    }
+  }, [selectedDate, cart.length, updateCartDate])
 
   // ── Seva Detail Modal State ───────────────────────────
   const [activeSevaDetail, setActiveSevaDetail] = useState<Seva | null>(null)
@@ -146,25 +169,44 @@ const AppContent = () => {
   )
 
   // ── Handlers ──────────────────────────────────────────
+  const handleRegister = useCallback(
+    (account: User) => {
+      register(account)
+      setIsNewUserJustRegistered(true)
+      window.sessionStorage.setItem('temple-seva.isNewUserRegistered', 'true')
+      window.localStorage.setItem('temple-seva.mustSelectTemple', 'true')
+    },
+    [register]
+  )
+
   const handleLogin = useCallback(
     (account: User) => {
       login(account)
       setAuthMode(null)
 
-      const isNewRegistration = window.sessionStorage.getItem('temple-seva.isNewUserRegistered') === 'true'
-      const hasStoredTemple = !!window.localStorage.getItem(STORAGE_TEMPLE)
+      const isNewUser =
+        isNewUserJustRegistered ||
+        window.sessionStorage.getItem('temple-seva.isNewUserRegistered') === 'true' ||
+        window.localStorage.getItem('temple-seva.mustSelectTemple') === 'true'
 
-      // If new user registered or no temple previously chosen, prompt them with the Temple modal
-      if (isNewRegistration || !hasStoredTemple) {
-        window.sessionStorage.removeItem('temple-seva.isNewUserRegistered')
+      setIsNewUserJustRegistered(false)
+      window.sessionStorage.removeItem('temple-seva.isNewUserRegistered')
+      window.localStorage.removeItem('temple-seva.mustSelectTemple')
+
+      if (isNewUser) {
+        // Clear previous selected temple from local storage so the newly registered user chooses fresh
+        window.localStorage.removeItem(STORAGE_TEMPLE)
+        setIsNewUserSelection(true)
         setPickerOpen(true)
         addToast(
           language === 'KN'
             ? `ಸ್ವಾಗತ, ${account.name}! ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪವಿತ್ರ ದೇವಾಲಯವನ್ನು ಆರಿಸಿ.`
-            : `Welcome, ${account.name}! Please select your sacred temple to continue.`,
+            : `Welcome, ${account.name}! Please select your sacred sanctuary to begin.`,
           'success'
         )
+        navigate('/sevas')
       } else {
+        setIsNewUserSelection(false)
         const savedTemple = readJson<Temple | null>(STORAGE_TEMPLE, null) || selectedTemple || temples[0]
         setSelectedTemple(savedTemple)
         window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(savedTemple))
@@ -178,7 +220,7 @@ const AppContent = () => {
         navigate('/sevas')
       }
     },
-    [login, selectedTemple, navigate, addToast, language, setAuthMode]
+    [login, isNewUserJustRegistered, selectedTemple, navigate, addToast, language, setAuthMode]
   )
 
   const handleLogout = useCallback(() => {
@@ -200,6 +242,7 @@ const AppContent = () => {
         clearCart()
       }
       setPickerOpen(false)
+      setIsNewUserSelection(false)
       const loc = translateTemple(temple)
       addToast(
         language === 'KN'
@@ -327,8 +370,8 @@ const AppContent = () => {
             <MainLayout
               user={user}
               cartCount={cart.length}
-              wishlistCount={wishlist.length}
-              ordersCount={orders.length}
+              wishlistCount={templeWishlist.length}
+              ordersCount={templeOrders.length}
               onLogin={() => setAuthMode('login')}
               onRegister={() => setAuthMode('register')}
               onOrders={handleNavigateToMySevas}
@@ -381,8 +424,8 @@ const AppContent = () => {
                 onOrders={handleNavigateToMySevas}
                 onProfile={handleNavigateToProfile}
                 onWishlist={handleNavigateToWishlist}
-                wishlistCount={wishlist.length}
-                ordersCount={orders.length}
+                wishlistCount={templeWishlist.length}
+                ordersCount={templeOrders.length}
                 onDevoteeDetails={handleNavigateToDevotees}
                 onOpenQrPass={() => setQrPassOpen(true)}
                 onLogin={() => setAuthMode('login')}
@@ -394,6 +437,7 @@ const AppContent = () => {
                 devotees={devotees}
                 onAddDevotee={addDevotee}
                 onCompleteOrder={handleCompleteOrder}
+                updateCartDate={updateCartDate}
               />
             </div>
           }
@@ -405,7 +449,7 @@ const AppContent = () => {
           element={
             <MySevasPage
               user={user}
-              orders={orders}
+              orders={templeOrders}
               selectedTemple={selectedTemple}
               switchTemple={switchTemple}
               devotees={devotees}
@@ -423,7 +467,7 @@ const AppContent = () => {
               onRegister={() => setAuthMode('register')}
               onProfile={handleNavigateToProfile}
               onWishlist={handleNavigateToWishlist}
-              wishlistCount={wishlist.length}
+              wishlistCount={templeWishlist.length}
               showToast={addToast}
             />
           }
@@ -445,9 +489,15 @@ const AppContent = () => {
               showToast={addToast}
               onDevoteeDetails={handleNavigateToDevotees}
               onSwitchTemple={() => setPickerOpen(true)}
-              wishlist={wishlist}
+              selectedTemple={selectedTemple}
+              orders={templeOrders}
+              wishlist={templeWishlist}
               onToggleWishlist={toggleWish}
               onAddToCart={handleAddToCartFromWishlist}
+              devotees={devotees}
+              onAddDevotee={addDevotee}
+              onUpdateDevotee={updateDevotee}
+              onRemoveDevotee={removeDevotee}
             />
           }
         />
@@ -460,7 +510,7 @@ const AppContent = () => {
         <AuthModal
           mode={authMode}
           registeredUser={registeredUser}
-          onRegister={register}
+          onRegister={handleRegister}
           onLogin={handleLogin}
           onClose={() => setAuthMode(null)}
           onSwitchMode={(mode) => setAuthMode(mode)}
@@ -526,7 +576,7 @@ const AppContent = () => {
       {/* Orders & Tracking Timeline Modal */}
       {ordersOpen && (
         <OrdersModal
-          orders={orders}
+          orders={templeOrders}
           onClose={() => setOrdersOpen(false)}
           onTrack={() => {}}
           onCancel={(id) => {
@@ -542,8 +592,8 @@ const AppContent = () => {
         <ProfileModal
           user={user}
           addresses={addresses}
-          orderCount={orders.length}
-          totalSpent={totalSpent}
+          orderCount={templeOrders.length}
+          totalSpent={templeOrders.filter((o) => o.status !== 'Cancelled').reduce((sum, o) => sum + o.total, 0)}
           onClose={() => setProfileOpen(false)}
           onLogout={handleLogout}
           onUpdateUser={(updates) => {
@@ -558,7 +608,8 @@ const AppContent = () => {
       {/* Payment QR Pass Modal for Successful Bookings */}
       {qrPassOpen && (
         <PaymentQrModal
-          orders={orders}
+          orders={templeOrders}
+          selectedTemple={selectedTemple}
           onClose={() => setQrPassOpen(false)}
           onNavigateToSevas={() => navigateToSevas()}
           onToast={addToast}
@@ -570,7 +621,11 @@ const AppContent = () => {
         <TemplePicker
           selectedTemple={selectedTemple}
           onSelect={selectTemple}
-          onClose={() => setPickerOpen(false)}
+          onClose={() => {
+            setPickerOpen(false)
+            setIsNewUserSelection(false)
+          }}
+          isNewUserSelection={isNewUserSelection}
         />
       )}
 
@@ -579,8 +634,9 @@ const AppContent = () => {
         isOpen={sideMenuOpen}
         onClose={() => setSideMenuOpen(false)}
         user={user}
-        wishlistCount={wishlist.length}
-        ordersCount={orders.length}
+        wishlistCount={templeWishlist.length}
+        ordersCount={templeOrders.length}
+        selectedTemple={selectedTemple}
         onWishlist={handleNavigateToWishlist}
         onDevoteeDetails={handleNavigateToDevotees}
         onProfile={handleNavigateToProfile}

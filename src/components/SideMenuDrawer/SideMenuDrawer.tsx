@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
-import type { User } from '../../types'
+import type { User, Temple } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
 
 export interface SideMenuDrawerProps {
@@ -10,6 +10,7 @@ export interface SideMenuDrawerProps {
   user: User | null
   wishlistCount?: number
   ordersCount?: number
+  selectedTemple?: Temple
   onWishlist?: () => void
   onDevoteeDetails?: () => void
   onProfile: () => void
@@ -27,6 +28,7 @@ const SideMenuDrawer = ({
   user,
   wishlistCount = 0,
   ordersCount = 0,
+  selectedTemple,
   onProfile,
   onLogout,
   onOrders,
@@ -35,7 +37,7 @@ const SideMenuDrawer = ({
   onLogin,
 }: SideMenuDrawerProps) => {
   const navigate = useNavigate()
-  const { language } = useLanguage()
+  const { language, setLanguage, translateTemple } = useLanguage()
 
   // Prevent background scrolling and close on Escape
   useEffect(() => {
@@ -186,9 +188,15 @@ const SideMenuDrawer = ({
                       <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
                         {language === 'KN' ? 'ದೇವಾಲಯ ಬದಲಾಯಿಸಿ (Switch Temple)' : 'Switch Temple'}
                       </h4>
-                      <span className="rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-2 py-0.2 text-[9px] font-bold text-[#c1440e]">
-                        Sanctuary
-                      </span>
+                      {selectedTemple ? (
+                        <span className="rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-2 py-0.5 text-[9px] font-bold text-[#c1440e] truncate max-w-[130px]">
+                          {translateTemple(selectedTemple).name}
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-2 py-0.2 text-[9px] font-bold text-[#c1440e]">
+                          Sanctuary
+                        </span>
+                      )}
                     </div>
                     <p className="text-[11.5px] text-[#777777] mt-0.5">
                       {language === 'KN' ? 'ಬೇರೆ ಪವಿತ್ರ ಕ್ಷೇತ್ರ ಮತ್ತು ಸೇವೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ' : 'Change active sacred sanctuary & explore offerings'}
@@ -307,6 +315,71 @@ const SideMenuDrawer = ({
                 <span className="text-sm font-bold text-[#b5b5b5] group-hover:translate-x-0.5 transition">›</span>
               </div>
             )}
+
+            {/* Change Language Card */}
+            <div className="mx-5 my-2 rounded-2xl border border-[#eadfd1] bg-[#fffcf6] p-3 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="grid h-7 w-7 place-items-center rounded-full bg-[#fdf2e9] text-[#c1440e] shadow-2xs">
+                    <svg
+                      className="h-4 w-4 text-[#c1440e]"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                  </span>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#34251e]">
+                      {language === 'KN' ? 'ವೆಬ್‌ಸೈಟ್ ಭಾಷೆ' : 'Website Language'}
+                    </h4>
+                    <p className="text-[11px] text-[#8b7a6d]">
+                      {language === 'KN' ? 'ಪ್ರಸ್ತುತ: ಕನ್ನಡ' : 'Current: English'}
+                    </p>
+                  </div>
+                </div>
+                <span className="rounded-md bg-[#fdf2e9] border border-[#f5cfb5] px-2 py-0.5 text-[10px] font-bold text-[#c1440e]">
+                  {language === 'KN' ? 'ಕನ್ನಡ' : 'EN'}
+                </span>
+              </div>
+
+              {/* Dual-Rectangle Segmented Selector in Theme Color */}
+              <div className="mt-2.5 grid grid-cols-2 gap-1.5 rounded-xl bg-[#f5ede2] p-1">
+                <button
+                  type="button"
+                  onClick={() => setLanguage('EN')}
+                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    language === 'EN'
+                      ? 'bg-gradient-to-r from-[#c1440e] to-[#df5619] text-white shadow-xs'
+                      : 'text-[#674f40] hover:text-[#c1440e] hover:bg-white/60'
+                  }`}
+                >
+                  <span className="text-sm">🇬🇧</span>
+                  <span>English</span>
+                  {language === 'EN' && <span className="text-[10px]">✓</span>}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setLanguage('KN')}
+                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    language === 'KN'
+                      ? 'bg-gradient-to-r from-[#c1440e] to-[#df5619] text-white shadow-xs'
+                      : 'text-[#674f40] hover:text-[#c1440e] hover:bg-white/60'
+                  }`}
+                >
+                  <span className="text-sm">🇮🇳</span>
+                  <span>ಕನ್ನಡ</span>
+                  {language === 'KN' && <span className="text-[10px]">✓</span>}
+                </button>
+              </div>
+            </div>
 
             {/* Help & Support */}
             <div

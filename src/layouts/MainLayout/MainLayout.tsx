@@ -4,7 +4,7 @@ import type { User } from '../../types'
 import { getInitials } from '../../utils/helpers'
 import { useLanguage } from '../../contexts/LanguageContext'
 import SideMenuDrawer from '../../components/SideMenuDrawer/SideMenuDrawer'
-import LanguageModal from '../../components/LanguageModal/LanguageModal'
+import LanguageDropdown from '../../components/LanguageDropdown/LanguageDropdown'
 
 interface MainLayoutProps {
   user: User | null
@@ -42,7 +42,6 @@ const MainLayout = ({
   const navigate = useNavigate()
   const { language, toggleLanguage: _toggleLanguage, t } = useLanguage()
   const [sideMenuOpen, setSideMenuOpen] = useState(false)
-  const [langModalOpen, setLangModalOpen] = useState(false)
 
   return (
     <div className="home-route min-h-screen bg-[#fffcf6] text-[#34251e]">
@@ -99,11 +98,6 @@ const MainLayout = ({
                 >
                   <span>📿</span>
                   <span>{t('navMySevas')}</span>
-                  {ordersCount > 0 && (
-                    <span className="rounded-full bg-[#f5ede2] px-2 py-0.5 text-[10px] font-bold text-[#c1440e]">
-                      {ordersCount}
-                    </span>
-                  )}
                 </button>
               </>
             ) : (
@@ -141,36 +135,9 @@ const MainLayout = ({
               </button>
             )}
 
-            {/* Wishlist quick-link when logged in */}
-            {user && onWishlist && (
-              <button
-                type="button"
-                onClick={onWishlist}
-                className="relative hidden sm:flex items-center justify-center h-9 w-9 rounded-full border border-[#e0d3c5] bg-white text-[#5c4d41] hover:border-[#c1440e] hover:bg-[#fff9f3] hover:text-[#c1440e] transition cursor-pointer"
-                title={t('navFavorites')}
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-[#c1440e] text-[9px] font-bold text-white shadow-2xs">
-                    {wishlistCount}
-                  </span>
-                )}
-              </button>
-            )}
 
-            {/* Language Switch Button */}
-            <button
-              type="button"
-              onClick={() => setLangModalOpen(true)}
-              className="flex items-center gap-1.5 rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] px-3 py-1.5 text-xs font-semibold text-[#5c4d41] hover:text-[#c1440e] shadow-2xs transition cursor-pointer shrink-0"
-              aria-label="Change Language"
-              title={language === 'EN' ? 'Change Language (Switch to ಕನ್ನಡ)' : 'Change Language (Switch to English)'}
-            >
-              <span className="text-sm">🌐</span>
-              <span className="font-bold">{language === 'EN' ? 'English' : 'ಕನ್ನಡ'}</span>
-            </button>
+            {/* Language Dropdown (Globe Icon Only) */}
+            <LanguageDropdown />
 
             {/* User Account / Profile Menu Pill */}
             {user ? (
@@ -219,11 +186,7 @@ const MainLayout = ({
         </div>
       </header>
 
-      {/* ── Language Switch Confirmation Modal ── */}
-      <LanguageModal
-        isOpen={langModalOpen}
-        onClose={() => setLangModalOpen(false)}
-      />
+
 
       {/* ── Slide-Out Side Modal / Drawer (Rendered via React Portal onto document.body) ── */}
       <SideMenuDrawer

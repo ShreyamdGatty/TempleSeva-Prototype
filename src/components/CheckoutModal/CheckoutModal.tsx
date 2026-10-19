@@ -108,7 +108,12 @@ const CheckoutModal = ({
                     <div className="flex-1">
                       <p className="text-sm font-bold">{localizedItemSeva.name}</p>
                       {item.devotee && <p className="text-xs text-[#8b7a6d]">{t('forDevotee')}: {item.devotee.name}</p>}
-                      <p className="text-xs text-[#8b7a6d]">Qty: {item.quantity}</p>
+                      <div className="flex items-center gap-2 text-xs text-[#8b7a6d] flex-wrap">
+                        <span>Qty: {item.quantity}</span>
+                        {item.date && (
+                          <span className="text-[#c1440e] font-semibold">· 📅 {item.date}</span>
+                        )}
+                      </div>
                     </div>
                     <p className="font-bold">{formatPrice(localizedItemSeva.price * item.quantity)}</p>
                   </div>
