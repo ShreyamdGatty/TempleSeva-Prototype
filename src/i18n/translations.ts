@@ -49,7 +49,7 @@ export const translations = {
 
     // Temples Section
     templesSub: 'Auspicious Destinations',
-    templesTitle: 'Revered Sacred Temples',
+    templesTitle: 'Available Temples',
     templesDesc: 'Select a temple to explore tailored Sevas, view priest credentials, and book rituals.',
     viewAvailableSevas: 'View Available Sevas →',
 
@@ -411,7 +411,7 @@ export const translations = {
 
     // Temples Section
     templesSub: 'ಪುಣ್ಯಕ್ಷೇತ್ರಗಳು',
-    templesTitle: 'ಪಾವನ ಪವಿತ್ರ ದೇವಾಲಯಗಳು',
+    templesTitle: 'ಲಭ್ಯವಿರುವ ದೇವಾಲಯಗಳು',
     templesDesc: 'ದೇವಾಲಯವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ, ಸೇವೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಸಂಕಲ್ಪ ಪೂಜೆಯನ್ನು ಕಾಯ್ದಿರಿಸಿ.',
     viewAvailableSevas: 'ಲಭ್ಯವಿರುವ ಸೇವೆಗಳು →',
 

@@ -16,27 +16,6 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
   const { addToast } = useToast()
   const { language, t, translateTemple, translateCategory } = useLanguage()
   const [openFaq, setOpenFaq] = useState<number | null>(0)
-  const [emailSub, setEmailSub] = useState('')
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!emailSub.includes('@')) {
-      addToast(
-        language === 'KN'
-          ? 'ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ನಮೂದಿಸಿ.'
-          : 'Please enter a valid email address.',
-        'error'
-      )
-      return
-    }
-    addToast(
-      language === 'KN'
-        ? 'ಪಂಚಾಂಗ ಮತ್ತು ಉತ್ಸವಗಳ ಮಾಹಿತಿಗೆ ಚಂದಾದಾರರಾಗಿದ್ದೀರಿ!'
-        : 'Subscribed for Panchangam & festival updates!',
-      'success'
-    )
-    setEmailSub('')
-  }
 
   const faqs = [
     { q: t('faq1Q'), a: t('faq1A') },
@@ -191,7 +170,7 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
           </div>
         </div>
 
-        {/* ── Sacred Hero Visual Composition ── */}
+        {/* ── Sacred Hero Visual Composition in Card ── */}
         <div className="relative flex items-center justify-center pt-6 lg:pt-0">
           {/* Spiritual Sunburst Radiance Glow */}
           <div className="absolute -inset-6 rounded-full bg-gradient-to-tr from-[#df5619]/25 via-[#f59e0b]/20 to-[#c1440e]/10 blur-3xl -z-10 pointer-events-none" />
@@ -203,7 +182,7 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
             style={{ animationDuration: '40s' }}
           />
 
-          {/* The Sacred Temple Artwork */}
+          {/* The Sacred Temple Artwork Card */}
           <div className="relative w-full max-w-[480px]">
             <div
               className="animate-float-hero relative overflow-hidden"
@@ -682,32 +661,6 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
         </>
       )}
 
-      {/* ── 9. Sacred Newsletter & Auspicious Tithi Updates ── */}
-      <section className="px-5 py-16 lg:px-8">
-        <div className="mx-auto max-w-3xl rounded-3xl bg-gradient-to-r from-[#2c170e] via-[#482819] to-[#2c170e] p-8 text-center text-white sm:p-12 shadow-2xl relative overflow-hidden border border-[#d4a64a]/30">
-          <span className="animate-diya text-4xl">🪔</span>
-          <h2 className="mt-4 font-serif text-2xl sm:text-3xl font-bold">{t('newsletterTitle')}</h2>
-          <p className="mt-2 text-xs sm:text-sm text-[#e0cfbe]">{t('newsletterSub')}</p>
-          <form
-            onSubmit={handleSubscribe}
-            className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center relative z-10"
-          >
-            <input
-              type="email"
-              value={emailSub}
-              onChange={(e) => setEmailSub(e.target.value)}
-              placeholder={t('newsletterPlaceholder')}
-              className="rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-xs sm:text-sm text-white placeholder-white/50 outline-none sm:w-80 focus:border-[#f2c778]"
-            />
-            <button
-              type="submit"
-              className="rounded-xl bg-[#c1440e] hover:bg-[#a5370a] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md cursor-pointer transition"
-            >
-              {t('newsletterBtn')}
-            </button>
-          </form>
-        </div>
-      </section>
     </main>
   )
 }

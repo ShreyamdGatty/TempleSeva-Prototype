@@ -375,7 +375,7 @@ const SideMenuDrawer = ({
             <div
               onClick={() => {
                 onClose()
-                window.location.hash = 'faq'
+                navigate('/profile?tab=help', { state: { tab: 'help' } })
               }}
               className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
             >
