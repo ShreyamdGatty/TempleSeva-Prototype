@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
-import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, useNavigate, Navigate } from 'react-router-dom'
 import './App.css'
 
 // Types
@@ -340,40 +340,40 @@ const AppContent = () => {
 
   const navigateToSevas = useCallback(
     (temple?: Temple) => {
-      if (temple) {
-        if (user) {
+      if (!user) {
+        if (temple) {
           setSelectedTemple(temple)
           window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(temple))
-          setPickerOpen(false)
-          navigate('/sevas')
-        } else {
-          addToast(
-            language === 'KN'
-              ? 'ದೇವಾಲಯವನ್ನು ಆಯ್ಕೆಮಾಡಲು ದಯವಿಟ್ಟು ಮೊದಲು ಲಾಗಿನ್ ಅಥವಾ ನೋಂದಣಿ ಮಾಡಿ.'
-              : 'Please login or register first to select and switch sanctuary.',
-            'info'
-          )
-          setAuthMode('login')
         }
+        setAuthMode('register')
+        addToast(
+          language === 'KN'
+            ? 'ಸೇವೆಗಳನ್ನು ನೋಡಲು ಮತ್ತು ಕಾಯ್ದಿರಿಸಲು ದಯವಿಟ್ಟು ನೋಂದಾಯಿಸಿ ಅಥವಾ ಲಾಗಿನ್ ಮಾಡಿ.'
+            : 'Please register or log in to explore and book Sevas.',
+          'info'
+        )
         return
       }
 
-      if (user) {
-        const saved = selectedTemple || readJson<Temple | null>(STORAGE_TEMPLE, null) || temples[0]
-        setSelectedTemple(saved)
+      if (temple) {
+        const isDifferent = !selectedTemple || selectedTemple.id !== temple.id
+        setSelectedTemple(temple)
+        window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(temple))
+        if (isDifferent) {
+          setSelectedDate('')
+          clearCart()
+        }
         setPickerOpen(false)
         navigate('/sevas')
-      } else {
-        addToast(
-          language === 'KN'
-            ? 'ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ದಯವಿಟ್ಟು ಮೊದಲು ಲಾಗಿನ್ ಅಥವಾ ನೋಂದಣಿ ಮಾಡಿ.'
-            : 'Please login or register first to explore sevas.',
-          'info'
-        )
-        setAuthMode('login')
+        return
       }
+
+      const saved = selectedTemple || readJson<Temple | null>(STORAGE_TEMPLE, null) || temples[0]
+      setSelectedTemple(saved)
+      setPickerOpen(false)
+      navigate('/sevas')
     },
-    [user, selectedTemple, navigate, setAuthMode, addToast, language]
+    [user, selectedTemple, clearCart, navigate, setAuthMode, addToast, language]
   )
 
   const totalSpent = orders
@@ -391,6 +391,7 @@ const AppContent = () => {
           element={
             <MainLayout
               user={user}
+              selectedTemple={selectedTemple}
               cartCount={cart.length}
               wishlistCount={templeWishlist.length}
               ordersCount={templeOrders.length}
@@ -401,13 +402,14 @@ const AppContent = () => {
               onWishlist={handleNavigateToWishlist}
               onDevoteeDetails={handleNavigateToDevotees}
               onOpenQrPass={() => setQrPassOpen(true)}
-              onSwitchTemple={user ? switchTemple : undefined}
+              onSwitchTemple={switchTemple}
               onLogout={handleLogout}
             >
               <HomePage
                 navigateToSevas={navigateToSevas}
                 onRegister={() => setAuthMode('register')}
                 user={user}
+                selectedTemple={selectedTemple}
               />
             </MainLayout>
           }
@@ -417,8 +419,11 @@ const AppContent = () => {
         <Route
           path="/sevas"
           element={
-            <div className="sevas-route min-h-screen bg-[#fffcf6] text-[#34251e]">
-              <SevasPage
+            !user ? (
+              <Navigate to="/" replace />
+            ) : (
+              <div className="sevas-route min-h-screen bg-[#fffcf6] text-[#34251e]">
+                <SevasPage
                 selectedTemple={selectedTemple}
                 pickerOpen={pickerOpen}
                 switchTemple={switchTemple}
@@ -462,6 +467,7 @@ const AppContent = () => {
                 updateCartDate={updateCartDate}
               />
             </div>
+            )
           }
         />
 

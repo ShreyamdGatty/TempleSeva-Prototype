@@ -297,14 +297,25 @@ const AboutPage = ({ navigateToSevas }: AboutPageProps) => {
                   key={temple.id}
                   className="overflow-hidden rounded-2xl border border-[#eadfd1] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                 >
-                  <img
-                    src={temple.image}
-                    alt={loc.name}
-                    className="h-44 w-full object-cover"
-                  />
+                  <div className="relative">
+                    <img
+                      src={temple.image}
+                      alt={loc.name}
+                      className="h-44 w-full object-cover"
+                    />
+                    <div className="absolute top-2.5 right-2.5 rounded-full bg-black/65 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-medium text-white shadow-md border border-white/25">
+                      {temple.id === 'kashi'
+                        ? (language === 'KN' ? '🕉️ ಜ್ಯೋತಿರ್ಲಿಂಗ ಸನ್ನಿಧಿ' : '🕉️ Jyotirlinga Shrine')
+                        : temple.id === 'venkateswara'
+                        ? (language === 'KN' ? '🪔 ಶ್ರೀ ಬಾಲಾಜಿ ಸನ್ನಿಧಿ' : '🪔 Lord Balaji Shrine')
+                        : (language === 'KN' ? '🌸 ದೇವಿ ಮೀನಾಕ್ಷಿ ಸನ್ನಿಧಿ' : '🌸 Devi Meenakshi Shrine')}
+                    </div>
+                  </div>
                   <div className="p-5">
-                    <p className="text-[11px] font-bold text-[#c1440e] uppercase tracking-wider">{loc.location}</p>
-                    <h3 className="mt-1 font-serif text-lg font-bold text-[#34251e]">{loc.name}</h3>
+                    <h3 className="font-serif text-lg font-bold text-[#34251e]">{loc.name}</h3>
+                    <p className="mt-1 text-[11px] font-bold text-[#c1440e] uppercase tracking-wider flex items-center gap-1">
+                      <span>📍</span> {loc.location}
+                    </p>
                     <p className="mt-2 text-xs text-[#786657] line-clamp-2 leading-relaxed">{loc.description}</p>
                     <button
                       onClick={() => handleExplore(temple)}

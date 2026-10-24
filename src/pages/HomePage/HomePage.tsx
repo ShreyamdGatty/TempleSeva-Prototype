@@ -1,21 +1,57 @@
 import { useState } from 'react'
-import { temples, categories, sevas, reviews } from '../../data'
+import { temples, categories, sevas, reviews, STORAGE_TEMPLE } from '../../data'
+import { readJson } from '../../utils/storage'
 import { useToast } from '../../contexts/ToastContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import type { Temple, User } from '../../types'
+import { IonIcon } from '../../components/IonIcon'
 
 interface HomePageProps {
   navigateToSevas: (temple?: Temple) => void
   onRegister: () => void
   onSelectTempleDirect?: (templeId: string) => void
   user?: User | null
+  selectedTemple?: Temple | null
 }
 
-const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
+const HomePage = ({ navigateToSevas, user, selectedTemple }: HomePageProps) => {
   const isLoggedIn = !!user
   const { addToast } = useToast()
   const { language, t, translateTemple, translateCategory } = useLanguage()
   const [openFaq, setOpenFaq] = useState<number | null>(0)
+
+  // Active selected temple for highlighting cards with "Active" badge
+  const activeTempleId =
+    selectedTemple?.id || readJson<Temple | null>(STORAGE_TEMPLE, null)?.id || temples[0]?.id
+
+  const currentSelectedTemple = translateTemple(
+    selectedTemple || temples.find((t) => t.id === activeTempleId) || temples[0]
+  )
+
+  const getTempleShrineInfo = (templeId: string, lang: string) => {
+    if (templeId === 'kashi') {
+      return {
+        icon: 'flame',
+        label: lang === 'KN' ? 'ಜ್ಯೋತಿರ್ಲಿಂಗ ಸನ್ನಿಧಿ' : 'Jyotirlinga Shrine',
+      }
+    }
+    if (templeId === 'venkateswara') {
+      return {
+        icon: 'sparkles',
+        label: lang === 'KN' ? 'ಶ್ರೀ ಬಾಲಾಜಿ ಸನ್ನಿಧಿ' : 'Lord Balaji Shrine',
+      }
+    }
+    if (templeId === 'meenakshi') {
+      return {
+        icon: 'flower',
+        label: lang === 'KN' ? 'ದೇವಿ ಮೀನಾಕ್ಷಿ ಸನ್ನಿಧಿ' : 'Devi Meenakshi Shrine',
+      }
+    }
+    return {
+      icon: 'business',
+      label: lang === 'KN' ? 'ಪವಿತ್ರ ಸನ್ನಿಧಿ' : 'Sacred Shrine',
+    }
+  }
 
   const faqs = [
     { q: t('faq1Q'), a: t('faq1A') },
@@ -71,10 +107,31 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
                 : 'Shukla Paksha Dashami · Anuradha Nakshatra · Abhijit Muhurtham: 11:45 AM - 12:35 PM'}
             </span>
           </div>
-          <div className="flex items-center gap-3 text-[11px] text-[#f2c778]/90 font-semibold">
-            <span>🪔 100% Sanctum Guaranteed</span>
-            <span className="hidden md:inline">✦</span>
-            <span className="hidden md:inline">📦 Doorstep Prasadam Delivery</span>
+          <div className="flex items-center gap-2 text-[11px] text-[#f2c778] font-semibold">
+            {user ? (
+              <span className="flex items-center gap-1.5 flex-wrap justify-center sm:justify-end">
+                <span className="text-[#d4a64a] font-bold">
+                  {language === 'KN' ? 'ಆಯ್ಕೆಮಾಡಿದ ದೇವಾಲಯ:' : 'Selected Temple:'}
+                </span>
+                <span className="text-white font-bold">{currentSelectedTemple.name}</span>
+                <span className="text-[#f2c778]/70">·</span>
+                <span className="text-[#e2d5c5] flex items-center gap-1">
+                  <IonIcon name="location-sharp" className="text-[#f2c778] text-xs shrink-0" />
+                  <span>{currentSelectedTemple.location}</span>
+                </span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 flex-wrap justify-center sm:justify-end">
+                <span className="text-[#d4a64a] font-bold">
+                  {language === 'KN' ? 'ಇಷ್ಟದ ದೇವಾಲಯ ಆಯ್ಕೆಮಾಡಿ,' : 'Choose Preferred Temple,'}
+                </span>
+                <span className="text-[#f2c778]">
+                  {language === 'KN'
+                    ? '🙏 ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಸೇವೆ ಕಾಯ್ದಿರಿಸಿ · 🛕 ದೈವಿಕ ಸನ್ನಿಧಾನದೊಂದಿಗೆ ಬೆಸೆಯಿರಿ'
+                    : '🙏 Book Your Seva Online · 🛕 Connect with the Divine'}
+                </span>
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -114,60 +171,6 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
               {t('heroBookSeva')}
             </button>
           </div>
-
-          {/* Quick Sanctuary Jump Pills (Direct 1-Click Access) */}
-          <div className="mt-6 pt-5 border-t border-[#eadfd1]">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#8b7a6d] mb-2.5 flex items-center gap-1.5">
-              <span>⚡</span>
-              <span>Direct Temple Sevas:</span>
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {temples.map((temple) => {
-                const count = sevas.filter((s) => s.templeId === temple.id).length
-                return (
-                  <button
-                    key={temple.id}
-                    onClick={() => navigateToSevas(temple)}
-                    className="inline-flex items-center gap-2 rounded-xl border border-[#e2d5c4] bg-white px-3 py-1.5 text-xs font-semibold text-[#34251e] transition hover:border-[#c1440e] hover:bg-[#fff9f3] hover:shadow-xs cursor-pointer group"
-                  >
-                    <span className="text-[#c1440e] text-sm group-hover:scale-110 transition-transform">🛕</span>
-                    <span>{translateTemple(temple).name}</span>
-                    <span className="rounded-full bg-[#f5ede2] text-[#c1440e] text-[10px] font-bold px-1.5 py-0.2">
-                      {count} Sevas
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Social Proof Counters */}
-          <div className="mt-8 grid grid-cols-3 gap-4 border-t border-[#eadfd1] pt-6">
-            <div className="transition-transform hover:scale-105">
-              <p className="font-serif text-2xl sm:text-3xl font-bold text-[#c1440e]">
-                {t('heroStat1Value')}
-              </p>
-              <p className="mt-0.5 text-xs font-semibold text-[#8b7a6d]">
-                {t('heroStat1Label')}
-              </p>
-            </div>
-            <div className="transition-transform hover:scale-105">
-              <p className="font-serif text-2xl sm:text-3xl font-bold text-[#34251e]">
-                {t('heroStat2Value')}
-              </p>
-              <p className="mt-0.5 text-xs font-semibold text-[#8b7a6d]">
-                {t('heroStat2Label')}
-              </p>
-            </div>
-            <div className="transition-transform hover:scale-105">
-              <p className="font-serif text-2xl sm:text-3xl font-bold text-[#d4a64a]">
-                {t('heroStat3Value')}
-              </p>
-              <p className="mt-0.5 text-xs font-semibold text-[#8b7a6d]">
-                {t('heroStat3Label')}
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* ── Sacred Hero Visual Composition in Card ── */}
@@ -203,7 +206,7 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
             {/* Top Left: Certified Priests Pill */}
             <div className="animate-bounce-subtle absolute -top-3 -left-2 sm:-left-4 flex items-center gap-2.5 rounded-full bg-white/95 backdrop-blur-md px-3.5 py-2 shadow-lg border border-[#eadfd1] transition hover:scale-105">
               <span className="grid h-7 w-7 place-items-center rounded-full bg-[#fdf2e9] text-[#c1440e] text-sm">
-                🪔
+                <IonIcon name="flame-outline" className="text-base text-[#c1440e]" />
               </span>
               <div>
                 <span className="block text-[11px] font-bold text-[#34251e] leading-tight">
@@ -218,7 +221,7 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
             {/* Bottom Right: Sacred Prasadam Delivery Pill */}
             <div className="animate-float-hero absolute -bottom-4 -right-2 sm:-right-4 flex items-center gap-3 rounded-2xl bg-white/95 backdrop-blur-md p-3.5 shadow-xl border border-[#eadfd1] transition hover:scale-105">
               <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-[#c1440e] to-[#df5619] text-white text-base shadow-xs">
-                📦
+                <IonIcon name="cube-outline" className="text-lg text-white" />
               </span>
               <div>
                 <span className="block text-xs font-bold text-[#34251e]">
@@ -233,6 +236,7 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
             {/* Bottom Left: Live Darshan Pill */}
             <div className="absolute bottom-5 -left-2 sm:-left-4 hidden sm:flex items-center gap-2 rounded-full bg-[#2c170e]/95 backdrop-blur-md px-3.5 py-1.5 text-white shadow-lg border border-[#d4a64a]/30">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <IonIcon name="videocam-outline" className="text-sm text-[#f2c778]" />
               <span className="text-[10px] font-bold tracking-wider uppercase text-[#f2c778]">
                 {language === 'KN' ? 'ಲೈವ್ ದರ್ಶನ ಲಭ್ಯ' : 'Live Darshan Active'}
               </span>
@@ -241,28 +245,33 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
         </div>
       </section>
 
-      {/* ── 3. Sacred Live Blessings Marquee Ticker ── */}
+      {/* ── 3. Sacred Journey Steps Marquee Ticker ── */}
       <div className="relative overflow-hidden bg-gradient-to-r from-[#2c170e] via-[#482819] to-[#2c170e] py-3 text-white border-y border-[#d4a64a]/30 shadow-md">
         <div className="animate-marquee whitespace-nowrap text-xs font-semibold tracking-wider flex items-center gap-8">
-          <span className="flex items-center gap-2">
-            <span className="animate-diya text-base">🪔</span> {language === 'KN' ? 'ಶಾಸ್ತ್ರೋಕ್ತ ವೈದಿಕ ಪುರೋಹಿತರು' : '100% Certified Vedic Gurukul Priests'}
-          </span>
-          <span className="text-[#f2c778]">✦</span>
-          <span className="flex items-center gap-2">
-            <span>🕉</span> {language === 'KN' ? 'ವೈಯಕ್ತಿಕ ಹೆಸರು & ಗೋತ್ರ ಸಂಕಲ್ಪ' : 'Personalized Name & Gotra Sankalpa Recording'}
-          </span>
-          <span className="text-[#f2c778]">✦</span>
-          <span className="flex items-center gap-2">
-            <span>📦</span> {language === 'KN' ? 'ಶುದ್ಧ ಪವಿತ್ರ ಪ್ರಸಾದ ಮನೆ ಬಾಗಿಲಿಗೆ' : 'Doorstep Sacred Prasadam Dispatch'}
-          </span>
-          <span className="text-[#f2c778]">✦</span>
-          <span className="flex items-center gap-2">
-            <span className="animate-diya text-base">🔔</span> {language === 'KN' ? 'ನೇರ ಪೂಜಾ ಫೋಟೋ & ವಿಡಿಯೋ ಮಾಹಿತಿ' : 'WhatsApp Video & Photo Sankalpa Updates'}
-          </span>
-          <span className="text-[#f2c778]">✦</span>
-          <span className="flex items-center gap-2">
-            <span>✨</span> {language === 'KN' ? '೫೦,೦೦೦+ ಸಫಲ ಸೇವೆಗಳು' : '50,000+ Devotee Offerings Fulfilled'}
-          </span>
+          {[1, 2].map((cycle) => (
+            <div key={cycle} className="flex items-center gap-8">
+              <span className="flex items-center gap-2">
+                <IonIcon name="business-outline" className="text-[#f2c778] text-base" />
+                <span className="uppercase tracking-wider">{language === 'KN' ? 'ದೇವಾಲಯ ಆಯ್ಕೆಮಾಡಿ' : 'Choose Temple'}</span>
+              </span>
+              <span className="text-[#f2c778] text-sm select-none">✦</span>
+              <span className="flex items-center gap-2">
+                <IonIcon name="flame-outline" className="text-[#f2c778] text-base" />
+                <span className="uppercase tracking-wider">{language === 'KN' ? 'ಸೇವೆ ಕಾಯ್ದಿರಿಸಿ' : 'Book Seva'}</span>
+              </span>
+              <span className="text-[#f2c778] text-sm select-none">✦</span>
+              <span className="flex items-center gap-2">
+                <IonIcon name="card-outline" className="text-[#f2c778] text-base" />
+                <span className="uppercase tracking-wider">{language === 'KN' ? 'ಪಾವತಿ ಮಾಡಿ' : 'Make Payment'}</span>
+              </span>
+              <span className="text-[#f2c778] text-sm select-none">✦</span>
+              <span className="flex items-center gap-2">
+                <IonIcon name="qr-code-outline" className="text-[#f2c778] text-base" />
+                <span className="uppercase tracking-wider">{language === 'KN' ? 'ಸೇವೆ ಪಡೆಯಲು QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ' : 'Scan QR Code to Receive the Seva'}</span>
+              </span>
+              <span className="text-[#f2c778] text-sm select-none">✦</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -285,94 +294,74 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
             {temples.map((originalTemple) => {
               const temple = translateTemple(originalTemple)
               const templeSevasCount = sevas.filter((s) => s.templeId === originalTemple.id).length
+              const isSelected = activeTempleId === originalTemple.id
+              const shrineInfo = getTempleShrineInfo(originalTemple.id, language)
 
               return (
                 <article
                   key={temple.id}
-                  className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-[#eadfd1] bg-white shadow-sm hover:shadow-xl transition-all duration-300 relative cursor-pointer"
+                  className={`group flex flex-col justify-between overflow-hidden rounded-3xl border transition-all duration-300 relative cursor-pointer ${
+                    isSelected
+                      ? 'border-[#c1440e] bg-[#fffbf7] shadow-xl ring-2 ring-[#c1440e]/30'
+                      : 'border-[#eadfd1] bg-white shadow-sm hover:shadow-xl'
+                  }`}
                   onClick={() => navigateToSevas(originalTemple)}
                 >
                   <div>
                     {/* Temple Banner Image with Overlay */}
-                    <div className="relative overflow-hidden h-60">
+                    <div className="relative overflow-hidden h-64 sm:h-72">
                       <img
                         loading="lazy"
                         src={temple.image}
                         alt={temple.name}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-108"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
                       
-                      {/* Top Badges */}
-                      <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-[#2c170e]/85 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-[#f2c778] border border-[#d4a64a]/30">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span>Sanctum Open</span>
+                      {/* Top Left: Active Badge (Only for selected temple) */}
+                      {isSelected && (
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-emerald-600/95 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-white shadow-md border border-emerald-300/40">
+                          <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                          <span>{language === 'KN' ? 'ಸಕ್ರಿಯ' : 'Active'}</span>
+                        </div>
+                      )}
+
+                      {/* Top Right: Sacred Shrine Badge */}
+                      <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-black/65 backdrop-blur-md px-3 py-1 text-[11px] font-medium text-white shadow-md border border-white/25">
+                        <IonIcon name={shrineInfo.icon} className="text-[#f8d07e] text-xs" />
+                        <span>{shrineInfo.label}</span>
                       </div>
 
-                      <div className="absolute top-3 right-3 rounded-full bg-white/90 backdrop-blur px-2.5 py-1 text-[11px] font-bold text-[#c1440e] shadow-2xs">
-                        {templeSevasCount} Sevas Available
-                      </div>
-
-                      {/* Location Badge */}
-                      <div className="absolute bottom-3 left-3 flex items-center gap-1 text-xs font-semibold text-white/95">
-                        <span>📍</span>
-                        <span>{temple.location}</span>
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-6">
-                      <h3 className="font-serif text-2xl font-bold text-[#34251e] group-hover:text-[#c1440e] transition-colors leading-tight">
-                        {temple.name}
-                      </h3>
-                      <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-[#75685d]">
-                        {temple.description}
-                      </p>
-
-                      {/* Temple Highlights */}
-                      <div className="mt-4 flex flex-wrap gap-1.5">
-                        {originalTemple.id === 'kashi' && (
-                          <>
-                            <span className="rounded-lg bg-[#fbf6f0] border border-[#eee2d3] px-2 py-0.5 text-[10px] font-semibold text-[#8b7a6d]">
-                              Jyotirlinga Sanctum
-                            </span>
-                            <span className="rounded-lg bg-[#fbf6f0] border border-[#eee2d3] px-2 py-0.5 text-[10px] font-semibold text-[#8b7a6d]">
-                              Ganga Theertham
-                            </span>
-                          </>
-                        )}
-                        {originalTemple.id === 'venkateswara' && (
-                          <>
-                            <span className="rounded-lg bg-[#fbf6f0] border border-[#eee2d3] px-2 py-0.5 text-[10px] font-semibold text-[#8b7a6d]">
-                              Lord Balaji Shrine
-                            </span>
-                            <span className="rounded-lg bg-[#fbf6f0] border border-[#eee2d3] px-2 py-0.5 text-[10px] font-semibold text-[#8b7a6d]">
-                              Tirupati Laddu Prasadam
-                            </span>
-                          </>
-                        )}
-                        {originalTemple.id === 'meenakshi' && (
-                          <>
-                            <span className="rounded-lg bg-[#fbf6f0] border border-[#eee2d3] px-2 py-0.5 text-[10px] font-semibold text-[#8b7a6d]">
-                              Goddess Shakti Peetham
-                            </span>
-                            <span className="rounded-lg bg-[#fbf6f0] border border-[#eee2d3] px-2 py-0.5 text-[10px] font-semibold text-[#8b7a6d]">
-                              Kumkuma Archana
-                            </span>
-                          </>
-                        )}
+                      {/* Bottom Left: Temple Name & Address Overlaid on Image */}
+                      <div className="absolute bottom-3.5 left-4 right-4 text-left">
+                        <h3 className="font-serif text-xl sm:text-2xl font-bold text-white leading-tight drop-shadow-md group-hover:text-[#f8d07e] transition-colors">
+                          {temple.name}
+                        </h3>
+                        <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[#f8d07e] drop-shadow-sm">
+                          <IonIcon name="location-sharp" className="text-[#f8d07e] text-sm shrink-0" />
+                          <span className="text-white/90">{temple.location}</span>
+                        </div>
                       </div>
                     </div>
+
                   </div>
 
                   {/* Bottom Action CTA */}
-                  <div className="p-6 pt-0">
+                  <div className="p-4 sm:p-5">
                     <button
                       type="button"
-                      className="w-full rounded-2xl border-2 border-[#34251e] py-3 text-xs sm:text-sm font-bold text-[#34251e] transition-all group-hover:border-[#c1440e] group-hover:bg-[#c1440e] group-hover:text-white flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+                      className={`w-full rounded-2xl py-3 text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs ${
+                        isSelected
+                          ? 'bg-[#c1440e] text-white border-2 border-[#c1440e] hover:bg-[#a53809]'
+                          : 'border-2 border-[#34251e] text-[#34251e] group-hover:border-[#c1440e] group-hover:bg-[#c1440e] group-hover:text-white'
+                      }`}
                     >
-                      <span>{t('viewAvailableSevas')}</span>
-                      <span>→</span>
+                      <span>
+                        {isSelected
+                          ? (language === 'KN' ? 'ಸಕ್ರಿಯ ದೇವಾಲಯ · ಸೇವೆಗಳನ್ನು ನೋಡಿ' : 'Active Sanctuary · View Sevas')
+                          : t('viewAvailableSevas')}
+                      </span>
+                      <IonIcon name="arrow-forward" className="text-sm transition-transform duration-300 group-hover:translate-x-1" />
                     </button>
                   </div>
                 </article>
@@ -458,7 +447,7 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
               className="text-sm font-bold text-[#c1440e] hover:underline cursor-pointer flex items-center gap-1"
             >
               <span>{t('viewAllSevas')}</span>
-              <span>→</span>
+              <IonIcon name="arrow-forward" className="text-sm" />
             </button>
           </div>
 
@@ -466,25 +455,25 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
             {[
               {
                 id: 'pooja',
-                icon: '🕉️',
+                icon: 'sparkles-outline',
                 title: 'Pooja & Darshan',
                 desc: 'Daily Mangala Aarti, Suprabhata, & sacred deity bathing',
               },
               {
                 id: 'homam',
-                icon: '🔥',
+                icon: 'flame-outline',
                 title: 'Vedic Homam & Yajna',
                 desc: 'Maha Mrityunjaya, Ganapathi & Ayushya fire oblations',
               },
               {
                 id: 'archana',
-                icon: '🌸',
+                icon: 'flower-outline',
                 title: 'Archana & Sahasranama',
                 desc: 'Personalized Gotra chanting & 1,000 holy names of deities',
               },
               {
                 id: 'special',
-                icon: '🕊️',
+                icon: 'gift-outline',
                 title: 'Special & Anna Daan',
                 desc: 'Ganga deepa offerings, celestial weddings & pilgrim food',
               },
@@ -495,7 +484,7 @@ const HomePage = ({ navigateToSevas, user }: HomePageProps) => {
                 className="group cursor-pointer rounded-3xl border border-[#eadfd1] bg-white p-5 text-center transition-all duration-300 hover:-translate-y-1.5 hover:border-[#c1440e] hover:shadow-xl"
               >
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#f5ede2] text-2xl transition-all duration-300 group-hover:scale-110 group-hover:bg-[#c1440e] group-hover:text-white shadow-2xs">
-                  {cat.icon}
+                  <IonIcon name={cat.icon} className="text-2xl text-[#c1440e] group-hover:text-white transition-colors" />
                 </div>
                 <h3 className="mt-3.5 font-serif text-base font-bold text-[#34251e] group-hover:text-[#c1440e]">
                   {cat.title}

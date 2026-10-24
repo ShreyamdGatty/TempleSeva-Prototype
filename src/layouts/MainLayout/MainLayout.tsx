@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { User } from '../../types'
+import type { User, Temple } from '../../types'
 import { getInitials } from '../../utils/helpers'
 import { useLanguage } from '../../contexts/LanguageContext'
 import SideMenuDrawer from '../../components/SideMenuDrawer/SideMenuDrawer'
@@ -8,6 +8,7 @@ import LanguageDropdown from '../../components/LanguageDropdown/LanguageDropdown
 
 interface MainLayoutProps {
   user: User | null
+  selectedTemple?: Temple | null
   cartCount?: number
   wishlistCount?: number
   ordersCount?: number
