@@ -5,6 +5,7 @@ import { temples } from '../../data'
 import { formatPrice } from '../../utils/helpers'
 import { useLanguage } from '../../contexts/LanguageContext'
 import LanguageDropdown from '../../components/LanguageDropdown/LanguageDropdown'
+import { IonIcon } from '../../components/IonIcon'
 
 interface MySevasPageProps {
   user: User | null
@@ -84,11 +85,8 @@ const MySevasPage = ({
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/')}
-              className="flex items-center gap-2.5 text-left shrink-0 cursor-pointer"
+              className="flex items-center text-left shrink-0 cursor-pointer"
             >
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-[#c1440e] to-[#df5619] font-serif text-xl font-bold text-white shadow-md">
-                ॐ
-              </span>
               <span className="font-serif text-2xl font-bold tracking-tight whitespace-nowrap">
                 {language === 'KN' ? (
                   <>
@@ -105,9 +103,8 @@ const MySevasPage = ({
             {/* Home link */}
             <button
               onClick={() => navigate('/')}
-              className="flex items-center gap-1.5 rounded-full border border-[#eadfd1] bg-white px-3.5 py-1.5 text-xs font-bold text-[#674f40] transition hover:border-[#c1440e] hover:text-[#c1440e] cursor-pointer"
+              className="flex items-center rounded-full border border-[#eadfd1] bg-white px-3.5 py-1.5 text-xs font-bold text-[#674f40] transition hover:border-[#c1440e] hover:text-[#c1440e] cursor-pointer"
             >
-              <span>🏠</span>
               <span>{t('navHome')}</span>
             </button>
           </div>
@@ -122,7 +119,7 @@ const MySevasPage = ({
                 className="relative flex items-center justify-center rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] p-2 text-xs font-semibold text-[#5c4d41] hover:text-[#c1440e] shadow-2xs transition cursor-pointer"
                 title={language === 'KN' ? 'ಮೆಚ್ಚಿನವುಗಳು' : 'Wishlist'}
               >
-                <span>❤️</span>
+                <IonIcon name="heart-outline" className="text-base text-[#c1440e]" />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-1 -right-1 grid h-4 min-w-[16px] place-items-center rounded-full bg-[#c1440e] px-1 text-[10px] font-bold text-white shadow-xs">
                     {wishlistCount}
@@ -134,9 +131,8 @@ const MySevasPage = ({
             {/* Book More Sevas CTA */}
             <button
               onClick={() => navigate('/sevas')}
-              className="hidden md:flex items-center gap-1.5 rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-3.5 py-1.5 text-xs font-bold text-[#c1440e] transition hover:bg-[#c1440e] hover:text-white shadow-xs cursor-pointer"
+              className="hidden md:flex items-center rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-3.5 py-1.5 text-xs font-bold text-[#c1440e] transition hover:bg-[#c1440e] hover:text-white shadow-xs cursor-pointer"
             >
-              <span className="animate-diya">🪔</span>
               <span>{t('backToSevas')}</span>
             </button>
 

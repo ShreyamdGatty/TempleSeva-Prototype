@@ -52,11 +52,8 @@ const MainLayout = ({
           {/* Logo */}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2.5 text-left shrink-0 mr-4 cursor-pointer"
+            className="flex items-center text-left shrink-0 mr-4 cursor-pointer"
           >
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-[#c1440e] to-[#df5619] font-serif text-xl font-bold text-white shadow-md">
-              ॐ
-            </span>
             <span className="font-serif text-2xl font-bold tracking-tight whitespace-nowrap">
               {language === 'KN' ? (
                 <>
@@ -87,18 +84,16 @@ const MainLayout = ({
                 <button
                   type="button"
                   onClick={() => navigate('/sevas')}
-                  className="flex items-center gap-1.5 whitespace-nowrap transition hover:text-[#c1440e] cursor-pointer"
+                  className="whitespace-nowrap transition hover:text-[#c1440e] cursor-pointer"
                 >
-                  <span className="text-[#c1440e]">🪔</span>
-                  <span>{language === 'KN' ? 'ಸೇವೆಗಳು' : 'Sevas'}</span>
+                  {language === 'KN' ? 'ಸೇವೆಗಳು' : 'Sevas'}
                 </button>
                 <button
                   type="button"
                   onClick={onOrders}
-                  className="flex items-center gap-1.5 whitespace-nowrap transition hover:text-[#c1440e] cursor-pointer"
+                  className="whitespace-nowrap transition hover:text-[#c1440e] cursor-pointer"
                 >
-                  <span>📿</span>
-                  <span>{t('navMySevas')}</span>
+                  {t('navMySevas')}
                 </button>
               </>
             ) : (
@@ -118,24 +113,6 @@ const MainLayout = ({
 
           {/* Right Action Bar */}
           <div className="flex items-center gap-2.5 shrink-0">
-            {/* Switch / Select Temple Pill - only visible after successful login */}
-            {user && onSwitchTemple && (
-              <button
-                type="button"
-                onClick={onSwitchTemple}
-                className="flex items-center gap-1.5 rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] px-3 py-1.5 text-xs font-semibold text-[#5c4d41] hover:text-[#c1440e] shadow-2xs transition cursor-pointer shrink-0"
-                title={language === 'KN' ? 'ದೇವಾಲಯವನ್ನು ಆಯ್ಕೆಮಾಡಿ' : 'Select Temple'}
-              >
-                <span className="text-sm text-[#c1440e]">🛕</span>
-                <span className="hidden sm:inline font-bold">
-                  {language === 'KN' ? 'ದೇವಾಲಯ ಆಯ್ಕೆ' : 'Select Temple'}
-                </span>
-                <svg className="h-3 w-3 text-[#8b7a6d]" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            )}
-
 
             {/* Language Dropdown (Globe Icon Only) */}
             <LanguageDropdown />

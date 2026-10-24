@@ -7,6 +7,7 @@ import { useDevotees } from '../../hooks/useDevotees'
 import { useWishlist } from '../../hooks/useWishlist'
 import { formatPrice } from '../../utils/helpers'
 import LanguageDropdown from '../../components/LanguageDropdown/LanguageDropdown'
+import { IonIcon } from '../../components/IonIcon'
 
 interface ProfilePageProps {
   user: User | null
@@ -288,11 +289,8 @@ const ProfilePage = ({
           {/* Logo */}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2.5 text-left shrink-0 cursor-pointer"
+            className="flex items-center text-left shrink-0 cursor-pointer"
           >
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-[#c1440e] to-[#df5619] font-serif text-xl font-bold text-white shadow-md">
-              ॐ
-            </span>
             <span className="font-serif text-2xl font-bold tracking-tight whitespace-nowrap">
               {language === 'KN' ? (
                 <>
@@ -402,12 +400,16 @@ const ProfilePage = ({
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="grid h-6 w-6 place-items-center rounded-full bg-[#fdf2e9] text-[#c1440e] text-xs">
-                    👤
+                  <span className="grid h-6 w-6 place-items-center rounded-full bg-[#fdf2e9] text-[#c1440e]">
+                    <IonIcon name="person-outline" className="text-sm text-[#c1440e]" />
                   </span>
                   <span>{language === 'KN' ? 'ಪ್ರೊಫೈಲ್' : 'Profile'}</span>
                 </div>
-                {activeTab === 'profile' && <span className="text-xs">▸</span>}
+                {activeTab === 'profile' ? (
+                  <span className="text-xs">▸</span>
+                ) : (
+                  <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
+                )}
               </button>
 
               {/* Add Devotee */}
@@ -421,7 +423,9 @@ const ProfilePage = ({
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-base text-[#c1440e] font-bold">➕</span>
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#fff0f3] text-[#f84464]">
+                    <IonIcon name="person-add-outline" className="text-sm text-[#f84464]" />
+                  </span>
                   <span className="font-medium text-[#34251e]">
                     {language === 'KN' ? 'ಭಕ್ತರ ವಿವರ ಸೇರಿಸಿ' : 'Add Devotee'}
                   </span>
@@ -429,7 +433,7 @@ const ProfilePage = ({
                 {activeTab === 'add-devotee' ? (
                   <span className="text-xs">▸</span>
                 ) : (
-                  <span className="text-xs text-[#b5a496]">›</span>
+                  <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
                 )}
               </button>
 
@@ -444,7 +448,9 @@ const ProfilePage = ({
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-base text-[#8b7a6d]">📿</span>
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#f5ede2] text-[#8b7a6d]">
+                    <IonIcon name="people-outline" className="text-sm text-[#5c4d41]" />
+                  </span>
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-[#34251e]">
                       {language === 'KN' ? 'ಭಕ್ತರ ಪಟ್ಟಿ' : 'Devotee List'}
@@ -459,7 +465,7 @@ const ProfilePage = ({
                 {activeTab === 'devotee-list' ? (
                   <span className="text-xs">▸</span>
                 ) : (
-                  <span className="text-xs text-[#b5a496]">›</span>
+                  <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
                 )}
               </button>
 
@@ -470,7 +476,9 @@ const ProfilePage = ({
                 className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[#75685d] hover:bg-[#faf4ec] transition cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-base text-[#8b7a6d]">📄</span>
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#f5ede2] text-[#8b7a6d]">
+                    <IonIcon name="receipt-outline" className="text-sm text-[#5c4d41]" />
+                  </span>
                   <div className="flex items-center gap-2">
                     <span>{language === 'KN' ? 'ನಿಮ್ಮ ಸೇವೆಗಳು (Your Orders)' : 'Your Orders'}</span>
                     {propOrders.length > 0 && (
@@ -480,7 +488,7 @@ const ProfilePage = ({
                     )}
                   </div>
                 </div>
-                <span className="text-xs text-[#b5a496]">›</span>
+                <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
               </button>
 
               {/* Your Wishlist */}
@@ -494,7 +502,9 @@ const ProfilePage = ({
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-base text-[#8b7a6d]">🤍</span>
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#fef2f2] text-[#dc2626]">
+                    <IonIcon name="heart-outline" className="text-sm text-[#dc2626]" />
+                  </span>
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-[#34251e]">
                       {language === 'KN' ? 'ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳು' : 'Your Wishlist'}
@@ -509,7 +519,7 @@ const ProfilePage = ({
                 {activeTab === 'wishlist' ? (
                   <span className="text-xs">▸</span>
                 ) : (
-                  <span className="text-xs text-[#b5a496]">›</span>
+                  <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
                 )}
               </button>
 
@@ -521,7 +531,9 @@ const ProfilePage = ({
                   className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[#75685d] hover:bg-[#faf4ec] transition cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-base text-[#8b7a6d]">📱</span>
+                    <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#f0fdf4] text-[#15803d]">
+                      <IonIcon name="qr-code-outline" className="text-sm text-[#15803d]" />
+                    </span>
                     <div className="flex items-center gap-2">
                       <span>{language === 'KN' ? 'ಪಾವತಿ ಕ್ಯೂಆರ್ ಪಾಸ್ (QR Pass)' : 'Payment QR Pass'}</span>
                       {propOrders.filter((o) => o.status === 'Confirmed' || o.status === 'In Progress').length > 0 && (
@@ -531,7 +543,7 @@ const ProfilePage = ({
                       )}
                     </div>
                   </div>
-                  <span className="text-xs text-[#b5a496]">›</span>
+                  <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
                 </button>
               )}
 
@@ -546,7 +558,9 @@ const ProfilePage = ({
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-base text-[#8b7a6d]">💬</span>
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#f5ede2] text-[#8b7a6d]">
+                    <IonIcon name="help-circle-outline" className="text-sm text-[#5c4d41]" />
+                  </span>
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-[#34251e]">
                       {language === 'KN' ? 'ಸಹಾಯ ಮತ್ತು ಬೆಂಬಲ' : 'Help & Support'}
@@ -556,7 +570,7 @@ const ProfilePage = ({
                 {activeTab === 'help' ? (
                   <span className="text-xs">▸</span>
                 ) : (
-                  <span className="text-xs text-[#b5a496]">›</span>
+                  <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
                 )}
               </button>
 
@@ -568,7 +582,9 @@ const ProfilePage = ({
                   className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[#75685d] hover:bg-[#fff9f3] transition cursor-pointer group"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-base text-[#c1440e]">🛕</span>
+                    <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#fff4ec] text-[#c1440e]">
+                      <IonIcon name="business-outline" className="text-sm text-[#c1440e]" />
+                    </span>
                     <div className="text-left">
                       <span className="block font-medium text-[#34251e] group-hover:text-[#c1440e] transition">
                         {language === 'KN' ? 'ದೇವಾಲಯ ಬದಲಾಯಿಸಿ' : 'Switch Temple'}
@@ -578,7 +594,7 @@ const ProfilePage = ({
                       </span>
                     </div>
                   </div>
-                  <span className="text-xs text-[#b5a496] group-hover:text-[#c1440e]">›</span>
+                  <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496] group-hover:text-[#c1440e]" />
                 </button>
               )}
 

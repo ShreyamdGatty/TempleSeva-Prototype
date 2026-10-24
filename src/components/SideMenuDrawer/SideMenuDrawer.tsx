@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import type { User, Temple } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { IonIcon } from '../IonIcon'
 
 export interface SideMenuDrawerProps {
   isOpen: boolean
@@ -104,7 +105,7 @@ const SideMenuDrawer = ({
                 className="mt-1 flex items-center gap-1 text-xs font-semibold text-[#666666] hover:text-[#f84464] transition cursor-pointer"
               >
                 <span>{language === 'KN' ? 'ಪ್ರೊಫೈಲ್ ಸಂಪಾದಿಸಿ' : 'Edit Profile'}</span>
-                <span className="text-sm font-bold leading-none">›</span>
+                <IonIcon name="chevron-forward-outline" className="text-xs font-bold leading-none" />
               </button>
             </div>
 
@@ -125,13 +126,7 @@ const SideMenuDrawer = ({
                     {user.name.charAt(0).toUpperCase()}
                   </span>
                 ) : (
-                  <svg
-                    className="h-7 w-7 text-[#8e8e93]"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-                  </svg>
+                  <IonIcon name="person-outline" className="text-2xl text-[#8e8e93]" />
                 )}
               </button>
 
@@ -142,7 +137,7 @@ const SideMenuDrawer = ({
                 className="grid h-8 w-8 place-items-center rounded-full text-lg font-bold text-[#888888] hover:bg-[#f4f4f5] hover:text-[#222222] transition cursor-pointer"
                 aria-label="Close"
               >
-                ×
+                <IonIcon name="close-outline" className="text-xl" />
               </button>
             </div>
           </div>
@@ -158,8 +153,10 @@ const SideMenuDrawer = ({
               }}
               className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
             >
-              <div className="flex items-center gap-4">
-                <span className="text-[#f84464] text-lg w-5 text-center font-bold">➕</span>
+              <div className="flex items-center gap-3.5">
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff0f3] text-[#f84464] shrink-0">
+                  <IonIcon name="person-add-outline" className="text-lg text-[#f84464]" />
+                </span>
                 <div>
                   <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#f84464] transition">
                     {language === 'KN' ? 'ಭಕ್ತರ ವಿವರ ಸೇರಿಸಿ (Add Devotee)' : 'Add Devotee'}
@@ -169,7 +166,7 @@ const SideMenuDrawer = ({
                   </p>
                 </div>
               </div>
-              <span className="text-sm font-bold text-[#b5b5b5] group-hover:translate-x-0.5 transition">›</span>
+              <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
             </div>
 
             {/* Switch Temple / Sanctuary */}
@@ -181,8 +178,10 @@ const SideMenuDrawer = ({
                 }}
                 className="flex items-center justify-between px-6 py-4 hover:bg-[#fff9f3] transition cursor-pointer group"
               >
-                <div className="flex items-center gap-4">
-                  <span className="text-[#c1440e] text-lg w-5 text-center">🛕</span>
+                <div className="flex items-center gap-3.5">
+                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4ec] text-[#c1440e] shrink-0">
+                    <IonIcon name="business-outline" className="text-lg text-[#c1440e]" />
+                  </span>
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
@@ -203,7 +202,7 @@ const SideMenuDrawer = ({
                     </p>
                   </div>
                 </div>
-                <span className="text-sm font-bold text-[#b5b5b5] group-hover:text-[#c1440e] group-hover:translate-x-0.5 transition">›</span>
+                <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:text-[#c1440e] group-hover:translate-x-0.5 transition" />
               </div>
             )}
 
@@ -215,8 +214,10 @@ const SideMenuDrawer = ({
               }}
               className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
             >
-              <div className="flex items-center gap-4">
-                <span className="text-[#333333] text-lg w-5 text-center">🛍️</span>
+              <div className="flex items-center gap-3.5">
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#f5ede2] text-[#5c4d41] shrink-0">
+                  <IonIcon name="receipt-outline" className="text-lg text-[#5c4d41]" />
+                </span>
                 <div>
                   <div className="flex items-center gap-2">
                     <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#f84464] transition">
@@ -233,7 +234,7 @@ const SideMenuDrawer = ({
                   </p>
                 </div>
               </div>
-              <span className="text-sm font-bold text-[#b5b5b5] group-hover:translate-x-0.5 transition">›</span>
+              <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
             </div>
 
             {/* Your Wishlist */}
@@ -244,8 +245,10 @@ const SideMenuDrawer = ({
               }}
               className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
             >
-              <div className="flex items-center gap-4">
-                <span className="text-[#333333] text-lg w-5 text-center">🤍</span>
+              <div className="flex items-center gap-3.5">
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fef2f2] text-[#dc2626] shrink-0">
+                  <IonIcon name="heart-outline" className="text-lg text-[#dc2626]" />
+                </span>
                 <div>
                   <div className="flex items-center gap-2">
                     <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#f84464] transition">
@@ -262,7 +265,7 @@ const SideMenuDrawer = ({
                   </p>
                 </div>
               </div>
-              <span className="text-sm font-bold text-[#b5b5b5] group-hover:translate-x-0.5 transition">›</span>
+              <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
             </div>
 
             {/* Devotee List / Family Sankalpa */}
@@ -273,8 +276,10 @@ const SideMenuDrawer = ({
               }}
               className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
             >
-              <div className="flex items-center gap-4">
-                <span className="text-[#333333] text-lg w-5 text-center">📿</span>
+              <div className="flex items-center gap-3.5">
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#f5ede2] text-[#5c4d41] shrink-0">
+                  <IonIcon name="people-outline" className="text-lg text-[#5c4d41]" />
+                </span>
                 <div>
                   <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#f84464] transition">
                     {language === 'KN' ? 'ಭಕ್ತರ ಪಟ್ಟಿ (Devotee List)' : 'Devotee List'}
@@ -284,7 +289,7 @@ const SideMenuDrawer = ({
                   </p>
                 </div>
               </div>
-              <span className="text-sm font-bold text-[#b5b5b5] group-hover:translate-x-0.5 transition">›</span>
+              <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
             </div>
 
             {/* Payment QR Pass */}
@@ -296,8 +301,10 @@ const SideMenuDrawer = ({
                 }}
                 className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
               >
-                <div className="flex items-center gap-4">
-                  <span className="text-[#333333] text-lg w-5 text-center">📱</span>
+                <div className="flex items-center gap-3.5">
+                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#f0fdf4] text-[#15803d] shrink-0">
+                    <IonIcon name="qr-code-outline" className="text-lg text-[#15803d]" />
+                  </span>
                   <div>
                     <div className="flex items-center gap-1.5">
                       <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#f84464] transition">
@@ -312,27 +319,15 @@ const SideMenuDrawer = ({
                     </p>
                   </div>
                 </div>
-                <span className="text-sm font-bold text-[#b5b5b5] group-hover:translate-x-0.5 transition">›</span>
+                <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
               </div>
             )}
 
             {/* Change Language Row */}
             <div className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition group border-t border-[#f2f2f2]">
-              <div className="flex items-center gap-4">
-                <span className="grid h-8 w-8 place-items-center rounded-full bg-[#fdf2e9] text-[#c1440e] shrink-0">
-                  <svg
-                    className="h-4.5 w-4.5 text-[#c1440e]"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="2" y1="12" x2="22" y2="12" />
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                  </svg>
+              <div className="flex items-center gap-3.5">
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fdf2e9] text-[#c1440e] shrink-0">
+                  <IonIcon name="globe-outline" className="text-lg text-[#c1440e]" />
                 </span>
                 <div>
                   <h4 className="text-sm font-semibold text-[#222222]">
@@ -379,8 +374,10 @@ const SideMenuDrawer = ({
               }}
               className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
             >
-              <div className="flex items-center gap-4">
-                <span className="text-[#333333] text-lg w-5 text-center">💬</span>
+              <div className="flex items-center gap-3.5">
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#f5ede2] text-[#5c4d41] shrink-0">
+                  <IonIcon name="help-circle-outline" className="text-lg text-[#5c4d41]" />
+                </span>
                 <div>
                   <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#f84464] transition">
                     {language === 'KN' ? 'ಸಹಾಯ ಮತ್ತು ಬೆಂಬಲ (Help & Support)' : 'Help & Support'}
@@ -390,7 +387,7 @@ const SideMenuDrawer = ({
                   </p>
                 </div>
               </div>
-              <span className="text-sm font-bold text-[#b5b5b5] group-hover:translate-x-0.5 transition">›</span>
+              <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
             </div>
 
           </div>
@@ -405,9 +402,10 @@ const SideMenuDrawer = ({
                 onClose()
                 onLogout()
               }}
-              className="w-full rounded-xl border border-[#f84464] py-3 text-center text-sm font-bold text-[#f84464] transition hover:bg-[#fff0f3] cursor-pointer"
+              className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#f84464] py-3 text-center text-sm font-bold text-[#f84464] transition hover:bg-[#fff0f3] cursor-pointer"
             >
-              {language === 'KN' ? 'ನಿರ್ಗಮಿಸಿ (Sign out)' : 'Sign out'}
+              <IonIcon name="log-out-outline" className="text-lg" />
+              <span>{language === 'KN' ? 'ನಿರ್ಗಮಿಸಿ (Sign out)' : 'Sign out'}</span>
             </button>
           ) : (
             <button
@@ -416,9 +414,10 @@ const SideMenuDrawer = ({
                 onClose()
                 onLogin()
               }}
-              className="w-full rounded-xl bg-[#f84464] py-3 text-center text-sm font-bold text-white shadow-xs transition hover:bg-[#e03152] cursor-pointer"
+              className="flex items-center justify-center gap-2 w-full rounded-xl bg-[#f84464] py-3 text-center text-sm font-bold text-white shadow-xs transition hover:bg-[#e03152] cursor-pointer"
             >
-              {language === 'KN' ? 'ಲಾಗಿನ್ ಮಾಡಿ (Sign in)' : 'Sign in'}
+              <IonIcon name="log-in-outline" className="text-lg" />
+              <span>{language === 'KN' ? 'ಲಾಗಿನ್ ಮಾಡಿ (Sign in)' : 'Sign in'}</span>
             </button>
           )}
         </div>

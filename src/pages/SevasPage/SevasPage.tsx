@@ -204,11 +204,8 @@ const SevasPage = ({
           <div className="flex items-center gap-4 sm:gap-6">
             <button
               onClick={() => navigate('/')}
-              className="flex items-center gap-2.5 text-left shrink-0 cursor-pointer"
+              className="flex items-center text-left shrink-0 cursor-pointer"
             >
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-[#c1440e] to-[#df5619] font-serif text-xl font-bold text-white shadow-md">
-                ॐ
-              </span>
               <span className="font-serif text-2xl font-bold tracking-tight whitespace-nowrap">
                 {language === 'KN' ? (
                   <>
@@ -225,10 +222,9 @@ const SevasPage = ({
             {/* Home link */}
             <button
               onClick={() => navigate('/')}
-              className="flex items-center gap-1.5 rounded-full border border-[#eadfd1] bg-white px-3.5 py-1.5 text-xs font-bold text-[#674f40] transition hover:border-[#c1440e] hover:text-[#c1440e] cursor-pointer"
+              className="flex items-center rounded-full border border-[#eadfd1] bg-white px-3.5 py-1.5 text-xs font-bold text-[#674f40] transition hover:border-[#c1440e] hover:text-[#c1440e] cursor-pointer"
               title="Home"
             >
-              <span>🏠</span>
               <span>{t('navHome')}</span>
             </button>
           </div>
@@ -238,9 +234,8 @@ const SevasPage = ({
             {/* Switch Sanctuary Pill */}
             <button
               onClick={switchTemple}
-              className="hidden sm:flex items-center gap-1.5 rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] px-3 py-1.5 text-xs font-semibold text-[#5c4d41] hover:text-[#c1440e] shadow-2xs transition cursor-pointer"
+              className="hidden sm:flex items-center rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] px-3.5 py-1.5 text-xs font-semibold text-[#5c4d41] hover:text-[#c1440e] shadow-2xs transition cursor-pointer"
             >
-              <span className="text-[#c1440e]">🛕</span>
               <span>{t('switchTemple')}</span>
             </button>
 
@@ -252,9 +247,8 @@ const SevasPage = ({
                 <button
                   type="button"
                   onClick={onOrders}
-                  className="flex items-center gap-1.5 rounded-full bg-[#f5ede2] hover:bg-[#ebdcc9] px-3.5 py-1.5 text-xs font-bold text-[#5c4d41] transition cursor-pointer"
+                  className="flex items-center rounded-full bg-[#f5ede2] hover:bg-[#ebdcc9] px-3.5 py-1.5 text-xs font-bold text-[#5c4d41] transition cursor-pointer"
                 >
-                  <span>📿</span>
                   <span className="hidden sm:inline">{t('navMySevas')}</span>
                 </button>
 
