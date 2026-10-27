@@ -89,7 +89,7 @@ const FaqSection = () => {
 
   const [activeCategory, setActiveCategory] = useState<'all' | 'booking' | 'qr' | 'account'>('all')
   const [searchQuery, setSearchQuery] = useState('')
-  const [openId, setOpenId] = useState<string | null>('faq-1') // Open first question by default like reference image
+  const [openId, setOpenId] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<Record<string, 'helpful' | 'not-helpful'>>({})
 
   // Filter questions based on active category and live search query
