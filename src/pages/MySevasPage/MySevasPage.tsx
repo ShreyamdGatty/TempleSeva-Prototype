@@ -80,7 +80,7 @@ const MySevasPage = ({
     <div className="min-h-screen bg-[#fffcf6] text-[#34251e]">
       {/* ── Top Header Bar ── */}
       <header className="sticky top-0 z-30 border-b border-[#eadfd1] bg-[#fffcf6]/95 backdrop-blur-md transition-all shadow-2xs">
-        <div className="mx-auto flex h-[74px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex h-[74px] w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo & Navigation */}
           <div className="flex items-center gap-4">
             <button
@@ -136,9 +136,6 @@ const MySevasPage = ({
               <span>{t('backToSevas')}</span>
             </button>
 
-            {/* Language Dropdown (Globe Icon Only) */}
-            <LanguageDropdown />
-
             {/* User Account / Profile Menu Button */}
             {user ? (
               <button
@@ -175,6 +172,12 @@ const MySevasPage = ({
                 {t('navLogin')}
               </button>
             )}
+
+            {/* Subtle Divider before Language Dropdown */}
+            <span className="hidden sm:inline-block h-6 w-px bg-[#eadfd1]" />
+
+            {/* Language Dropdown in Corner of Navbar */}
+            <LanguageDropdown />
           </div>
         </div>
       </header>

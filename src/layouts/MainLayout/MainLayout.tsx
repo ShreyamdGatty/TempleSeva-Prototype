@@ -48,7 +48,7 @@ const MainLayout = ({
     <div className="home-route min-h-screen bg-[#fffcf6] text-[#34251e]">
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-[#eadfd1] bg-[#fffcf6]/95 backdrop-blur-md transition-all">
-        <div className="mx-auto flex h-[74px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex h-[74px] w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <button
             onClick={() => navigate('/')}
@@ -70,7 +70,16 @@ const MainLayout = ({
           {/* Central Navigation Links */}
           <nav className="hidden items-center gap-6 xl:gap-8 text-sm font-semibold text-[#5c4d41] lg:flex shrink-0">
             {!user && (
-              <a href="/#about" className="whitespace-nowrap transition hover:text-[#c1440e]">
+              <a
+                href="/#about"
+                onClick={(e) => {
+                  if (window.location.pathname === '/' || window.location.pathname === '') {
+                    e.preventDefault()
+                    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })
+                  }
+                }}
+                className="whitespace-nowrap transition hover:text-[#c1440e]"
+              >
                 {t('navAbout')}
               </a>
             )}
@@ -101,8 +110,8 @@ const MainLayout = ({
                 <a href="/#how" className="whitespace-nowrap transition hover:text-[#c1440e]">
                   {t('navHowItWorks')}
                 </a>
-                <a href="/#trust" className="whitespace-nowrap transition hover:text-[#c1440e]">
-                  {t('navTrust')}
+                <a href="/#why-us" className="whitespace-nowrap transition hover:text-[#c1440e]">
+                  {t('navWhyUs')}
                 </a>
                 <a href="/#faq" className="whitespace-nowrap transition hover:text-[#c1440e]">
                   {t('navFaq')}
@@ -113,10 +122,6 @@ const MainLayout = ({
 
           {/* Right Action Bar */}
           <div className="flex items-center gap-2.5 shrink-0">
-
-            {/* Language Dropdown (Globe Icon Only) */}
-            <LanguageDropdown />
-
             {/* User Account / Profile Menu Pill */}
             {user ? (
               <button
@@ -160,6 +165,12 @@ const MainLayout = ({
                 </button>
               </div>
             )}
+
+            {/* Subtle Divider before Language Dropdown */}
+            <span className="hidden sm:inline-block h-6 w-px bg-[#eadfd1]" />
+
+            {/* Language Dropdown in the Right Corner of the Navbar */}
+            <LanguageDropdown />
           </div>
         </div>
       </header>
@@ -219,7 +230,7 @@ const MainLayout = ({
               <ul className="mt-3 space-y-2 text-sm text-[#806f61]">
                 <li><a href="/#temples" className="hover:text-[#c1440e]">{t('navTemples')}</a></li>
                 <li><a href="/#how" className="hover:text-[#c1440e]">{t('navHowItWorks')}</a></li>
-                <li><a href="/#trust" className="hover:text-[#c1440e]">{t('navTrust')}</a></li>
+                <li><a href="/#why-us" className="hover:text-[#c1440e]">{t('navWhyUs')}</a></li>
                 <li><a href="/#faq" className="hover:text-[#c1440e]">{t('navFaq')}</a></li>
               </ul>
             </div>

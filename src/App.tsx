@@ -6,7 +6,7 @@ import './App.css'
 import type { Temple, Seva, Order, User, Address, Devotee } from './types'
 
 // Data
-import { dates, STORAGE_TEMPLE, temples, sevas } from './data'
+import { dates, STORAGE_TEMPLE, STORAGE_SESSION, temples, sevas } from './data'
 import { readJson } from './utils/storage'
 
 // Contexts
@@ -29,6 +29,7 @@ import HomePage from './pages/HomePage/HomePage'
 import SevasPage from './pages/SevasPage/SevasPage'
 import MySevasPage from './pages/MySevasPage/MySevasPage'
 import ProfilePage from './pages/ProfilePage/ProfilePage'
+import AboutPage from './pages/AboutPage/AboutPage'
 
 // Components
 import ToastContainer from './components/Toast/Toast'
@@ -52,9 +53,14 @@ const AppContent = () => {
   const { user, registeredUser, authMode, setAuthMode, login, logout, register, updateUser } = useAuth()
 
   // ── Temple & Booking State (persisted across page navigation) ────
-  const [selectedTemple, setSelectedTemple] = useState<Temple>(() =>
-    readJson<Temple | null>(STORAGE_TEMPLE, null) || temples[0]
-  )
+  const [selectedTemple, setSelectedTemple] = useState<Temple | null>(() => {
+    const isSessionActive = window.localStorage.getItem(STORAGE_SESSION) === 'true'
+    if (!isSessionActive) {
+      window.localStorage.removeItem(STORAGE_TEMPLE)
+      return null
+    }
+    return readJson<Temple | null>(STORAGE_TEMPLE, null)
+  })
   const [pickerOpen, setPickerOpen] = useState(false)
   const [isNewUserJustRegistered, setIsNewUserJustRegistered] = useState(false)
   const [isNewUserSelection, setIsNewUserSelection] = useState(false)
@@ -88,25 +94,27 @@ const AppContent = () => {
 
   // ── Temple-Scoped Orders ──────────────────────────────
   const templeOrders = useMemo(() => {
+    if (!selectedTemple) return orders
     return orders.filter((o) => o.temple?.id === selectedTemple.id)
-  }, [orders, selectedTemple.id])
+  }, [orders, selectedTemple])
 
   // ── Wishlist ──────────────────────────────────────────
   const { wishlist, toggle: toggleWish, isWished } = useWishlist()
 
   // ── Temple-Scoped Wishlist ────────────────────────────
   const templeWishlist = useMemo(() => {
+    if (!selectedTemple) return wishlist
     return wishlist.filter((sevaId) => {
       const seva = sevas.find((s) => s.id === sevaId)
       return seva && seva.templeId === selectedTemple.id
     })
-  }, [wishlist, selectedTemple.id])
+  }, [wishlist, selectedTemple])
 
   // ── Addresses ─────────────────────────────────────────
   const { addresses, defaultAddress, addAddress, removeAddress, setDefault: setDefaultAddress } = useAddresses()
 
   // ── Devotees (Scoped specifically for the active temple) ──
-  const { devotees, addDevotee, updateDevotee, removeDevotee } = useDevotees(user?.name, selectedTemple.id)
+  const { devotees, addDevotee, updateDevotee, removeDevotee } = useDevotees(user?.name, selectedTemple?.id || 'meenakshi')
 
   // Automatically synchronize dates of items in cart whenever selectedDate changes
   useEffect(() => {
@@ -193,9 +201,27 @@ const AppContent = () => {
       window.sessionStorage.removeItem('temple-seva.isNewUserRegistered')
       window.localStorage.removeItem('temple-seva.mustSelectTemple')
 
-      if (isNewUser) {
+      // Check if user clicked a temple before logging in
+      const pendingTempleId = window.sessionStorage.getItem('temple-seva.pendingTemple')
+      window.sessionStorage.removeItem('temple-seva.pendingTemple')
+      const pendingTemple = pendingTempleId ? temples.find((t) => t.id === pendingTempleId) : null
+
+      if (pendingTemple) {
+        // Activate the temple chosen by user now that they are logged in
+        setSelectedTemple(pendingTemple)
+        window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(pendingTemple))
+        setPickerOpen(false)
+        addToast(
+          language === 'KN'
+            ? `${translateTemple(pendingTemple).name} ಸಕ್ರಿಯವಾಗಿದೆ!`
+            : `${translateTemple(pendingTemple).name} selected!`,
+          'success'
+        )
+        navigate('/sevas')
+      } else if (isNewUser) {
         // Clear previous selected temple from local storage so the newly registered user chooses fresh
         window.localStorage.removeItem(STORAGE_TEMPLE)
+        setSelectedTemple(null)
         setIsNewUserSelection(true)
         setPickerOpen(true)
         addToast(
@@ -207,9 +233,12 @@ const AppContent = () => {
         navigate('/sevas')
       } else {
         setIsNewUserSelection(false)
-        const savedTemple = readJson<Temple | null>(STORAGE_TEMPLE, null) || selectedTemple || temples[0]
-        setSelectedTemple(savedTemple)
-        window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(savedTemple))
+        const savedTemple = readJson<Temple | null>(STORAGE_TEMPLE, null)
+        if (savedTemple) {
+          setSelectedTemple(savedTemple)
+        } else {
+          setSelectedTemple(null)
+        }
         setPickerOpen(false)
         addToast(
           language === 'KN'
@@ -220,13 +249,14 @@ const AppContent = () => {
         navigate('/sevas')
       }
     },
-    [login, isNewUserJustRegistered, selectedTemple, navigate, addToast, language, setAuthMode]
+    [login, isNewUserJustRegistered, navigate, addToast, language, setAuthMode, translateTemple]
   )
 
   const handleLogout = useCallback(() => {
     logout()
-    setSelectedTemple(temples[0])
+    setSelectedTemple(null)
     window.localStorage.removeItem(STORAGE_TEMPLE)
+    window.sessionStorage.removeItem('temple-seva.pendingTemple')
     clearCart()
     addToast(language === 'KN' ? 'ನೀವು ಯಶಸ್ವಿಯಾಗಿ ನಿರ್ಗಮಿಸಿದ್ದೀರಿ.' : 'You have been logged out.', 'info')
     navigate('/')
@@ -342,8 +372,8 @@ const AppContent = () => {
     (temple?: Temple) => {
       if (!user) {
         if (temple) {
-          setSelectedTemple(temple)
-          window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(temple))
+          // Remember user's desired temple in session; do not set active badge or STORAGE_TEMPLE yet
+          window.sessionStorage.setItem('temple-seva.pendingTemple', temple.id)
         }
         setAuthMode('register')
         addToast(
@@ -368,10 +398,14 @@ const AppContent = () => {
         return
       }
 
-      const saved = selectedTemple || readJson<Temple | null>(STORAGE_TEMPLE, null) || temples[0]
-      setSelectedTemple(saved)
-      setPickerOpen(false)
-      navigate('/sevas')
+      const saved = selectedTemple || readJson<Temple | null>(STORAGE_TEMPLE, null)
+      if (saved) {
+        setSelectedTemple(saved)
+        setPickerOpen(false)
+        navigate('/sevas')
+      } else {
+        setPickerOpen(true)
+      }
     },
     [user, selectedTemple, clearCart, navigate, setAuthMode, addToast, language]
   )
@@ -478,7 +512,7 @@ const AppContent = () => {
             <MySevasPage
               user={user}
               orders={templeOrders}
-              selectedTemple={selectedTemple}
+              selectedTemple={selectedTemple || undefined}
               switchTemple={switchTemple}
               devotees={devotees}
               onAddDevotee={addDevotee}
@@ -517,7 +551,7 @@ const AppContent = () => {
               showToast={addToast}
               onDevoteeDetails={handleNavigateToDevotees}
               onSwitchTemple={() => setPickerOpen(true)}
-              selectedTemple={selectedTemple}
+              selectedTemple={selectedTemple || undefined}
               orders={templeOrders}
               wishlist={templeWishlist}
               onToggleWishlist={toggleWish}
@@ -527,6 +561,30 @@ const AppContent = () => {
               onUpdateDevotee={updateDevotee}
               onRemoveDevotee={removeDevotee}
             />
+          }
+        />
+        {/* ── About Us Page Route ── */}
+        <Route
+          path="/about"
+          element={
+            <MainLayout
+              user={user}
+              selectedTemple={selectedTemple}
+              cartCount={cart.length}
+              wishlistCount={templeWishlist.length}
+              ordersCount={templeOrders.length}
+              onLogin={() => setAuthMode('login')}
+              onRegister={() => setAuthMode('register')}
+              onOrders={handleNavigateToMySevas}
+              onProfile={handleNavigateToProfile}
+              onWishlist={handleNavigateToWishlist}
+              onDevoteeDetails={handleNavigateToDevotees}
+              onOpenQrPass={() => setQrPassOpen(true)}
+              onSwitchTemple={switchTemple}
+              onLogout={handleLogout}
+            >
+              <AboutPage navigateToSevas={navigateToSevas} />
+            </MainLayout>
           }
         />
       </Routes>

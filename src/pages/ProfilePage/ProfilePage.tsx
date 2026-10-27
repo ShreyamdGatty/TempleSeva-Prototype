@@ -285,7 +285,7 @@ const ProfilePage = ({
     <div className="min-h-screen bg-[#fffcf6] text-[#34251e]">
       {/* ── Top Header (Temple Theme) ── */}
       <header className="sticky top-0 z-30 border-b border-[#eadfd1] bg-[#fffcf6]/95 backdrop-blur-md transition-all shadow-2xs">
-        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex h-[72px] w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <button
             onClick={() => navigate('/')}
@@ -306,9 +306,6 @@ const ProfilePage = ({
 
           {/* Right Header Navigation */}
           <div className="flex items-center gap-3">
-            {/* Language Dropdown (Globe Icon Only) */}
-            <LanguageDropdown />
-
             {/* User Profile Menu Trigger: Clicking Hi, {displayName} opens the profile menu */}
             {user ? (
               <button
@@ -344,6 +341,12 @@ const ProfilePage = ({
                 <span className="hidden sm:inline">Hi, {displayName}</span>
               </div>
             )}
+
+            {/* Subtle Divider before Language Dropdown */}
+            <span className="hidden sm:inline-block h-6 w-px bg-[#eadfd1]" />
+
+            {/* Language Dropdown in Corner of Navbar */}
+            <LanguageDropdown />
           </div>
         </div>
 

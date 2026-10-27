@@ -199,7 +199,7 @@ const SevasPage = ({
     <>
       {/* ── Top Header Navigation Bar ── */}
       <header className="sticky top-0 z-30 border-b border-[#eadfd1] bg-[#fffcf6]/95 backdrop-blur-md transition-all shadow-2xs">
-        <div className="mx-auto flex h-[74px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex h-[74px] w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo & Navigation */}
           <div className="flex items-center gap-4 sm:gap-6">
             <button
@@ -238,9 +238,6 @@ const SevasPage = ({
             >
               <span>{t('switchTemple')}</span>
             </button>
-
-            {/* Language Dropdown (Globe Icon Only) */}
-            <LanguageDropdown />
 
             {user ? (
               <>
@@ -295,6 +292,12 @@ const SevasPage = ({
                 </button>
               </div>
             )}
+
+            {/* Subtle Divider before Language Dropdown */}
+            <span className="hidden sm:inline-block h-6 w-px bg-[#eadfd1]" />
+
+            {/* Language Dropdown in Corner of Navbar */}
+            <LanguageDropdown />
           </div>
         </div>
       </header>
