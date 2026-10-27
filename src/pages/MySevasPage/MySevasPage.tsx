@@ -10,7 +10,7 @@ import { IonIcon } from '../../components/IonIcon'
 interface MySevasPageProps {
   user: User | null
   orders: Order[]
-  selectedTemple?: Temple
+  selectedTemple?: Temple | null
   switchTemple?: () => void
   devotees?: Devotee[]
   onAddDevotee?: (devotee: Omit<Devotee, 'id'>) => void

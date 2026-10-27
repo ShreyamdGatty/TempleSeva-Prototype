@@ -5,7 +5,7 @@ import { useLanguage } from '../../contexts/LanguageContext'
 
 interface WishlistModalProps {
   wishlistIds: string[]
-  selectedTemple?: import('../../types').Temple
+  selectedTemple?: import('../../types').Temple | null
   onClose: () => void
   onRemove: (sevaId: string) => void
   onAddToCart: (seva: Seva) => void

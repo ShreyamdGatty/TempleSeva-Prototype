@@ -24,7 +24,7 @@ interface ProfilePageProps {
   wishlist?: string[]
   onToggleWishlist?: (sevaId: string) => void
   onAddToCart?: (seva: Seva) => void
-  selectedTemple?: import('../../types').Temple
+  selectedTemple?: import('../../types').Temple | null
   orders?: import('../../types').Order[]
   devotees?: Devotee[]
   onAddDevotee?: (data: Omit<Devotee, 'id'>) => Devotee

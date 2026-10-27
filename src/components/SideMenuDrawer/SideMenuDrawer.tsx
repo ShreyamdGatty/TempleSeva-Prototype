@@ -11,7 +11,7 @@ export interface SideMenuDrawerProps {
   user: User | null
   wishlistCount?: number
   ordersCount?: number
-  selectedTemple?: Temple
+  selectedTemple?: Temple | null
   onWishlist?: () => void
   onDevoteeDetails?: () => void
   onProfile: () => void

@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react'
-import type { Order } from '../../types'
+import type { Order, Temple } from '../../types'
 import { formatPrice } from '../../utils/helpers'
 import { useLanguage } from '../../contexts/LanguageContext'
 
 interface PaymentQrModalProps {
   orders: Order[]
-  selectedTemple?: import('../../types').Temple
+  selectedTemple?: Temple | null
   onClose: () => void
   onNavigateToSevas?: () => void
   onToast?: (msg: string, variant: 'success' | 'error' | 'info' | 'warning') => void
