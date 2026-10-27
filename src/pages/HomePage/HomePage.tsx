@@ -8,6 +8,7 @@ import { IonIcon } from '../../components/IonIcon'
 import { HowTempleSevaWorks } from '../../components/HowTempleSevaWorks/HowTempleSevaWorks'
 import { WhyChooseTempleSeva } from '../../components/WhyChooseTempleSeva/WhyChooseTempleSeva'
 import { GoldenTempleVisual } from '../../components/GoldenTempleVisual/GoldenTempleVisual'
+import FaqSection from '../../components/FaqSection/FaqSection'
 
 interface HomePageProps {
   navigateToSevas: (temple?: Temple) => void
@@ -21,7 +22,6 @@ const HomePage = ({ navigateToSevas, user, selectedTemple }: HomePageProps) => {
   const isLoggedIn = !!user
   const { addToast } = useToast()
   const { language, t, translateTemple, translateCategory } = useLanguage()
-  const [openFaq, setOpenFaq] = useState<number | null>(0)
 
   // Active selected temple for highlighting cards with "Active" badge
   // STRICT RULE: If user is not registered or logged in, NO temple should ever show the Active Badge.
@@ -48,13 +48,7 @@ const HomePage = ({ navigateToSevas, user, selectedTemple }: HomePageProps) => {
     }
   }
 
-  const faqs = [
-    { icon: '🔸', q: t('faq1Q'), a: t('faq1A') },
-    { icon: '🔸', q: t('faq2Q'), a: t('faq2A') },
-    { icon: '🪔', q: t('faq3Q'), a: t('faq3A') },
-    { icon: '🪷', q: t('faq4Q'), a: t('faq4A') },
-    { icon: '🛕', q: t('faq5Q'), a: t('faq5A') },
-  ]
+
 
 
 
@@ -275,44 +269,8 @@ const HomePage = ({ navigateToSevas, user, selectedTemple }: HomePageProps) => {
           {/* Why Choose Temple Seva Section */}
           <WhyChooseTempleSeva />
 
-          {/* Frequently Asked Questions Section */}
-          <section id="faq" className="border-t border-[#eadfd1] bg-[#faf4ec] px-5 pt-8 sm:pt-10 pb-16 sm:pb-20 lg:px-8">
-            <div className="mx-auto max-w-3xl">
-              <div className="text-center">
-                <h2 className="font-serif text-3xl sm:text-4xl font-bold">{t('faqTitle')}</h2>
-              </div>
-
-              <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
-                {faqs.map((faq, index) => {
-                  const isOpen = openFaq === index
-                  return (
-                    <div
-                      key={faq.q}
-                      className="rounded-2xl border border-[#eadfd1] bg-white overflow-hidden shadow-2xs transition"
-                    >
-                      <button
-                        onClick={() => setOpenFaq(isOpen ? null : index)}
-                        className="flex w-full items-center justify-between p-5 text-left font-serif text-base sm:text-lg font-bold text-[#34251e] cursor-pointer"
-                      >
-                        <span className="flex items-center gap-3">
-                          <span className="text-base shrink-0 select-none">{faq.icon}</span>
-                          <span>{faq.q}</span>
-                        </span>
-                        <span className="text-xl text-[#c1440e] transition-transform duration-300 shrink-0 ml-4">
-                          {isOpen ? '−' : '+'}
-                        </span>
-                      </button>
-                      {isOpen && (
-                        <div className="border-t border-[#f5ede2] px-5 pb-5 pt-3 text-xs sm:text-sm leading-relaxed text-[#75685d] animate-fade-in">
-                          {faq.a}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </section>
+          {/* Frequently Asked Questions Section (Matching Reference Design & Theme) */}
+          <FaqSection />
         </>
       )}
 

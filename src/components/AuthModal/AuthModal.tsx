@@ -316,54 +316,46 @@ const AuthModal = ({
           ×
         </button>
 
-        {/* ── Mobile-Only Header Banner (with Low-Poly Texture & Diagonal Edge) ── */}
-        <div className="block md:hidden relative h-36 overflow-hidden text-white">
+        {/* ── Mobile-Only Header Banner (with Low-Poly Texture) ── */}
+        <div className="block md:hidden relative h-32 sm:h-36 overflow-hidden text-white">
           <div className="absolute inset-0 z-0">
             <SacredLowPolyMesh />
           </div>
-          <div
-            className="absolute inset-0 z-10 flex flex-col justify-end p-5 pb-4 bg-gradient-to-t from-black/50 via-transparent to-transparent"
-            style={{
-              clipPath: 'polygon(0 0, 100% 0, 100% 90%, 0 100%)',
-            }}
-          >
-            <h1 className="font-serif text-3xl font-extrabold tracking-tight text-white leading-tight drop-shadow-md">
+          <div className="absolute inset-0 z-10 flex flex-col justify-center px-6 text-white bg-black/25">
+            <h1 className="font-serif text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight drop-shadow-lg">
               {mode === 'login'
-                ? isKn ? 'ಮರಳಿ ಸ್ವಾಗತ' : 'Welcome Back'
-                : isKn ? 'ಸ್ವಾಗತ' : 'Welcome'}
+                ? isKn ? 'ಮರಳಿ ಸ್ವಾಗತ.' : 'Welcome Back.'
+                : isKn ? 'ಸ್ವಾಗತ.' : 'Welcome.'}
             </h1>
           </div>
         </div>
 
-        {/* ── Desktop Diagonal Split Section (Matching reference with polygon cut) ── */}
+        {/* ── Desktop Low-Poly Diagonal Background (Clipped safely in background) ── */}
         <div
-          className="hidden md:block absolute inset-0 z-10 pointer-events-none"
+          className="hidden md:block absolute inset-0 z-0 pointer-events-none select-none"
           style={{
-            clipPath: 'polygon(40% 0%, 100% 0%, 100% 100%, 86% 100%)',
+            clipPath: 'polygon(32% 0%, 100% 0%, 100% 100%, 68% 100%)',
           }}
         >
-          {/* Low-Poly Faceted Mesh Background */}
-          <div className="absolute inset-0 z-0">
-            <SacredLowPolyMesh />
-          </div>
+          <SacredLowPolyMesh />
+        </div>
 
-          {/* Right Hero Content inside the polygon: Welcome Back for login / Welcome for register */}
-          <div className="absolute top-0 right-0 w-[55%] h-full p-8 sm:p-12 lg:p-16 flex flex-col justify-center text-white pointer-events-auto">
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight drop-shadow-2xl select-none">
-              {mode === 'login' ? (
-                <>
-                  <span className="block">{isKn ? 'ಮರಳಿ' : 'Welcome'}</span>
-                  <span className="block">{isKn ? 'ಸ್ವಾಗತ' : 'Back'}</span>
-                </>
-              ) : (
-                <span className="block text-white drop-shadow-2xl">{isKn ? 'ಸ್ವಾಗತ' : 'Welcome'}</span>
-              )}
-            </h1>
-          </div>
+        {/* ── Desktop Right Hero Text (Completely independent of clipPath - NO CLIPPING) ── */}
+        <div className="hidden md:flex absolute top-0 right-0 w-[46%] h-full z-20 flex-col justify-center items-center text-center p-6 lg:p-8 pointer-events-none select-none">
+          <h1 className="font-serif text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)]">
+            {mode === 'login' ? (
+              <>
+                <span className="block">{isKn ? 'ಮರಳಿ' : 'Welcome'}</span>
+                <span className="block">{isKn ? 'ಸ್ವಾಗತ.' : 'Back.'}</span>
+              </>
+            ) : (
+              <span className="block">{isKn ? 'ಸ್ವಾಗತ.' : 'Welcome.'}</span>
+            )}
+          </h1>
         </div>
 
         {/* ── Left Form Container (Matching Form in Reference Image) ── */}
-        <div className="relative z-20 w-full md:w-[48%] p-6 sm:p-9 lg:p-11 flex flex-col justify-between bg-transparent min-h-[460px]">
+        <div className="relative z-20 w-full md:w-[48%] p-6 sm:p-9 lg:p-11 flex flex-col justify-center bg-transparent min-h-[460px]">
           <div>
             {/* Header: "Login" + "Don't have an account? Create your account" */}
             <div className="text-left">
@@ -565,47 +557,6 @@ const AuthModal = ({
                 {mode === 'login'
                   ? isKn ? 'ಲಾಗಿನ್' : 'LOGIN'
                   : isKn ? 'ನೋಂದಣಿ' : 'REGISTER'}
-              </button>
-            </div>
-          </div>
-
-          {/* ── Social Login Row matching reference image ── */}
-          <div className="mt-8 pt-2 flex items-center gap-3">
-            <span className="text-xs text-[#8c7a6e] font-medium whitespace-nowrap">
-              {mode === 'login'
-                ? isKn ? 'ಅಥವಾ ಲಾಗಿನ್ ಮಾಡಿ' : 'Or login with'
-                : isKn ? 'ಅಥವಾ ನೋಂದಾಯಿಸಿ' : 'Or register with'}
-            </span>
-            <div className="flex items-center gap-2">
-              {/* Facebook Pill */}
-              <button
-                type="button"
-                onClick={submitLogin}
-                title="Login with Facebook"
-                className="h-8 px-3.5 rounded-full bg-[#701a23] hover:bg-[#8b1e2a] text-white font-serif text-sm font-bold flex items-center justify-center transition shadow-2xs hover:scale-105 cursor-pointer"
-              >
-                f
-              </button>
-
-              {/* Google Pill */}
-              <button
-                type="button"
-                onClick={submitLogin}
-                title="Login with Google"
-                className="h-8 px-3.5 rounded-full bg-[#c1440e] hover:bg-[#d45311] text-white text-xs font-bold flex items-center justify-center transition shadow-2xs hover:scale-105 cursor-pointer"
-              >
-                G
-              </button>
-
-              {/* Phone / OTP Pill */}
-              <button
-                type="button"
-                onClick={submitLogin}
-                title="Login with Phone OTP"
-                className="h-8 px-3.5 rounded-full bg-[#d97706] hover:bg-[#b45309] text-white text-xs font-bold flex items-center gap-1 justify-center transition shadow-2xs hover:scale-105 cursor-pointer"
-              >
-                <IonIcon name="phone-portrait-outline" />
-                <span className="text-[10px] uppercase font-semibold">OTP</span>
               </button>
             </div>
           </div>
