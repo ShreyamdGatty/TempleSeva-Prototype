@@ -119,14 +119,14 @@ const HomePage = ({ navigateToSevas, user, selectedTemple }: HomePageProps) => {
           </p>
 
           {/* Primary Action Buttons */}
-          <div className="mt-8 flex flex-wrap items-center gap-3.5">
-            <a href="#temples" className="btn-primary sheen-card shadow-lg px-7 py-3.5 text-sm font-bold">
+          <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+            <a href="#temples" className="btn-primary sheen-card shadow-lg px-7 py-3.5 text-sm font-bold text-center justify-center">
               <span className="animate-diya mr-2">🪔</span>
               {t('heroExploreTemples')}
             </a>
             <button
               onClick={() => navigateToSevas()}
-              className="rounded-full border-2 border-[#d9cabb] bg-white px-7 py-3 text-sm font-bold shadow-2xs transition hover:border-[#c1440e] hover:shadow-md cursor-pointer text-[#34251e]"
+              className="rounded-full border-2 border-[#d9cabb] bg-white px-7 py-3 text-sm font-bold shadow-2xs transition hover:border-[#c1440e] hover:shadow-md cursor-pointer text-[#34251e] text-center"
             >
               {t('heroBookSeva')}
             </button>
@@ -260,19 +260,15 @@ const HomePage = ({ navigateToSevas, user, selectedTemple }: HomePageProps) => {
         </div>
       </section>
 
-      {/* ── 8. Conditionally Displayed for Guests (Hidden When User is Logged In) ── */}
-      {!isLoggedIn && (
-        <>
-          {/* How It Works Section */}
-          <HowTempleSevaWorks />
+      {/* ── 8. How It Works, Why Choose Us & FAQ Sections (Available For All Devotees) ── */}
+      {/* How It Works Section */}
+      <HowTempleSevaWorks />
 
-          {/* Why Choose Temple Seva Section */}
-          <WhyChooseTempleSeva />
+      {/* Why Choose Temple Seva Section */}
+      <WhyChooseTempleSeva />
 
-          {/* Frequently Asked Questions Section (Matching Reference Design & Theme) */}
-          <FaqSection />
-        </>
-      )}
+      {/* Frequently Asked Questions Section */}
+      <FaqSection />
 
     </main>
   )

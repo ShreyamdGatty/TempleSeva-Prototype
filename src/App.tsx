@@ -217,20 +217,20 @@ const AppContent = () => {
             : `${translateTemple(pendingTemple).name} selected!`,
           'success'
         )
-        navigate('/sevas')
+        navigate('/')
       } else if (isNewUser) {
-        // Clear previous selected temple from local storage so the newly registered user chooses fresh
+        // Clear previous selected temple from local storage so the newly registered user chooses fresh when Sevas is clicked
         window.localStorage.removeItem(STORAGE_TEMPLE)
         setSelectedTemple(null)
-        setIsNewUserSelection(true)
-        setPickerOpen(true)
+        setIsNewUserSelection(false)
+        setPickerOpen(false)
         addToast(
           language === 'KN'
-            ? `ಸ್ವಾಗತ, ${account.name}! ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪವಿತ್ರ ದೇವಾಲಯವನ್ನು ಆರಿಸಿ.`
-            : `Welcome, ${account.name}! Please select your sacred sanctuary to begin.`,
+            ? `ಸ್ವಾಗತ, ${account.name}!`
+            : `Welcome, ${account.name}!`,
           'success'
         )
-        navigate('/sevas')
+        navigate('/')
       } else {
         setIsNewUserSelection(false)
         const savedTemple = readJson<Temple | null>(STORAGE_TEMPLE, null)
@@ -246,7 +246,7 @@ const AppContent = () => {
             : `Welcome back, ${account.name}!`,
           'success'
         )
-        navigate('/sevas')
+        navigate('/')
       }
     },
     [login, isNewUserJustRegistered, navigate, addToast, language, setAuthMode, translateTemple]
@@ -398,14 +398,8 @@ const AppContent = () => {
         return
       }
 
-      const saved = selectedTemple || readJson<Temple | null>(STORAGE_TEMPLE, null)
-      if (saved) {
-        setSelectedTemple(saved)
-        setPickerOpen(false)
-        navigate('/sevas')
-      } else {
-        setPickerOpen(true)
-      }
+      // When Sevas is clicked without a specific temple, first ask for the temple
+      setPickerOpen(true)
     },
     [user, selectedTemple, clearCart, navigate, setAuthMode, addToast, language]
   )
@@ -437,6 +431,7 @@ const AppContent = () => {
               onDevoteeDetails={handleNavigateToDevotees}
               onOpenQrPass={() => setQrPassOpen(true)}
               onSwitchTemple={switchTemple}
+              onSevas={() => setPickerOpen(true)}
               onLogout={handleLogout}
             >
               <HomePage
@@ -551,6 +546,7 @@ const AppContent = () => {
               showToast={addToast}
               onDevoteeDetails={handleNavigateToDevotees}
               onSwitchTemple={() => setPickerOpen(true)}
+              onSevas={() => setPickerOpen(true)}
               selectedTemple={selectedTemple || undefined}
               orders={templeOrders}
               wishlist={templeWishlist}
@@ -730,6 +726,7 @@ const AppContent = () => {
         onOrders={handleNavigateToMySevas}
         onOpenQrPass={() => setQrPassOpen(true)}
         onSwitchTemple={() => setPickerOpen(true)}
+        onSevas={() => setPickerOpen(true)}
         onLogin={() => setAuthMode('login')}
         onRegister={() => setAuthMode('register')}
       />

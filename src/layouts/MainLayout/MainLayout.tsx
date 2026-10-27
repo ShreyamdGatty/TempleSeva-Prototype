@@ -20,6 +20,7 @@ interface MainLayoutProps {
   onDevoteeDetails?: () => void
   onOpenQrPass?: () => void
   onSwitchTemple?: () => void
+  onSevas?: () => void
   onLogout: () => void
   children: React.ReactNode
 }
@@ -37,6 +38,7 @@ const MainLayout = ({
   onDevoteeDetails,
   onOpenQrPass,
   onSwitchTemple,
+  onSevas,
   onLogout,
   children,
 }: MainLayoutProps) => {
@@ -92,7 +94,15 @@ const MainLayout = ({
               <>
                 <button
                   type="button"
-                  onClick={() => navigate('/sevas')}
+                  onClick={() => {
+                    if (onSevas) {
+                      onSevas()
+                    } else if (onSwitchTemple) {
+                      onSwitchTemple()
+                    } else {
+                      navigate('/sevas')
+                    }
+                  }}
                   className="whitespace-nowrap transition hover:text-[#c1440e] cursor-pointer"
                 >
                   {language === 'KN' ? 'ಸೇವೆಗಳು' : 'Sevas'}
@@ -104,6 +114,18 @@ const MainLayout = ({
                 >
                   {t('navMySevas')}
                 </button>
+                <a
+                  href="/#how"
+                  onClick={(e) => {
+                    if (window.location.pathname === '/' || window.location.pathname === '') {
+                      e.preventDefault()
+                      document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })
+                    }
+                  }}
+                  className="whitespace-nowrap transition hover:text-[#c1440e]"
+                >
+                  {t('navHowItWorks')}
+                </a>
               </>
             ) : (
               <>
@@ -171,6 +193,18 @@ const MainLayout = ({
 
             {/* Language Dropdown in the Right Corner of the Navbar */}
             <LanguageDropdown />
+
+            {/* Mobile Hamburger Menu Button (Visible on screens < lg) */}
+            <button
+              type="button"
+              onClick={() => setSideMenuOpen(true)}
+              className="flex lg:hidden items-center justify-center h-9 w-9 rounded-full border border-[#e0d3c5] bg-white text-[#5c4d41] hover:border-[#c1440e] hover:text-[#c1440e] transition shadow-2xs cursor-pointer ml-0.5"
+              aria-label="Open mobile navigation menu"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </div>
       </header>
@@ -199,6 +233,7 @@ const MainLayout = ({
         onOrders={onOrders}
         onOpenQrPass={onOpenQrPass}
         onSwitchTemple={onSwitchTemple}
+        onSevas={onSevas}
         onLogin={onLogin}
         onRegister={onRegister}
       />

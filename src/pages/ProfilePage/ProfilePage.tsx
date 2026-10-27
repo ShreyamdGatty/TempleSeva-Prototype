@@ -21,6 +21,7 @@ interface ProfilePageProps {
   showToast: (msg: string, variant: 'success' | 'error' | 'info' | 'warning') => void
   onDevoteeDetails?: () => void
   onSwitchTemple?: () => void
+  onSevas?: () => void
   wishlist?: string[]
   onToggleWishlist?: (sevaId: string) => void
   onAddToCart?: (seva: Seva) => void
@@ -38,11 +39,12 @@ const ProfilePage = ({
   onUpdateUser,
   onWishlist: _onWishlist,
   onOrders,
-  onOpenQrPass,
+  onOpenQrPass: _onOpenQrPass,
   onOpenSideMenu,
   onLogout,
   showToast,
   onSwitchTemple,
+  onSevas,
   wishlist: propWishlist,
   onToggleWishlist,
   onAddToCart,
@@ -92,8 +94,8 @@ const ProfilePage = ({
     }, 350)
   }
 
-  // Active tab in "My Account" sidebar: 'profile' | 'add-devotee' | 'devotee-list' | 'wishlist' | 'help'
-  const getInitialTab = (): 'profile' | 'add-devotee' | 'devotee-list' | 'wishlist' | 'help' => {
+  // Active tab in "My Account" sidebar: 'profile' | 'add-devotee' | 'devotee-list' | 'wishlist'
+  const getInitialTab = (): 'profile' | 'add-devotee' | 'devotee-list' | 'wishlist' => {
     const params = new URLSearchParams(location.search)
     const tabParam = params.get('tab')
     const state = location.state as { tab?: string } | null
@@ -101,22 +103,15 @@ const ProfilePage = ({
     if (chosen === 'devotee-list' || chosen === 'devotees') return 'devotee-list'
     if (chosen === 'add-devotee') return 'add-devotee'
     if (chosen === 'wishlist' || chosen === 'favorites') return 'wishlist'
-    if (chosen === 'help' || chosen === 'support') return 'help'
     return 'profile'
   }
 
-  const [activeTab, setActiveTab] = useState<'profile' | 'add-devotee' | 'devotee-list' | 'wishlist' | 'help'>(getInitialTab)
+  const [activeTab, setActiveTab] = useState<'profile' | 'add-devotee' | 'devotee-list' | 'wishlist'>(getInitialTab)
 
-  const selectTab = (tab: 'profile' | 'add-devotee' | 'devotee-list' | 'wishlist' | 'help') => {
+  const selectTab = (tab: 'profile' | 'add-devotee' | 'devotee-list' | 'wishlist') => {
     setActiveTab(tab)
     navigate(`/profile?tab=${tab}`, { replace: true, state: { tab } })
   }
-
-  // Help & Support form state
-  const [supportCategory, setSupportCategory] = useState('sankalpa')
-  const [supportMessage, setSupportMessage] = useState('')
-  const [supportSubmitted, setSupportSubmitted] = useState(false)
-  const [activeFaqIndex, setActiveFaqIndex] = useState<number | null>(0)
 
   // Sync tab if URL query or state changes
   useEffect(() => {
@@ -130,8 +125,6 @@ const ProfilePage = ({
       setActiveTab('add-devotee')
     } else if (chosen === 'wishlist' || chosen === 'favorites') {
       setActiveTab('wishlist')
-    } else if (chosen === 'help' || chosen === 'support') {
-      setActiveTab('help')
     } else if (chosen === 'profile') {
       setActiveTab('profile')
     }
@@ -240,7 +233,7 @@ const ProfilePage = ({
       gotram: '',
     })
     setDevoteeErrors({})
-    selectTab('devotee-list')
+    // User stays on the Add Devotee form without navigating to devotee-list
   }
 
   // Edit states for Account Details
@@ -285,24 +278,53 @@ const ProfilePage = ({
     <div className="min-h-screen bg-[#fffcf6] text-[#34251e]">
       {/* ── Top Header (Temple Theme) ── */}
       <header className="sticky top-0 z-30 border-b border-[#eadfd1] bg-[#fffcf6]/95 backdrop-blur-md transition-all shadow-2xs">
-        <div className="flex h-[72px] w-full items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="relative flex h-[74px] w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center text-left shrink-0 cursor-pointer"
-          >
-            <span className="font-serif text-2xl font-bold tracking-tight whitespace-nowrap">
-              {language === 'KN' ? (
-                <>
-                  ಟೆಂಪಲ್<span className="text-[#c1440e]">ಸೇವಾ</span>
-                </>
-              ) : (
-                <>
-                  Temple<span className="text-[#c1440e]">Seva</span>
-                </>
-              )}
-            </span>
-          </button>
+          <div className="flex items-center shrink-0">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center text-left shrink-0 cursor-pointer"
+            >
+              <span className="font-serif text-2xl font-bold tracking-tight whitespace-nowrap">
+                {language === 'KN' ? (
+                  <>
+                    ಟೆಂಪಲ್<span className="text-[#c1440e]">ಸೇವಾ</span>
+                  </>
+                ) : (
+                  <>
+                    Temple<span className="text-[#c1440e]">Seva</span>
+                  </>
+                )}
+              </span>
+            </button>
+          </div>
+
+          {/* Centered Navigation Links: Home, Sevas */}
+          <nav className="hidden sm:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 lg:gap-8 text-sm font-semibold text-[#5c4d41]">
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="whitespace-nowrap transition hover:text-[#c1440e] cursor-pointer"
+            >
+              {t('navHome')}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (onSevas) {
+                  onSevas()
+                } else if (onSwitchTemple) {
+                  onSwitchTemple()
+                } else {
+                  navigate('/sevas')
+                }
+              }}
+              className="whitespace-nowrap transition hover:text-[#c1440e] cursor-pointer"
+            >
+              {language === 'KN' ? 'ಸೇವೆಗಳು' : 'Sevas'}
+            </button>
+          </nav>
 
           {/* Right Header Navigation */}
           <div className="flex items-center gap-3">
@@ -347,23 +369,18 @@ const ProfilePage = ({
 
             {/* Language Dropdown in Corner of Navbar */}
             <LanguageDropdown />
-          </div>
-        </div>
 
-        {/* Category Subheader */}
-        <div className="hidden lg:flex border-t border-[#eadfd1] bg-[#fffcf6] px-8 py-2 text-xs font-medium text-[#75685d]">
-          <div className="mx-auto flex max-w-7xl w-full items-center justify-between">
-            <div className="flex gap-6">
-              <button onClick={() => navigate('/sevas')} className="hover:text-[#c1440e] cursor-pointer">
-                {t('navTemples')}
-              </button>
-              <button onClick={() => navigate('/sevas')} className="hover:text-[#c1440e] cursor-pointer">
-                {t('heroBookSeva')}
-              </button>
-              <button onClick={() => onOrders()} className="hover:text-[#c1440e] cursor-pointer">
-                {t('navMySevas')}
-              </button>
-            </div>
+            {/* Mobile Hamburger Menu Button (Visible on screens < lg) */}
+            <button
+              type="button"
+              onClick={onOpenSideMenu}
+              className="flex lg:hidden items-center justify-center h-9 w-9 rounded-full border border-[#e0d3c5] bg-white text-[#5c4d41] hover:border-[#c1440e] hover:text-[#c1440e] transition shadow-2xs cursor-pointer ml-0.5"
+              aria-label="Open mobile navigation menu"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </div>
       </header>
@@ -391,12 +408,12 @@ const ProfilePage = ({
 
 
             {/* Menu Items */}
-            <nav className="space-y-1 text-sm font-medium">
+            <nav className="flex flex-row overflow-x-auto no-scrollbar gap-2 pb-1 md:flex-col md:space-y-1 text-sm font-medium">
               {/* Profile */}
               <button
                 type="button"
                 onClick={() => selectTab('profile')}
-                className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 transition cursor-pointer ${
+                className={`shrink-0 md:w-full flex items-center justify-between gap-2.5 rounded-xl px-3.5 py-2.5 md:py-3 transition cursor-pointer whitespace-nowrap ${
                   activeTab === 'profile'
                     ? 'bg-[#fdf2e9] text-[#c1440e] font-bold'
                     : 'text-[#75685d] hover:bg-[#faf4ec]'
@@ -419,24 +436,24 @@ const ProfilePage = ({
               <button
                 type="button"
                 onClick={() => selectTab('add-devotee')}
-                className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 transition cursor-pointer ${
+                className={`shrink-0 md:w-full flex items-center justify-between gap-2.5 rounded-xl px-3.5 py-2.5 md:py-3 transition cursor-pointer whitespace-nowrap ${
                   activeTab === 'add-devotee'
-                    ? 'bg-[#fdf2e9] text-[#c1440e] font-bold'
+                    ? 'bg-[#fdf2e9] text-[#c1440e] font-bold border border-[#f5cb9e] md:border-transparent'
                     : 'text-[#75685d] hover:bg-[#faf4ec]'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#fff0f3] text-[#f84464]">
-                    <IonIcon name="person-add-outline" className="text-sm text-[#f84464]" />
+                <div className="flex items-center gap-2.5 md:gap-3">
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#fff0f3] text-[#c1440e]">
+                    <IonIcon name="person-add-outline" className="text-sm text-[#c1440e]" />
                   </span>
                   <span className="font-medium text-[#34251e]">
                     {language === 'KN' ? 'ಭಕ್ತರ ವಿವರ ಸೇರಿಸಿ' : 'Add Devotee'}
                   </span>
                 </div>
                 {activeTab === 'add-devotee' ? (
-                  <span className="text-xs">▸</span>
+                  <span className="hidden md:inline-block text-xs">▸</span>
                 ) : (
-                  <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
+                  <IonIcon name="chevron-forward-outline" className="hidden md:inline-block text-xs text-[#b5a496]" />
                 )}
               </button>
 
@@ -444,13 +461,13 @@ const ProfilePage = ({
               <button
                 type="button"
                 onClick={() => selectTab('devotee-list')}
-                className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 transition cursor-pointer ${
+                className={`shrink-0 md:w-full flex items-center justify-between gap-2.5 rounded-xl px-3.5 py-2.5 md:py-3 transition cursor-pointer whitespace-nowrap ${
                   activeTab === 'devotee-list'
-                    ? 'bg-[#fdf2e9] text-[#c1440e] font-bold'
+                    ? 'bg-[#fdf2e9] text-[#c1440e] font-bold border border-[#f5cb9e] md:border-transparent'
                     : 'text-[#75685d] hover:bg-[#faf4ec]'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5 md:gap-3">
                   <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#f5ede2] text-[#8b7a6d]">
                     <IonIcon name="people-outline" className="text-sm text-[#5c4d41]" />
                   </span>
@@ -466,9 +483,9 @@ const ProfilePage = ({
                   </div>
                 </div>
                 {activeTab === 'devotee-list' ? (
-                  <span className="text-xs">▸</span>
+                  <span className="hidden md:inline-block text-xs">▸</span>
                 ) : (
-                  <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
+                  <IonIcon name="chevron-forward-outline" className="hidden md:inline-block text-xs text-[#b5a496]" />
                 )}
               </button>
 
@@ -476,9 +493,9 @@ const ProfilePage = ({
               <button
                 type="button"
                 onClick={() => onOrders()}
-                className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[#75685d] hover:bg-[#faf4ec] transition cursor-pointer"
+                className="shrink-0 md:w-full flex items-center justify-between gap-2.5 rounded-xl px-3.5 py-2.5 md:py-3 text-[#75685d] hover:bg-[#faf4ec] transition cursor-pointer whitespace-nowrap"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5 md:gap-3">
                   <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#f5ede2] text-[#8b7a6d]">
                     <IonIcon name="receipt-outline" className="text-sm text-[#5c4d41]" />
                   </span>
@@ -491,20 +508,20 @@ const ProfilePage = ({
                     )}
                   </div>
                 </div>
-                <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
+                <IonIcon name="chevron-forward-outline" className="hidden md:inline-block text-xs text-[#b5a496]" />
               </button>
 
               {/* Your Wishlist */}
               <button
                 type="button"
                 onClick={() => selectTab('wishlist')}
-                className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 transition cursor-pointer ${
+                className={`shrink-0 md:w-full flex items-center justify-between gap-2.5 rounded-xl px-3.5 py-2.5 md:py-3 transition cursor-pointer whitespace-nowrap ${
                   activeTab === 'wishlist'
-                    ? 'bg-[#fdf2e9] text-[#c1440e] font-bold'
+                    ? 'bg-[#fdf2e9] text-[#c1440e] font-bold border border-[#f5cb9e] md:border-transparent'
                     : 'text-[#75685d] hover:bg-[#faf4ec]'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5 md:gap-3">
                   <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#fef2f2] text-[#dc2626]">
                     <IonIcon name="heart-outline" className="text-sm text-[#dc2626]" />
                   </span>
@@ -520,62 +537,13 @@ const ProfilePage = ({
                   </div>
                 </div>
                 {activeTab === 'wishlist' ? (
-                  <span className="text-xs">▸</span>
+                  <span className="hidden md:inline-block text-xs">▸</span>
                 ) : (
-                  <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
+                  <IonIcon name="chevron-forward-outline" className="hidden md:inline-block text-xs text-[#b5a496]" />
                 )}
               </button>
 
-              {/* Payment QR Pass */}
-              {onOpenQrPass && (
-                <button
-                  type="button"
-                  onClick={onOpenQrPass}
-                  className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[#75685d] hover:bg-[#faf4ec] transition cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#f0fdf4] text-[#15803d]">
-                      <IonIcon name="qr-code-outline" className="text-sm text-[#15803d]" />
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span>{language === 'KN' ? 'ಪಾವತಿ ಕ್ಯೂಆರ್ ಪಾಸ್ (QR Pass)' : 'Payment QR Pass'}</span>
-                      {propOrders.filter((o) => o.status === 'Confirmed' || o.status === 'In Progress').length > 0 && (
-                        <span className="rounded-full bg-[#e9f5ed] px-2 py-0.5 text-[10px] font-bold text-[#28724d]">
-                          {propOrders.filter((o) => o.status === 'Confirmed' || o.status === 'In Progress').length} Active
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
-                </button>
-              )}
 
-              {/* Help & Support */}
-              <button
-                type="button"
-                onClick={() => selectTab('help')}
-                className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 transition cursor-pointer ${
-                  activeTab === 'help'
-                    ? 'bg-[#fdf2e9] text-[#c1440e] font-bold'
-                    : 'text-[#75685d] hover:bg-[#faf4ec]'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#f5ede2] text-[#8b7a6d]">
-                    <IonIcon name="help-circle-outline" className="text-sm text-[#5c4d41]" />
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-[#34251e]">
-                      {language === 'KN' ? 'ಸಹಾಯ ಮತ್ತು ಬೆಂಬಲ' : 'Help & Support'}
-                    </span>
-                  </div>
-                </div>
-                {activeTab === 'help' ? (
-                  <span className="text-xs">▸</span>
-                ) : (
-                  <IonIcon name="chevron-forward-outline" className="text-xs text-[#b5a496]" />
-                )}
-              </button>
 
               {/* Switch Temple */}
               {onSwitchTemple && (
@@ -593,7 +561,7 @@ const ProfilePage = ({
                         {language === 'KN' ? 'ದೇವಾಲಯ ಬದಲಾಯಿಸಿ' : 'Switch Temple'}
                       </span>
                       <span className="block text-[11px] text-[#8b7a6d]">
-                        {language === 'KN' ? 'ಕ್ಷೇತ್ರ ಬದಲಾವಣೆ' : 'Change active sanctuary'}
+                        {language === 'KN' ? 'ಕ್ಷೇತ್ರ ಬದಲಾವಣೆ' : 'Change active temple'}
                       </span>
                     </div>
                   </div>
@@ -1417,278 +1385,6 @@ const ProfilePage = ({
               </div>
             )}
 
-            {/* ── 4. HELP & SUPPORT TAB ── */}
-            {activeTab === 'help' && (
-              <div>
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#eadfd1] gap-4">
-                  <div className="flex items-center gap-4">
-                    <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-tr from-[#c1440e] to-[#df5619] text-2xl text-white shadow-sm">
-                      💬
-                    </span>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#34251e]">
-                          {language === 'KN' ? 'ಸಹಾಯ ಮತ್ತು ಬೆಂಬಲ' : 'Help & Support'}
-                        </h2>
-                        <span className="rounded-full bg-[#e9f5ed] px-2.5 py-0.5 text-xs font-bold text-[#28724d]">
-                          24/7 Helpline
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs sm:text-sm text-[#8b7a6d]">
-                        {language === 'KN'
-                          ? 'ಪೂಜಾ ಬುಕಿಂಗ್, ಸಂಕಲ್ಪ ವಿವರಗಳು ಮತ್ತು ಪ್ರಸಾದ ವಿತರಣೆಗೆ ಸಂಬಂಧಿಸಿದ ಯಾವುದೇ ಸಹಾಯಕ್ಕಾಗಿ ಸಂಪರ್ಕಿಸಿ'
-                          : 'Dedicated devotee assistance for seva bookings, sankalpa recitations & prasada delivery'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3 Quick Help Cards */}
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Phone Helpline */}
-                  <div className="rounded-2xl border border-[#eadfd1] bg-[#fffcf6] p-5 shadow-2xs hover:shadow-xs transition">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#fdf2e9] text-xl text-[#c1440e]">
-                        📞
-                      </span>
-                      <div>
-                        <h4 className="font-bold text-sm text-[#34251e]">
-                          {language === 'KN' ? 'ಅರ್ಚಕರ ಸಹಾಯವಾಣಿ' : 'Priest Helpline'}
-                        </h4>
-                        <p className="text-[11px] text-[#8b7a6d]">6:00 AM – 9:00 PM</p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-[#75685d] mb-3">
-                      {language === 'KN' ? 'ನೇರ ಪೂಜಾ ಮಾರ್ಗದರ್ಶನ ಮತ್ತು ಸಂಕಲ್ಪ ಸಲಹೆ' : 'Direct guidance on rituals and muhurtham timings'}
-                    </p>
-                    <a
-                      href="tel:18002087382"
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-[#eadfd1] py-2 text-xs font-bold text-[#c1440e] hover:bg-[#fdf2e9] transition"
-                    >
-                      <span>📞</span>
-                      <span>1800-208-SEVA</span>
-                    </a>
-                  </div>
-
-                  {/* WhatsApp Support */}
-                  <div className="rounded-2xl border border-[#eadfd1] bg-[#fffcf6] p-5 shadow-2xs hover:shadow-xs transition">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#e9f5ed] text-xl text-[#15803d]">
-                        💬
-                      </span>
-                      <div>
-                        <h4 className="font-bold text-sm text-[#34251e]">
-                          {language === 'KN' ? 'ವಾಟ್ಸಾಪ್ ಸೇವಾ ಡೆಸ್ಕ್' : 'WhatsApp Support'}
-                        </h4>
-                        <p className="text-[11px] text-[#15803d] font-semibold">Instant Response</p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-[#75685d] mb-3">
-                      {language === 'KN' ? 'ಪೂಜಾ ಫೋಟೋಗಳು ಮತ್ತು ಬುಕಿಂಗ್ ದೃಢೀಕರಣ' : 'Receive sankalpa videos & booking receipts'}
-                    </p>
-                    <a
-                      href="https://wa.me/919480012345"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] py-2 text-xs font-bold text-white hover:bg-[#166534] transition shadow-xs"
-                    >
-                      <span>💬</span>
-                      <span>+91 94800 12345</span>
-                    </a>
-                  </div>
-
-                  {/* Email Support */}
-                  <div className="rounded-2xl border border-[#eadfd1] bg-[#fffcf6] p-5 shadow-2xs hover:shadow-xs transition">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#fdf2e9] text-xl text-[#c1440e]">
-                        ✉️
-                      </span>
-                      <div>
-                        <h4 className="font-bold text-sm text-[#34251e]">
-                          {language === 'KN' ? 'ಇಮೇಲ್ ಸಹಾಯವಾಣಿ' : 'Email Support'}
-                        </h4>
-                        <p className="text-[11px] text-[#8b7a6d]">Replies in 2 hrs</p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-[#75685d] mb-3">
-                      {language === 'KN' ? 'ವಿಶೇಷ ಸೇವಾ ವಿನಂತಿಗಳು ಮತ್ತು ಸಂದೇಹಗಳು' : 'Special seva arrangements & receipt inquiries'}
-                    </p>
-                    <a
-                      href="mailto:support@templeseva.org"
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-[#eadfd1] py-2 text-xs font-bold text-[#34251e] hover:bg-[#faf4ec] transition"
-                    >
-                      <span>✉️</span>
-                      <span>support@templeseva.org</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* FAQ Accordion Section */}
-                <div className="mt-10">
-                  <h3 className="font-serif text-lg font-bold text-[#34251e] mb-4 flex items-center gap-2">
-                    <span>🕉️</span>
-                    <span>{language === 'KN' ? 'ಪದೇ ಪದೇ ಕೇಳಲಾಗುವ ಪ್ರಶ್ನೆಗಳು (FAQs)' : 'Frequently Asked Questions'}</span>
-                  </h3>
-
-                  <div className="space-y-3">
-                    {[
-                      {
-                        q: language === 'KN' ? 'ನನ್ನ ಹೆಸರಿನಲ್ಲಿ ಸಂಕಲ್ಪ ಮಾಡಲಾಗಿದೆಯೇ ಎಂದು ತಿಳಿಯುವುದು ಹೇಗೆ?' : 'How do I know my Sankalpa was recited by the priests?',
-                        a: language === 'KN' ? 'ಪೂಜೆಯ ಸಮಯದಲ್ಲಿ ಪ್ರಧಾನ ಅರ್ಚಕರು ನಿಮ್ಮ ಮತ್ತು ನಿಮ್ಮ ಕುಟುಂಬದ ಹೆಸರು, ನಕ್ಷತ್ರ ಹಾಗೂ ಗೋತ್ರವನ್ನು ಉಚ್ಚರಿಸಿ ದೈವಿಕ ಸಂಕಲ್ಪ ಮಾಡುತ್ತಾರೆ. ಪೂಜೆ ಪೂರ್ಣಗೊಂಡ ನಂತರ ನಿಮಗೆ ಎಸ್ಎಂಎಸ್ ಮತ್ತು ವಾಟ್ಸಾಪ್ ಮೂಲಕ ದೃಢೀಕರಣ ತಲುಪುತ್ತದೆ.' : 'During the auspicious puja muhurtham, the head priest recites your registered name, gotram, and nakshatra in the sacred Vedic sankalpa. A confirmation message and photo/video update are shared post-ritual.'
-                      },
-                      {
-                        q: language === 'KN' ? 'ದೇವಸ್ಥಾನದ ಪವಿತ್ರ ಪ್ರಸಾದ ಯಾವಾಗ ತಲುಪುತ್ತದೆ?' : 'When will the sacred temple prasada be delivered to my address?',
-                        a: language === 'KN' ? 'ಪೂಜೆಯ ನಂತರ ಪವಿತ್ರ ಕುಂಕುಮ, ವಿಭೂತಿ ಮತ್ತು ಪ್ರಸಾದವನ್ನು ಶುದ್ಧತೆಯಿಂದ ಪ್ಯಾಕ್ ಮಾಡಿ, 24 ರಿಂದ 48 ಗಂಟೆಗಳ ಒಳಗೆ ನಿಮ್ಮ ವಿಳಾಸಕ್ಕೆ ಸ್ಪೀಡ್ ಪೋಸ್ಟ್/ಕೊರಿಯರ್ ಮೂಲಕ ರವಾನಿಸಲಾಗುತ್ತದೆ.' : 'After the rituals are completed, the consecrated prasada, vibhuti, and sacred raksha are hygienically sealed and dispatched via expedited courier within 24–48 hours to your registered address.'
-                      },
-                      {
-                        q: language === 'KN' ? 'ಪಾವತಿ ಕ್ಯೂಆರ್ ಪಾಸ್ (Payment QR Pass) ಅನ್ನು ಹೇಗೆ ಬಳಸುವುದು?' : 'What is the Payment QR Pass and how do I use it at the temple?',
-                        a: language === 'KN' ? 'ಬುಕಿಂಗ್ ಯಶಸ್ವಿಯಾದ ತಕ್ಷಣ ಪಾವತಿ ಕ್ಯೂಆರ್ ಪಾಸ್ ಸಕ್ರಿಯಗೊಳ್ಳುತ್ತದೆ. ದೇವಸ್ಥಾನದ ಪ್ರವೇಶ ದ್ವಾರದಲ್ಲಿ ಅಥವಾ ಕೌಂಟರ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಮೊಬೈಲ್‌ನಲ್ಲಿರುವ ಕ್ಯೂಆರ್ ಕೋಡ್ ತೋರಿಸಿ ಸುಲಭವಾಗಿ ಪ್ರವೇಶ ಪಡೆಯಬಹುದು.' : 'The Payment QR Pass is instantly generated once your seva booking is confirmed. You can display it on your smartphone at the temple entrance counter for priority entry and sankalpa badge collection.'
-                      },
-                      {
-                        q: language === 'KN' ? 'ನನ್ನ ಭಕ್ತರ ಪಟ್ಟಿಗೆ ಕುಟುಂಬದ ಹೆಚ್ಚಿನ ಸದಸ್ಯರನ್ನು ಸೇರಿಸಬಹುದೇ?' : 'Can I add more family members to my devotee list?',
-                        a: language === 'KN' ? 'ಹೌದು, ನಿಮ್ಮ ಖಾತೆಯ "ಭಕ್ತರ ವಿವರ ಸೇರಿಸಿ" ಮೆನುವನ್ನು ಬಳಸಿ ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಕುಟುಂಬ ಸದಸ್ಯರ ಹೆಸರು, ಗೋತ್ರ, ರಾಶಿ ಮತ್ತು ನಕ್ಷತ್ರವನ್ನು ಸೇರಿಸಬಹುದು.' : 'Yes! Use the "Add Devotee" tab in your account menu anytime to save family members. Their details will automatically be available for all future puja sankalpas.'
-                      }
-                    ].map((faq, idx) => (
-                      <div
-                        key={idx}
-                        className="rounded-xl border border-[#eadfd1] bg-white overflow-hidden transition"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setActiveFaqIndex(activeFaqIndex === idx ? null : idx)}
-                          className="w-full flex items-center justify-between p-4 text-left font-semibold text-sm text-[#34251e] hover:bg-[#fffcf6] transition cursor-pointer"
-                        >
-                          <span className="flex items-center gap-2.5">
-                            <span className="text-[#c1440e] font-bold">Q{idx + 1}.</span>
-                            <span>{faq.q}</span>
-                          </span>
-                          <span className="text-base text-[#8b7a6d] shrink-0 ml-2">
-                            {activeFaqIndex === idx ? '−' : '+'}
-                          </span>
-                        </button>
-                        {activeFaqIndex === idx && (
-                          <div className="px-4 pb-4 pt-1 text-xs sm:text-sm text-[#75685d] leading-relaxed border-t border-[#f5ede2] bg-[#fffcf6]">
-                            {faq.a}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Direct Query Form */}
-                <div className="mt-10 rounded-2xl border border-[#eadfd1] bg-white p-6 shadow-xs">
-                  <h3 className="font-serif text-lg font-bold text-[#34251e] mb-2 flex items-center gap-2">
-                    <span className="text-[#c1440e]">✍️</span>
-                    <span>{language === 'KN' ? 'ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ನಮಗೆ ಕಳುಹಿಸಿ' : 'Submit a Support Request'}</span>
-                  </h3>
-                  <p className="text-xs text-[#8b7a6d] mb-5">
-                    {language === 'KN'
-                      ? 'ನಿಮ್ಮ ಯಾವುದೇ ವಿಶೇಷ ವಿನಂತಿ ಅಥವಾ ಸಂಶಯಗಳನ್ನು ನಮೂದಿಸಿ, ನಮ್ಮ ಸೇವಾ ತಂಡ ಶೀಘ್ರದಲ್ಲೇ ಉತ್ತರಿಸುತ್ತದೆ.'
-                      : 'Have an urgent inquiry regarding your sankalpa or ritual? Leave a message and our team will get in touch.'}
-                  </p>
-
-                  {supportSubmitted ? (
-                    <div className="rounded-xl bg-[#f0fdf4] border border-[#bbf7d0] p-5 text-center">
-                      <span className="text-3xl">✅</span>
-                      <h4 className="mt-2 font-bold text-sm text-[#16a34a]">
-                        {language === 'KN' ? 'ವಿನಂತಿಯನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಕಳುಹಿಸಲಾಗಿದೆ!' : 'Support Request Submitted Successfully!'}
-                      </h4>
-                      <p className="mt-1 text-xs text-[#15803d]">
-                        {language === 'KN'
-                          ? `ಧನ್ಯವಾದಗಳು! ನಮ್ಮ ದೇವಾಲಯ ಸೇವಾ ಸಂಯೋಜಕರು ನಿಮ್ಮ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಗೆ (${phone || user?.phone || 'registered number'}) ಶೀಘ್ರದಲ್ಲೇ ಸಂಪರ್ಕಿಸುತ್ತಾರೆ.`
-                          : `Thank you! Our temple seva coordinator will reach out to you at ${phone || user?.phone || 'your phone number'} within 2 hours.`}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSupportSubmitted(false)
-                          setSupportMessage('')
-                        }}
-                        className="mt-4 rounded-lg bg-[#16a34a] px-4 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-[#15803d] transition cursor-pointer"
-                      >
-                        {language === 'KN' ? 'ಮತ್ತೊಂದು ಸಂದೇಶ ಕಳುಹಿಸಿ' : 'Send Another Message'}
-                      </button>
-                    </div>
-                  ) : (
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault()
-                        if (!supportMessage.trim()) {
-                          showToast(language === 'KN' ? 'ದಯವಿಟ್ಟು ನಿಮ್ಮ ಸಂದೇಶವನ್ನು ನಮೂದಿಸಿ' : 'Please enter your message', 'error')
-                          return
-                        }
-                        setSupportSubmitted(true)
-                        showToast(
-                          language === 'KN' ? 'ನಿಮ್ಮ ವಿನಂತಿಯನ್ನು ದಾಖಲಿಸಲಾಗಿದೆ!' : 'Support request submitted successfully!',
-                          'success'
-                        )
-                      }}
-                      className="space-y-4"
-                    >
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
-                            {language === 'KN' ? 'ವಿಷಯ (Topic)' : 'Inquiry Topic'}
-                          </label>
-                          <select
-                            value={supportCategory}
-                            onChange={(e) => setSupportCategory(e.target.value)}
-                            className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-2.5 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] cursor-pointer"
-                          >
-                            <option value="sankalpa">Sankalpa & Priest Recitation</option>
-                            <option value="prasada">Prasada Delivery & Courier</option>
-                            <option value="qr-pass">Payment QR Pass & Temple Entry</option>
-                            <option value="reschedule">Rescheduling / Booking Change</option>
-                            <option value="other">Other Inquiry</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
-                            {language === 'KN' ? 'ಸಂಪರ್ಕ ಸಂಖ್ಯೆ' : 'Contact Phone'}
-                          </label>
-                          <input
-                            type="text"
-                            value={phone || user?.phone || '+91 98765 43210'}
-                            readOnly
-                            className="w-full rounded-xl border border-[#eadfd1] bg-[#faf4ec] px-4 py-2.5 text-sm text-[#5c4d41] outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-[#8b7a6d] mb-1.5">
-                          {language === 'KN' ? 'ನಿಮ್ಮ ಸಂದೇಶ / ವಿವರಣೆ' : 'Your Message / Inquiry'}{' '}
-                          <span className="text-[#c1440e]">*</span>
-                        </label>
-                        <textarea
-                          rows={3}
-                          value={supportMessage}
-                          onChange={(e) => setSupportMessage(e.target.value)}
-                          placeholder={
-                            language === 'KN'
-                              ? 'ನಿಮ್ಮ ಪೂಜಾ ಬುಕಿಂಗ್, ಸಂಕಲ್ಪ ಅಥವಾ ಪ್ರಸಾದಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ವಿವರಗಳನ್ನು ಬರೆಯಿರಿ...'
-                              : 'Please describe your query regarding seva booking, sankalpa names, or prasada delivery...'
-                          }
-                          className="w-full rounded-xl border border-[#eadfd1] bg-white px-4 py-3 text-sm text-[#34251e] outline-none transition focus:border-[#c1440e] focus:ring-2 focus:ring-[#c1440e]/20 resize-none"
-                        />
-                      </div>
-
-                      <div className="flex justify-end">
-                        <button
-                          type="submit"
-                          className="rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:shadow-lg transition cursor-pointer"
-                        >
-                          {language === 'KN' ? 'ಸಂದೇಶ ಕಳುಹಿಸಿ' : 'Submit Support Request'}
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </div>
-              </div>
-            )}
           </section>
         </div>
       </main>

@@ -85,7 +85,7 @@ const CalendarModal = ({ selectedDate: _selectedDate, onSelectDate, onClose }: C
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className="modal-container w-full max-w-md bg-[#fffdf9] p-6 shadow-2xl"
+        className="modal-container w-full max-w-md max-h-[92vh] overflow-y-auto bg-[#fffdf9] p-4 sm:p-6 shadow-2xl rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

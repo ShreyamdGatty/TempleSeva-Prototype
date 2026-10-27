@@ -72,20 +72,20 @@ export const GoldenTempleVisual = ({ className = '' }: GoldenTempleVisualProps) 
 
       {/* ── 1. Sacred Golden Aura & Radiance Layer ── */}
       <div className="absolute -inset-10 rounded-full bg-gradient-to-tr from-[#df5619]/35 via-[#f59e0b]/35 to-[#d4a64a]/25 blur-3xl -z-10 pointer-events-none animate-pulse" />
-      <div className="absolute h-[520px] w-[520px] rounded-full bg-amber-400/20 blur-2xl -z-10 pointer-events-none" />
+      <div className="absolute h-[260px] w-[260px] sm:h-[400px] sm:w-[400px] lg:h-[520px] lg:w-[520px] rounded-full bg-amber-400/20 blur-2xl -z-10 pointer-events-none" />
 
-      {/* ── 2. Rotating Sacred Mandala Rings (Animation Effect) ── */}
+      {/* ── 2. Rotating Sacred Mandala Rings (Responsive on mobile) ── */}
       <div
-        className="absolute h-[580px] w-[580px] max-w-full rounded-full border border-dashed border-[#d4a64a]/45 -z-10 pointer-events-none animate-spin-slow select-none"
+        className="absolute h-[300px] w-[300px] sm:h-[440px] sm:w-[440px] lg:h-[580px] lg:w-[580px] max-w-full rounded-full border border-dashed border-[#d4a64a]/45 -z-10 pointer-events-none animate-spin-slow select-none"
         style={{ animationDuration: '45s' }}
       />
       <div
-        className="absolute h-[460px] w-[460px] max-w-full rounded-full border border-[#c1440e]/30 -z-10 pointer-events-none animate-spin-slow select-none"
+        className="absolute h-[240px] w-[240px] sm:h-[360px] sm:w-[360px] lg:h-[460px] lg:w-[460px] max-w-full rounded-full border border-[#c1440e]/30 -z-10 pointer-events-none animate-spin-slow select-none"
         style={{ animationDuration: '30s', animationDirection: 'reverse' }}
       />
 
-      {/* ── 3. Main Temple Animated Container (Large & Majestic) ── */}
-      <div className="relative w-full max-w-[580px] lg:max-w-[680px] flex items-center justify-center">
+      {/* ── 3. Main Temple Animated Container (Responsive & Majestic) ── */}
+      <div className="relative w-full max-w-[340px] sm:max-w-[480px] lg:max-w-[680px] flex items-center justify-center">
         {/* Floating Animation Wrapper */}
         <div className="relative w-full group cursor-pointer transition-transform duration-700 hover:scale-105 flex items-center justify-center">
           {/* Saffron/Gold Radiant Drop Shadow Effect */}
@@ -93,13 +93,13 @@ export const GoldenTempleVisual = ({ className = '' }: GoldenTempleVisualProps) 
             <img
               src={cutoutUrl || '/golden-temple-hero.jpg'}
               alt="Sacred Golden Temple Sanctum"
-              className={`w-full h-auto max-h-[560px] sm:max-h-[600px] lg:max-h-[660px] object-contain select-none pointer-events-none filter transition-all duration-1000 ${
+              className={`w-full h-auto max-h-[320px] sm:max-h-[460px] lg:max-h-[660px] object-contain select-none pointer-events-none filter transition-all duration-1000 ${
                 isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
               }`}
               style={{
                 animation: 'divineFloat 6s ease-in-out infinite',
                 filter:
-                  'drop-shadow(0 0 25px rgba(245, 158, 11, 0.45)) drop-shadow(0 20px 40px rgba(112, 26, 35, 0.35))',
+                  'drop-shadow(0 0 20px rgba(245, 158, 11, 0.45)) drop-shadow(0 15px 30px rgba(112, 26, 35, 0.35))',
               }}
             />
           </div>

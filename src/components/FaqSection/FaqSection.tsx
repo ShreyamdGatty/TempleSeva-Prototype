@@ -165,7 +165,7 @@ const FaqSection = () => {
               {isKn ? 'ವರ್ಗಗಳು' : 'Category'}
             </h3>
 
-            <div className="space-y-1.5">
+            <div className="flex flex-row overflow-x-auto gap-2 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 lg:flex-col lg:space-y-1.5 lg:overflow-visible no-scrollbar">
               {CATEGORIES.map((cat) => {
                 const isActive = activeCategory === cat.id
                 // Count questions in this category
@@ -182,13 +182,13 @@ const FaqSection = () => {
                       setActiveCategory(cat.id)
                       setSearchQuery('')
                     }}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer text-left ${
+                    className={`shrink-0 lg:w-full flex items-center justify-between gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer text-left whitespace-nowrap ${
                       isActive
                         ? 'bg-[#fceddc] text-[#c1440e] border border-[#f5cb9e] shadow-xs'
-                        : 'bg-white/60 hover:bg-white text-[#5c4a3e] border border-transparent hover:border-[#eadfd1]'
+                        : 'bg-white/70 hover:bg-white text-[#5c4a3e] border border-transparent hover:border-[#eadfd1]'
                     }`}
                   >
-                    <span className="flex items-center gap-3">
+                    <span className="flex items-center gap-2.5 sm:gap-3">
                       <span className={`text-base ${isActive ? 'text-[#c1440e]' : 'text-[#8c7769]'}`}>
                         <IonIcon name={cat.icon} />
                       </span>

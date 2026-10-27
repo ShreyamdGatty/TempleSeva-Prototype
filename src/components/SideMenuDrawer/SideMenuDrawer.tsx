@@ -19,6 +19,7 @@ export interface SideMenuDrawerProps {
   onOrders?: () => void
   onOpenQrPass?: () => void
   onSwitchTemple?: () => void
+  onSevas?: () => void
   onLogin: () => void
   onRegister?: () => void
 }
@@ -33,9 +34,11 @@ const SideMenuDrawer = ({
   onProfile,
   onLogout,
   onOrders,
-  onOpenQrPass,
+  onOpenQrPass: _onOpenQrPass,
   onSwitchTemple,
+  onSevas,
   onLogin,
+  onRegister,
 }: SideMenuDrawerProps) => {
   const navigate = useNavigate()
   const { language, setLanguage, translateTemple } = useLanguage()
@@ -60,8 +63,8 @@ const SideMenuDrawer = ({
     }
   }, [isOpen, onClose])
 
-  // Drawer is only available for authenticated users
-  if (!isOpen || !user) return null
+  // Drawer opens when isOpen is true
+  if (!isOpen) return null
 
   const modalContent = (
     <div
@@ -89,44 +92,55 @@ const SideMenuDrawer = ({
       >
         {/* ── Scrollable Body ── */}
         <div className="flex-1 overflow-y-auto">
-          {/* ── 1. BookMyShow Style Header: "Hey!" + Avatar + Edit Profile Link ── */}
+          {/* ── 1. Header: User Info or Guest Welcome ── */}
           <div className="flex items-center justify-between px-6 pt-6 pb-5 bg-white border-b border-[#f0f0f0]">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight text-[#222222]">
-                {user ? `Hey, ${user.name.split(' ')[0]}!` : 'Hey!'}
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#222222]">
+                {user ? `Hey, ${user.name.split(' ')[0]}!` : (language === 'KN' ? 'ನಮಸ್ಕಾರ!' : 'Welcome!')}
               </h2>
-              <button
-                type="button"
-                onClick={() => {
-                  onClose()
-                  navigate('/profile?tab=profile', { state: { tab: 'profile' } })
-                  if (onProfile) onProfile()
-                }}
-                className="mt-1 flex items-center gap-1 text-xs font-semibold text-[#666666] hover:text-[#f84464] transition cursor-pointer"
-              >
-                <span>{language === 'KN' ? 'ಪ್ರೊಫೈಲ್ ಸಂಪಾದಿಸಿ' : 'Edit Profile'}</span>
-                <IonIcon name="chevron-forward-outline" className="text-xs font-bold leading-none" />
-              </button>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose()
+                    navigate('/profile?tab=profile', { state: { tab: 'profile' } })
+                    if (onProfile) onProfile()
+                  }}
+                  className="mt-1 flex items-center gap-1 text-xs font-semibold text-[#666666] hover:text-[#c1440e] transition cursor-pointer"
+                >
+                  <span>{language === 'KN' ? 'ಪ್ರೊಫೈಲ್ ಸಂಪಾದಿಸಿ' : 'Edit Profile'}</span>
+                  <IonIcon name="chevron-forward-outline" className="text-xs font-bold leading-none" />
+                </button>
+              ) : (
+                <p className="mt-1 text-xs text-[#786657]">
+                  {language === 'KN' ? 'ಪವಿತ್ರ ಸೇವೆಗಳನ್ನು ಪಡೆಯಿರಿ' : 'Explore sacred temple rituals'}
+                </p>
+              )}
             </div>
 
-            {/* User Avatar Circle */}
-            <div className="flex items-center gap-3">
+            {/* Avatar Circle & Close Button */}
+            <div className="flex items-center gap-2.5">
               <button
                 type="button"
                 onClick={() => {
-                  onClose()
-                  navigate('/profile?tab=profile', { state: { tab: 'profile' } })
-                  if (onProfile) onProfile()
+                  if (user) {
+                    onClose()
+                    navigate('/profile?tab=profile', { state: { tab: 'profile' } })
+                    if (onProfile) onProfile()
+                  } else {
+                    onClose()
+                    onLogin()
+                  }
                 }}
-                className="grid h-13 w-13 place-items-center rounded-full bg-[#e4e4e7] text-white shadow-xs cursor-pointer hover:opacity-90 transition"
+                className="grid h-11 w-11 place-items-center rounded-full bg-[#f5ede2] text-[#c1440e] shadow-xs cursor-pointer hover:bg-[#ebdcc9] transition"
                 aria-label="Profile"
               >
                 {user ? (
-                  <span className="font-serif text-lg font-bold text-[#444444]">
+                  <span className="font-serif text-base font-bold text-[#c1440e]">
                     {user.name.charAt(0).toUpperCase()}
                   </span>
                 ) : (
-                  <IonIcon name="person-outline" className="text-2xl text-[#8e8e93]" />
+                  <IonIcon name="person-outline" className="text-xl text-[#c1440e]" />
                 )}
               </button>
 
@@ -142,17 +156,162 @@ const SideMenuDrawer = ({
             </div>
           </div>
 
-          {/* ── 2. BookMyShow Menu List Rows ── */}
-          <div className="divide-y divide-[#f2f2f2] bg-white">
+          {/* Guest Action Callout if not logged in */}
+          {!user && (
+            <div className="p-4 bg-[#fff9f3] border-b border-[#f5e6d6]">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose()
+                    onLogin()
+                  }}
+                  className="flex-1 rounded-xl border border-[#c1440e] py-2 text-xs font-bold text-[#c1440e] hover:bg-white transition cursor-pointer text-center"
+                >
+                  {language === 'KN' ? 'ಲಾಗಿನ್' : 'Login'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose()
+                    if (onRegister) onRegister()
+                  }}
+                  className="flex-1 rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] py-2 text-xs font-bold text-white shadow-xs hover:shadow-sm transition cursor-pointer text-center"
+                >
+                  {language === 'KN' ? 'ನೋಂದಣಿ' : 'Register'}
+                </button>
+              </div>
+            </div>
+          )}
 
-            {/* Add Devotee (Directly below Profile) */}
-            <div
-              onClick={() => {
-                onClose()
-                navigate('/profile?tab=add-devotee', { state: { tab: 'add-devotee' } })
-              }}
-              className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
-            >
+          {/* ── 2. Menu List Rows ── */}
+          <div className="divide-y divide-[#f2f2f2] bg-white">
+            {/* Guest Navigation Links */}
+            {!user && (
+              <>
+                <a
+                  href="/#about"
+                  onClick={(e) => {
+                    onClose()
+                    if (window.location.pathname === '/' || window.location.pathname === '') {
+                      e.preventDefault()
+                      document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })
+                    }
+                  }}
+                  className="flex items-center justify-between px-6 py-3.5 hover:bg-[#fafafa] transition cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4eb] text-[#c1440e] shrink-0">
+                      <IonIcon name="book-outline" className="text-lg text-[#c1440e]" />
+                    </span>
+                    <span className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
+                      {language === 'KN' ? 'ನಮ್ಮ ಬಗ್ಗೆ (About)' : 'About Sanctum'}
+                    </span>
+                  </div>
+                  <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
+                </a>
+
+                <a
+                  href="/#temples"
+                  onClick={(e) => {
+                    onClose()
+                    if (window.location.pathname === '/' || window.location.pathname === '') {
+                      e.preventDefault()
+                      document.getElementById('temples')?.scrollIntoView({ behavior: 'smooth' })
+                    }
+                  }}
+                  className="flex items-center justify-between px-6 py-3.5 hover:bg-[#fafafa] transition cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4eb] text-[#c1440e] shrink-0">
+                      <IonIcon name="business-outline" className="text-lg text-[#c1440e]" />
+                    </span>
+                    <span className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
+                      {language === 'KN' ? 'ಪವಿತ್ರ ದೇವಾಲಯಗಳು (Temples)' : 'Holy Temples'}
+                    </span>
+                  </div>
+                  <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
+                </a>
+
+                <a
+                  href="/#how"
+                  onClick={(e) => {
+                    onClose()
+                    if (window.location.pathname === '/' || window.location.pathname === '') {
+                      e.preventDefault()
+                      document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })
+                    }
+                  }}
+                  className="flex items-center justify-between px-6 py-3.5 hover:bg-[#fafafa] transition cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4eb] text-[#c1440e] shrink-0">
+                      <IonIcon name="git-network-outline" className="text-lg text-[#c1440e]" />
+                    </span>
+                    <span className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
+                      {language === 'KN' ? 'ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ (How It Works)' : 'How It Works'}
+                    </span>
+                  </div>
+                  <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
+                </a>
+
+                <a
+                  href="/#why-us"
+                  onClick={(e) => {
+                    onClose()
+                    if (window.location.pathname === '/' || window.location.pathname === '') {
+                      e.preventDefault()
+                      document.getElementById('why-us')?.scrollIntoView({ behavior: 'smooth' })
+                    }
+                  }}
+                  className="flex items-center justify-between px-6 py-3.5 hover:bg-[#fafafa] transition cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4eb] text-[#c1440e] shrink-0">
+                      <IonIcon name="shield-checkmark-outline" className="text-lg text-[#c1440e]" />
+                    </span>
+                    <span className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
+                      {language === 'KN' ? 'ನಮ್ಮನ್ನು ಏಕೆ ಆರಿಸಬೇಕು (Why Us)' : 'Why Choose Us'}
+                    </span>
+                  </div>
+                  <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
+                </a>
+
+                <a
+                  href="/#faq"
+                  onClick={(e) => {
+                    onClose()
+                    if (window.location.pathname === '/' || window.location.pathname === '') {
+                      e.preventDefault()
+                      document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })
+                    }
+                  }}
+                  className="flex items-center justify-between px-6 py-3.5 hover:bg-[#fafafa] transition cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4eb] text-[#c1440e] shrink-0">
+                      <IonIcon name="help-circle-outline" className="text-lg text-[#c1440e]" />
+                    </span>
+                    <span className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
+                      {language === 'KN' ? 'ಪದೇ ಪದೇ ಕೇಳಲಾಗುವ ಪ್ರಶ್ನೆಗಳು (FAQ)' : 'FAQ'}
+                    </span>
+                  </div>
+                  <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
+                </a>
+              </>
+            )}
+
+            {/* Authenticated User Menu Rows */}
+            {user && (
+              <>
+                {/* Add Devotee (Directly below Profile) */}
+                <div
+                  onClick={() => {
+                    onClose()
+                    navigate('/profile?tab=add-devotee', { state: { tab: 'add-devotee' } })
+                  }}
+                  className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
+                >
               <div className="flex items-center gap-3.5">
                 <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff0f3] text-[#f84464] shrink-0">
                   <IonIcon name="person-add-outline" className="text-lg text-[#f84464]" />
@@ -167,6 +326,36 @@ const SideMenuDrawer = ({
                 </div>
               </div>
               <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
+            </div>
+
+            {/* Book Sevas (Asks Temple first) */}
+            <div
+              onClick={() => {
+                onClose()
+                if (onSevas) {
+                  onSevas()
+                } else if (onSwitchTemple) {
+                  onSwitchTemple()
+                } else {
+                  navigate('/sevas')
+                }
+              }}
+              className="flex items-center justify-between px-6 py-4 hover:bg-[#fff9f3] transition cursor-pointer group"
+            >
+              <div className="flex items-center gap-3.5">
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4ec] text-[#c1440e] shrink-0">
+                  <IonIcon name="flame-outline" className="text-lg text-[#c1440e]" />
+                </span>
+                <div>
+                  <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
+                    {language === 'KN' ? 'ಸೇವೆಗಳು (Book Sevas)' : 'Book Sevas'}
+                  </h4>
+                  <p className="text-[11.5px] text-[#777777] mt-0.5">
+                    {language === 'KN' ? 'ದೇವಾಲಯ ಆರಿಸಿ ಪವಿತ್ರ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ' : 'Select temple & explore holy offerings'}
+                  </p>
+                </div>
+              </div>
+              <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:text-[#c1440e] group-hover:translate-x-0.5 transition" />
             </div>
 
             {/* Switch Temple / Sanctuary */}
@@ -187,18 +376,14 @@ const SideMenuDrawer = ({
                       <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
                         {language === 'KN' ? 'ದೇವಾಲಯ ಬದಲಾಯಿಸಿ (Switch Temple)' : 'Switch Temple'}
                       </h4>
-                      {selectedTemple ? (
+                      {selectedTemple && (
                         <span className="rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-2 py-0.5 text-[9px] font-bold text-[#c1440e] truncate max-w-[130px]">
                           {translateTemple(selectedTemple).name}
-                        </span>
-                      ) : (
-                        <span className="rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-2 py-0.2 text-[9px] font-bold text-[#c1440e]">
-                          Sanctuary
                         </span>
                       )}
                     </div>
                     <p className="text-[11.5px] text-[#777777] mt-0.5">
-                      {language === 'KN' ? 'ಬೇರೆ ಪವಿತ್ರ ಕ್ಷೇತ್ರ ಮತ್ತು ಸೇವೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ' : 'Change active sacred sanctuary & explore offerings'}
+                      {language === 'KN' ? 'ಬೇರೆ ಪವಿತ್ರ ಕ್ಷೇತ್ರ ಮತ್ತು ಸೇವೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ' : 'Change active temple & explore offerings'}
                     </p>
                   </div>
                 </div>
@@ -292,35 +477,36 @@ const SideMenuDrawer = ({
               <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
             </div>
 
-            {/* Payment QR Pass */}
-            {onOpenQrPass && (
-              <div
-                onClick={() => {
-                  onClose()
-                  onOpenQrPass()
-                }}
-                className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
-              >
-                <div className="flex items-center gap-3.5">
-                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#f0fdf4] text-[#15803d] shrink-0">
-                    <IonIcon name="qr-code-outline" className="text-lg text-[#15803d]" />
-                  </span>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#f84464] transition">
-                        {language === 'KN' ? 'ಪಾವತಿ ಕ್ಯೂಆರ್ ಪಾಸ್ (QR Pass)' : 'Payment QR Pass'}
-                      </h4>
-                      <span className="rounded-full bg-[#dcfce7] px-1.5 py-0.2 text-[9px] font-black text-[#15803d]">
-                        LIVE
-                      </span>
-                    </div>
-                    <p className="text-[11.5px] text-[#777777] mt-0.5">
-                      {language === 'KN' ? 'ಯಶಸ್ವಿ ಬುಕಿಂಗ್‌ನ ಅಧಿಕೃತ ಪ್ರವೇಶ ಕ್ಯೂಆರ್ ಕೋಡ್' : 'Verified digital pass & booking entry code'}
-                    </p>
-                  </div>
+
+
+            {/* How It Works */}
+            <a
+              href="/#how"
+              onClick={(e) => {
+                onClose()
+                if (window.location.pathname === '/' || window.location.pathname === '') {
+                  e.preventDefault()
+                  document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })
+                }
+              }}
+              className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
+            >
+              <div className="flex items-center gap-3.5">
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4eb] text-[#c1440e] shrink-0">
+                  <IonIcon name="git-network-outline" className="text-lg text-[#c1440e]" />
+                </span>
+                <div>
+                  <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
+                    {language === 'KN' ? 'ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ (How It Works)' : 'How It Works'}
+                  </h4>
+                  <p className="text-[11.5px] text-[#777777] mt-0.5">
+                    {language === 'KN' ? 'ಸರಳ ಹಂತಗಳಲ್ಲಿ ಪವಿತ್ರ ಸೇವೆಗಳ ಮಾರ್ಗದರ್ಶಿ' : 'Easy step-by-step puja booking guide'}
+                  </p>
                 </div>
-                <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
               </div>
+              <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
+            </a>
+            </>
             )}
 
             {/* Change Language Row */}
@@ -379,7 +565,7 @@ const SideMenuDrawer = ({
                   <IonIcon name="help-circle-outline" className="text-lg text-[#5c4d41]" />
                 </span>
                 <div>
-                  <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#f84464] transition">
+                  <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
                     {language === 'KN' ? 'ಸಹಾಯ ಮತ್ತು ಬೆಂಬಲ (Help & Support)' : 'Help & Support'}
                   </h4>
                   <p className="text-[11.5px] text-[#777777] mt-0.5">
@@ -393,7 +579,7 @@ const SideMenuDrawer = ({
           </div>
         </div>
 
-        {/* ── 4. BookMyShow Bottom Sticky Sign Out Bar ── */}
+        {/* ── 4. Bottom Sticky Sign In / Sign Out Bar ── */}
         <div className="p-4 bg-white border-t border-[#f0f0f0] shadow-xs">
           {user ? (
             <button
@@ -402,7 +588,7 @@ const SideMenuDrawer = ({
                 onClose()
                 onLogout()
               }}
-              className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#f84464] py-3 text-center text-sm font-bold text-[#f84464] transition hover:bg-[#fff0f3] cursor-pointer"
+              className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#c1440e] py-3 text-center text-sm font-bold text-[#c1440e] transition hover:bg-[#fff9f3] cursor-pointer"
             >
               <IonIcon name="log-out-outline" className="text-lg" />
               <span>{language === 'KN' ? 'ನಿರ್ಗಮಿಸಿ (Sign out)' : 'Sign out'}</span>
@@ -414,7 +600,7 @@ const SideMenuDrawer = ({
                 onClose()
                 onLogin()
               }}
-              className="flex items-center justify-center gap-2 w-full rounded-xl bg-[#f84464] py-3 text-center text-sm font-bold text-white shadow-xs transition hover:bg-[#e03152] cursor-pointer"
+              className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-[#c1440e] to-[#df5619] py-3 text-center text-sm font-bold text-white shadow-xs transition hover:opacity-95 cursor-pointer"
             >
               <IonIcon name="log-in-outline" className="text-lg" />
               <span>{language === 'KN' ? 'ಲಾಗಿನ್ ಮಾಡಿ (Sign in)' : 'Sign in'}</span>
