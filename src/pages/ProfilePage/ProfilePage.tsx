@@ -39,7 +39,7 @@ const ProfilePage = ({
   onUpdateUser,
   onWishlist: _onWishlist,
   onOrders,
-  onOpenQrPass: _onOpenQrPass,
+  onOpenQrPass,
   onOpenSideMenu,
   onLogout,
   showToast,
@@ -285,7 +285,7 @@ const ProfilePage = ({
               onClick={() => navigate('/')}
               className="flex items-center text-left shrink-0 cursor-pointer"
             >
-              <span className="font-serif text-2xl font-bold tracking-tight whitespace-nowrap">
+              <span className="font-serif text-xl sm:text-2xl font-bold tracking-tight whitespace-nowrap">
                 {language === 'KN' ? (
                   <>
                     ಟೆಂಪಲ್<span className="text-[#c1440e]">ಸೇವಾ</span>
@@ -340,7 +340,7 @@ const ProfilePage = ({
                 <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-[#c1440e] to-[#d4a64a] text-white text-[10px] font-bold shadow-2xs">
                   {displayName.charAt(0).toUpperCase()}
                 </span>
-                <span className="font-semibold text-[#34251e] group-hover:text-[#c1440e] transition-colors">
+                <span className="font-semibold text-[#34251e] group-hover:text-[#c1440e] transition-colors truncate max-w-[80px] sm:max-w-none">
                   Hi, {displayName}
                 </span>
                 <svg
@@ -541,6 +541,33 @@ const ProfilePage = ({
                 ) : (
                   <IonIcon name="chevron-forward-outline" className="hidden md:inline-block text-xs text-[#b5a496]" />
                 )}
+              </button>
+
+              {/* Payment QR Pass (Active & Deactive Codes) */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (onOpenQrPass) {
+                    onOpenQrPass()
+                  }
+                }}
+                className="shrink-0 md:w-full flex items-center justify-between gap-2.5 rounded-xl px-3.5 py-2.5 md:py-3 text-[#75685d] hover:bg-[#faf4ec] transition cursor-pointer whitespace-nowrap group"
+              >
+                <div className="flex items-center gap-2.5 md:gap-3">
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#fff4eb] text-[#c1440e]">
+                    <IonIcon name="qr-code-outline" className="text-sm text-[#c1440e]" />
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-[#34251e]">
+                      {language === 'KN' ? 'ಪಾವತಿ ಕ್ಯೂಆರ್ ಪಾಸ್ (Payment QR Pass)' : 'Payment QR Pass'}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-1.5 py-0.5 text-[9px] font-bold text-[#c1440e]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Active / Deactive
+                    </span>
+                  </div>
+                </div>
+                <IonIcon name="chevron-forward-outline" className="hidden md:inline-block text-xs text-[#b5a496] group-hover:text-[#c1440e] transition" />
               </button>
 
 

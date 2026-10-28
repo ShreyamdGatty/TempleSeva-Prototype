@@ -4,6 +4,7 @@ import { formatPrice } from '../../utils/helpers'
 import { nakshatras, rashis } from '../../data'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { SacredQrCodeSvg } from '../PaymentQrModal/PaymentQrModal'
+import { IonIcon } from '../IonIcon'
 
 interface SankalpamModalProps {
   isOpen: boolean
@@ -24,6 +25,7 @@ interface SankalpamModalProps {
   onLogin: () => void
   showToast: (msg: string, variant: 'success' | 'error' | 'info' | 'warning') => void
   onNavigateToMySevas?: () => void
+  onNavigateToAssignDevotee?: () => void
 }
 
 type ModalStep = 'cart' | 'sankalpam' | 'payment' | 'qr-pass'
@@ -47,6 +49,7 @@ const SankalpamModal = ({
   onLogin,
   showToast,
   onNavigateToMySevas,
+  onNavigateToAssignDevotee,
 }: SankalpamModalProps) => {
   const { language, t, translateSeva, translateTemple } = useLanguage()
   const [step, setStep] = useState<ModalStep>(initialStep)
@@ -244,24 +247,41 @@ const SankalpamModal = ({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className="modal-container w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-[#fffdfa] p-5 sm:p-7 shadow-2xl rounded-3xl"
+        className="modal-container w-full max-w-[480px] max-h-[90vh] overflow-y-auto bg-[#fffdfa] p-3.5 sm:p-5 shadow-2xl rounded-2xl sm:rounded-3xl mx-auto"
+        style={{ maxWidth: '480px' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── STEP 1: MY CART ── */}
         {step === 'cart' && (
           <div>
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-[#eadfd1] pb-4">
-              <div className="flex items-center gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-tr from-[#c1440e] to-[#df5619] text-xl text-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-[#eadfd1] pb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-[#c1440e] to-[#df5619] text-base text-white shadow-sm shrink-0">
                   🛒
                 </span>
                 <div>
-                  <h2 className="font-serif text-2xl font-bold text-[#34251e]">
-                    {language === 'KN' ? 'ನನ್ನ ಕಾರ್ಟ್ (My Cart)' : 'My Cart'}
-                  </h2>
-                  <p className="text-xs text-[#8b7a6d]">
-                    {cart.reduce((s, i) => s + i.quantity, 0)} {language === 'KN' ? 'ಸೇವೆಗಳು' : 'Seva Offerings'} · {localizedTemple?.name || 'Temple'}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="font-serif text-lg sm:text-xl font-bold text-[#34251e]">
+                      {language === 'KN' ? 'ನನ್ನ ಕಾರ್ಟ್ (My Cart)' : 'My Cart'}
+                    </h2>
+                    {cart.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          cart.forEach((item) => removeItem(item.id))
+                          showToast(language === 'KN' ? 'ಕಾರ್ಟ್ ಖಾಲಿ ಮಾಡಲಾಗಿದೆ' : 'Cart cleared', 'info')
+                        }}
+                        className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 px-2 py-0.5 text-[11px] font-bold transition cursor-pointer shadow-2xs"
+                        title={language === 'KN' ? 'ಎಲ್ಲಾ ಸೇವೆಗಳನ್ನು ಅಳಿಸಿ' : 'Delete all sevas'}
+                      >
+                        <IonIcon name="trash-outline" className="text-xs" />
+                        <span>{language === 'KN' ? 'ಅಳಿಸಿ' : 'Delete'}</span>
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[11px] font-semibold text-[#8b7a6d]">
+                    {cart.reduce((s, i) => s + i.quantity, 0)} {language === 'KN' ? 'ಸೇವೆಗಳು' : cart.reduce((s, i) => s + i.quantity, 0) === 1 ? 'Seva' : 'Sevas'}
                   </p>
                 </div>
               </div>
@@ -277,9 +297,9 @@ const SankalpamModal = ({
 
             {/* Cart Items List */}
             {cart.length === 0 ? (
-              <div className="py-12 text-center">
-                <span className="text-5xl">🪔</span>
-                <p className="mt-3 font-serif text-lg font-bold text-[#34251e]">
+              <div className="py-10 text-center">
+                <span className="text-4xl">🪔</span>
+                <p className="mt-2 font-serif text-base font-bold text-[#34251e]">
                   {language === 'KN' ? 'ನಿಮ್ಮ ಕಾರ್ಟ್ ಖಾಲಿಯಾಗಿದೆ' : 'Your cart is empty'}
                 </p>
                 <p className="mt-1 text-xs text-[#8b7a6d]">
@@ -287,7 +307,7 @@ const SankalpamModal = ({
                 </p>
               </div>
             ) : (
-              <div className="mt-5 space-y-3.5">
+              <div className="mt-3.5 space-y-2.5">
                 {cart.map((item) => {
                   const localizedSeva = translateSeva(item.seva)
                   const maxQty = item.seva.maxQuantity || 5
@@ -297,75 +317,78 @@ const SankalpamModal = ({
                   return (
                     <div
                       key={item.id}
-                      className="rounded-2xl border border-[#eadfd1] bg-white p-4 shadow-2xs transition hover:border-[#c1440e]/40"
+                      className="rounded-xl sm:rounded-2xl border border-[#eadfd1] bg-white p-3 sm:p-3.5 shadow-2xs transition hover:border-[#c1440e]/40"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                         {/* Seva details */}
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-serif text-base font-bold text-[#34251e]">
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h4 className="font-serif text-sm sm:text-base font-bold text-[#34251e]">
                               {localizedSeva.name}
                             </h4>
                             {requiresDev ? (
-                              <span className="rounded-full bg-[#fdf2ea] border border-[#fbd3b6] px-2.5 py-0.5 text-[10px] font-bold text-[#c1440e]">
+                              <span className="rounded-full bg-[#fdf2ea] border border-[#fbd3b6] px-2 py-0.2 text-[9px] font-bold text-[#c1440e]">
                                 🕉️ Sankalpa Required
                               </span>
                             ) : (
-                              <span className="rounded-full bg-[#f0fdf4] border border-[#bbf7d0] px-2.5 py-0.5 text-[10px] font-bold text-[#16a34a]">
+                              <span className="rounded-full bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.2 text-[9px] font-bold text-[#16a34a]">
                                 🌿 Devotee Not Required
                               </span>
                             )}
                           </div>
 
-                          {/* Date and Slot */}
-                          <div className="flex items-center gap-3 text-xs text-[#75685d] flex-wrap">
-                            <span className="flex items-center gap-1 font-medium text-[#c1440e]">
-                              📅 {selectedDate || item.date}
+                          {/* Date, Slot, and Amount Badges */}
+                          <div className="flex items-center gap-1.5 text-[11px] text-[#75685d] flex-wrap">
+                            {/* Amount Badge */}
+                            <span className="inline-flex items-center gap-1 font-medium bg-[#fdf5f0] border border-[#f5cfb5] px-2 py-0.5 rounded-md">
+                              <span>🪙</span>
+                              <span className="font-bold text-[#8b7a6d]">{language === 'KN' ? 'ಮೊತ್ತ:' : 'Amount:'}</span>
+                              <span className="font-bold text-[#c1440e]">{formatPrice(item.seva.price * item.quantity)}</span>
                             </span>
-                            <span className="flex items-center gap-1 font-medium bg-[#faf5ef] px-2 py-0.5 rounded-md text-[#34251e]">
-                              ⏰ {item.slot || '07:00 AM - Morning Pooja'}
+
+                            {/* Date Badge */}
+                            <span className="inline-flex items-center gap-1 font-medium bg-[#faf5ef] border border-[#ebd8c6] px-2 py-0.5 rounded-md">
+                              <span>📅</span>
+                              <span className="font-bold text-[#8b7a6d]">{language === 'KN' ? 'ದಿನಾಂಕ:' : 'Date:'}</span>
+                              <span className="font-bold text-[#34251e]">{selectedDate || item.date}</span>
+                            </span>
+
+                            {/* Slot Badge */}
+                            <span className="inline-flex items-center gap-1 font-medium bg-[#faf5ef] border border-[#ebd8c6] px-2 py-0.5 rounded-md">
+                              <span>⏰</span>
+                              <span className="font-bold text-[#8b7a6d]">{language === 'KN' ? 'ಸ್ಲಾಟ್:' : 'Slot:'}</span>
+                              <span className="font-bold text-[#34251e]">{item.slot || '07:00 AM - Morning Pooja'}</span>
                             </span>
                           </div>
 
                           {/* Reminder if present */}
                           {item.seva.reminder && (
-                            <p className="text-[11px] text-[#8a6842]">
+                            <p className="text-[10px] text-[#8a6842] leading-tight">
                               {item.seva.reminder}
                             </p>
                           )}
                         </div>
 
-                        {/* Amount & Stepper */}
-                        <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 border-t sm:border-t-0 border-[#f3eae0] pt-2 sm:pt-0">
-                          <div className="text-right">
-                            <p className="font-serif text-base font-bold text-[#c1440e]">
-                              {formatPrice(item.seva.price * item.quantity)}
-                            </p>
-                            {item.quantity > 1 && (
-                              <p className="text-[10px] text-[#8b7a6d]">
-                                {formatPrice(item.seva.price)} × {item.quantity}
-                              </p>
-                            )}
-                          </div>
-
+                        {/* Stepper with - [qty] + and delete item */}
+                        <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 border-t sm:border-t-0 border-[#f3eae0] pt-1.5 sm:pt-0">
                           {/* Stepper with - [qty] + */}
-                          <div className="flex items-center gap-1.5 rounded-xl border border-[#e0d3c5] bg-[#fffaf5] p-1">
+                          <div className="flex items-center gap-1 rounded-lg border border-[#e0d3c5] bg-[#fffaf5] p-0.5">
                             <button
                               type="button"
                               onClick={() => changeQty(item.id, -1, showToast)}
-                              className="grid h-7 w-7 place-items-center rounded-lg bg-white hover:bg-[#c1440e] hover:text-white text-xs font-bold transition cursor-pointer shadow-2xs"
+                              className="grid h-6 w-6 place-items-center rounded-md bg-white hover:bg-[#c1440e] hover:text-white text-xs font-bold transition cursor-pointer shadow-2xs"
                               title="Decrease quantity"
                             >
                               −
                             </button>
-                            <span className="w-6 text-center text-xs font-bold text-[#34251e]">
+                            <span className="w-5 text-center text-xs font-bold text-[#34251e]">
                               {item.quantity}
                             </span>
                             <button
                               type="button"
                               disabled={isMax}
                               onClick={() => changeQty(item.id, 1, showToast)}
-                              className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-bold transition shadow-2xs ${
+                              className={`grid h-6 w-6 place-items-center rounded-md text-xs font-bold transition shadow-2xs ${
                                 isMax
                                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                   : 'bg-white hover:bg-[#c1440e] hover:text-white cursor-pointer'
@@ -380,16 +403,16 @@ const SankalpamModal = ({
                           <button
                             type="button"
                             onClick={() => removeItem(item.id)}
-                            className="p-1.5 text-xs text-[#a8998c] hover:text-[#d94444] transition cursor-pointer"
+                            className="grid h-7 w-7 place-items-center rounded-lg border border-red-200 bg-red-50 text-[#c1440e] hover:bg-red-600 hover:text-white transition cursor-pointer shadow-2xs"
                             title="Remove Seva"
                           >
-                            🗑️
+                            <IonIcon name="trash-outline" className="text-sm" />
                           </button>
                         </div>
                       </div>
 
                       {isMax && (
-                        <p className="mt-2 text-[10px] text-[#b45309] font-medium">
+                        <p className="mt-1.5 text-[9px] text-[#b45309] font-medium">
                           ⚠️ Maximum limit of {maxQty} tickets reached for this ritual.
                         </p>
                       )}
@@ -423,7 +446,7 @@ const SankalpamModal = ({
 
             {/* Bottom Actions */}
             {cart.length > 0 && (
-              <div className="mt-6 flex gap-3">
+              <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
                 <button
                   type="button"
                   onClick={onClose}
@@ -434,18 +457,15 @@ const SankalpamModal = ({
                 <button
                   type="button"
                   onClick={() => {
-                    if (hasDevoteeSeva) {
-                      setStep('sankalpam')
-                    } else {
-                      handleProceedToPayment()
+                    onClose()
+                    if (onNavigateToAssignDevotee) {
+                      onNavigateToAssignDevotee()
                     }
                   }}
                   className="btn-primary flex-1 py-3 text-xs sm:text-sm font-bold shadow-md cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>
-                    {hasDevoteeSeva
-                      ? (language === 'KN' ? 'ಭಕ್ತರನ್ನು ನಿಯೋಜಿಸಿ →' : 'Assign Devotee (For Required Sevas) →')
-                      : (language === 'KN' ? 'ಪಾವತಿಗೆ ಮುಂದುವರಿಯಿರಿ (ಭಕ್ತರ ಅಗತ್ಯವಿಲ್ಲ) →' : 'Proceed to Pay (No Devotee Needed) →')}
+                    {language === 'KN' ? 'ಭಕ್ತರನ್ನು ನಿಯೋಜಿಸಿ (ಸಂಕಲ್ಪ) →' : 'Assign Devotee (Sankalpam) →'}
                   </span>
                 </button>
               </div>

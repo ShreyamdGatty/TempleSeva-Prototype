@@ -30,6 +30,7 @@ import SevasPage from './pages/SevasPage/SevasPage'
 import MySevasPage from './pages/MySevasPage/MySevasPage'
 import ProfilePage from './pages/ProfilePage/ProfilePage'
 import AboutPage from './pages/AboutPage/AboutPage'
+import AssignDevoteePage from './pages/AssignDevoteePage/AssignDevoteePage'
 
 // Components
 import ToastContainer from './components/Toast/Toast'
@@ -43,6 +44,7 @@ import ProfileModal from './components/ProfileModal/ProfileModal'
 import SevaDetailModal from './components/SevaDetailModal/SevaDetailModal'
 import PaymentQrModal from './components/PaymentQrModal/PaymentQrModal'
 import SideMenuDrawer from './components/SideMenuDrawer/SideMenuDrawer'
+import { SearchModal } from './components/SearchModal/SearchModal'
 
 const AppContent = () => {
   const navigate = useNavigate()
@@ -54,18 +56,29 @@ const AppContent = () => {
 
   // ── Temple & Booking State (persisted across page navigation) ────
   const [selectedTemple, setSelectedTemple] = useState<Temple | null>(() => {
-    const isSessionActive = window.localStorage.getItem(STORAGE_SESSION) === 'true'
-    if (!isSessionActive) {
+    const isLogged = window.localStorage.getItem(STORAGE_SESSION) === 'true'
+    if (!isLogged) {
       window.localStorage.removeItem(STORAGE_TEMPLE)
       return null
     }
     return readJson<Temple | null>(STORAGE_TEMPLE, null)
   })
+
+  // Ensure that before register and login, selectedTemple is always null
+  useEffect(() => {
+    if (!user) {
+      setSelectedTemple(null)
+      window.localStorage.removeItem(STORAGE_TEMPLE)
+    }
+  }, [user])
   const [pickerOpen, setPickerOpen] = useState(false)
   const [isNewUserJustRegistered, setIsNewUserJustRegistered] = useState(false)
   const [isNewUserSelection, setIsNewUserSelection] = useState(false)
   const [selectedDate, setSelectedDate] = useState('')
   const [profileOpen, setProfileOpen] = useState(false)
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
+  const [searchModalMode, setSearchModalMode] = useState<'view' | 'select'>('select')
+  const [redirectToSevasAfterTempleSelect, setRedirectToSevasAfterTempleSelect] = useState(false)
 
   // ── Cart ──────────────────────────────────────────────
   const {
@@ -183,8 +196,14 @@ const AppContent = () => {
       setIsNewUserJustRegistered(true)
       window.sessionStorage.setItem('temple-seva.isNewUserRegistered', 'true')
       window.localStorage.setItem('temple-seva.mustSelectTemple', 'true')
+      addToast(
+        language === 'KN'
+          ? 'ನೋಂದಣಿ ಯಶಸ್ವಿಯಾಗಿದೆ! ಮುಂದುವರಿಯಲು ದಯವಿಟ್ಟು ಲಾಗಿನ್ ಮಾಡಿ.'
+          : 'Registration successful! Please log in to continue.',
+        'success'
+      )
     },
-    [register]
+    [register, addToast, language]
   )
 
   const handleLogin = useCallback(
@@ -264,6 +283,17 @@ const AppContent = () => {
 
   const selectTemple = useCallback(
     (temple: Temple) => {
+      if (!user) {
+        window.sessionStorage.setItem('temple-seva.pendingTemple', temple.id)
+        setAuthMode('login')
+        addToast(
+          language === 'KN'
+            ? 'ದೇವಾಲಯವನ್ನು ಆಯ್ಕೆಮಾಡಲು ದಯವಿಟ್ಟು ಮೊದಲು ಲಾಗಿನ್ ಅಥವಾ ನೋಂದಣಿ ಮಾಡಿ.'
+            : 'Please log in or register first to select a temple.',
+          'info'
+        )
+        return
+      }
       const isDifferent = !selectedTemple || selectedTemple.id !== temple.id
       setSelectedTemple(temple)
       window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(temple))
@@ -280,25 +310,16 @@ const AppContent = () => {
           : `${loc.name} selected. Please pick an auspicious date.`,
         'success'
       )
-      navigate('/sevas')
+      navigate('/')
     },
-    [selectedTemple, clearCart, addToast, language, translateTemple, navigate]
+    [user, selectedTemple, clearCart, addToast, language, translateTemple, navigate, setAuthMode]
   )
 
   const switchTemple = useCallback(() => {
-    if (!user) {
-      addToast(
-        language === 'KN'
-          ? 'ದೇವಾಲಯವನ್ನು ಬದಲಾಯಿಸಲು ದಯವಿಟ್ಟು ಮೊದಲು ಲಾಗಿನ್ ಅಥವಾ ನೋಂದಣಿ ಮಾಡಿ.'
-          : 'Please login or register first to switch sanctuary.',
-        'info'
-      )
-      setAuthMode('login')
-      return
-    }
-    // Open picker without resetting current temple or cart so cancel restores everything
-    setPickerOpen(true)
-  }, [user, addToast, language, setAuthMode])
+    setRedirectToSevasAfterTempleSelect(false)
+    setSearchModalMode('select')
+    setIsSearchModalOpen(true)
+  }, [])
 
   const handleCompleteOrder = useCallback(
     (paymentMethod: string, addressOrAllocations?: Address | Record<string, Devotee[]>) => {
@@ -370,22 +391,19 @@ const AppContent = () => {
 
   const navigateToSevas = useCallback(
     (temple?: Temple) => {
-      if (!user) {
-        if (temple) {
-          // Remember user's desired temple in session; do not set active badge or STORAGE_TEMPLE yet
-          window.sessionStorage.setItem('temple-seva.pendingTemple', temple.id)
-        }
-        setAuthMode('register')
-        addToast(
-          language === 'KN'
-            ? 'ಸೇವೆಗಳನ್ನು ನೋಡಲು ಮತ್ತು ಕಾಯ್ದಿರಿಸಲು ದಯವಿಟ್ಟು ನೋಂದಾಯಿಸಿ ಅಥವಾ ಲಾಗಿನ್ ಮಾಡಿ.'
-            : 'Please register or log in to explore and book Sevas.',
-          'info'
-        )
-        return
-      }
-
       if (temple) {
+        if (!user) {
+          window.sessionStorage.setItem('temple-seva.pendingTemple', temple.id)
+          setAuthMode('login')
+          addToast(
+            language === 'KN'
+              ? 'ಸೇವೆಗಳನ್ನು ನೋಡಲು ಮತ್ತು ಕಾಯ್ದಿರಿಸಲು ದಯವಿಟ್ಟು ಲಾಗಿನ್ ಅಥವಾ ನೋಂದಣಿ ಮಾಡಿ.'
+              : 'Please login or register to explore and book Sevas.',
+            'info'
+          )
+          return
+        }
+
         const isDifferent = !selectedTemple || selectedTemple.id !== temple.id
         setSelectedTemple(temple)
         window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(temple))
@@ -393,15 +411,76 @@ const AppContent = () => {
           setSelectedDate('')
           clearCart()
         }
-        setPickerOpen(false)
         navigate('/sevas')
         return
       }
 
-      // When Sevas is clicked without a specific temple, first ask for the temple
-      setPickerOpen(true)
+      if (!user) {
+        setAuthMode('login')
+        addToast(
+          language === 'KN'
+            ? 'ಸೇವೆಗಳನ್ನು ನೋಡಲು ಮತ್ತು ಕಾಯ್ದಿರಿಸಲು ದಯವಿಟ್ಟು ಲಾಗಿನ್ ಅಥವಾ ನೋಂದಣಿ ಮಾಡಿ.'
+            : 'Please login or register to explore and book Sevas.',
+          'info'
+        )
+        return
+      }
+
+      // Before selecting temple if Explore sevas is clicked, it should go for the temple modal in select mode
+      if (!selectedTemple) {
+        setRedirectToSevasAfterTempleSelect(true)
+        setSearchModalMode('select')
+        setIsSearchModalOpen(true)
+        return
+      }
+
+      // When Sevas is clicked with a selected temple, go to sevas
+      navigate('/sevas')
     },
     [user, selectedTemple, clearCart, navigate, setAuthMode, addToast, language]
+  )
+
+  const handleSelectTempleFromSearch = useCallback(
+    (temple: Temple) => {
+      setIsSearchModalOpen(false)
+      if (!user) {
+        window.sessionStorage.setItem('temple-seva.pendingTemple', temple.id)
+        setAuthMode('login')
+        addToast(
+          language === 'KN'
+            ? 'ದೇವಾಲಯವನ್ನು ಆಯ್ಕೆಮಾಡಲು ದಯವಿಟ್ಟು ಮೊದಲು ಲಾಗಿನ್ ಅಥವಾ ನೋಂದಣಿ ಮಾಡಿ.'
+            : 'Please log in or register first to select a temple.',
+          'info'
+        )
+        return
+      }
+
+      const isDifferent = !selectedTemple || selectedTemple.id !== temple.id
+      setSelectedTemple(temple)
+      window.localStorage.setItem(STORAGE_TEMPLE, JSON.stringify(temple))
+      if (isDifferent) {
+        setSelectedDate('')
+        clearCart()
+      }
+
+      addToast(
+        language === 'KN'
+          ? `${translateTemple(temple).name} ದೇವಾಲಯ ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ.`
+          : `${translateTemple(temple).name} selected successfully.`,
+        'success'
+      )
+
+      if (redirectToSevasAfterTempleSelect) {
+        setRedirectToSevasAfterTempleSelect(false)
+        navigate('/sevas')
+      } else if (window.location.pathname === '/sevas') {
+        navigate('/sevas')
+      } else {
+        // From search bar: stay on home page itself!
+        navigate('/')
+      }
+    },
+    [user, selectedTemple, clearCart, navigate, redirectToSevasAfterTempleSelect, addToast, language, translateTemple, setAuthMode]
   )
 
   const totalSpent = orders
@@ -431,12 +510,25 @@ const AppContent = () => {
               onDevoteeDetails={handleNavigateToDevotees}
               onOpenQrPass={() => setQrPassOpen(true)}
               onSwitchTemple={switchTemple}
-              onSevas={() => setPickerOpen(true)}
+              onSevas={navigateToSevas}
               onLogout={handleLogout}
+              onSelectTemple={handleSelectTempleFromSearch}
+              navigateToSevas={navigateToSevas}
+              onOpenSearch={() => {
+                setRedirectToSevasAfterTempleSelect(false)
+                setSearchModalMode('select')
+                setIsSearchModalOpen(true)
+              }}
+              isSearchModalOpen={isSearchModalOpen}
+              setIsSearchModalOpen={setIsSearchModalOpen}
+              searchModalMode={searchModalMode}
+              setSearchModalMode={setSearchModalMode}
             >
               <HomePage
                 navigateToSevas={navigateToSevas}
                 onRegister={() => setAuthMode('register')}
+                onLogin={() => setAuthMode('login')}
+                onSwitchTemple={switchTemple}
                 user={user}
                 selectedTemple={selectedTemple}
               />
@@ -453,50 +545,95 @@ const AppContent = () => {
             ) : (
               <div className="sevas-route min-h-screen bg-[#fffcf6] text-[#34251e]">
                 <SevasPage
-                selectedTemple={selectedTemple}
-                pickerOpen={pickerOpen}
-                switchTemple={switchTemple}
-                onSelectTemple={selectTemple}
-                dates={dates}
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-                addSeva={addSeva}
-                cart={cart}
-                subtotal={subtotal}
-                discount={discount}
-                total={total}
-                appliedCoupon={appliedCoupon}
-                changeQty={changeQty}
-                removeItem={removeItem}
-                onPay={() => {
-                  if (!user) {
-                    setAuthMode('login')
-                  } else {
-                    setCheckoutOpen(true)
-                  }
-                }}
-                user={user}
-                logout={handleLogout}
-                onOrders={handleNavigateToMySevas}
-                onProfile={handleNavigateToProfile}
-                onWishlist={handleNavigateToWishlist}
-                wishlistCount={templeWishlist.length}
-                ordersCount={templeOrders.length}
-                onDevoteeDetails={handleNavigateToDevotees}
-                onOpenQrPass={() => setQrPassOpen(true)}
-                onLogin={() => setAuthMode('login')}
-                onRegister={() => setAuthMode('register')}
-                isWished={isWished}
-                onToggleWish={toggleWish}
-                onViewSevaDetails={(seva) => setActiveSevaDetail(seva)}
-                showToast={addToast}
-                devotees={devotees}
-                onAddDevotee={addDevotee}
-                onCompleteOrder={handleCompleteOrder}
-                updateCartDate={updateCartDate}
-              />
-            </div>
+                  selectedTemple={selectedTemple}
+                  pickerOpen={pickerOpen}
+                  switchTemple={switchTemple}
+                  onSelectTemple={handleSelectTempleFromSearch}
+                  dates={dates}
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  addSeva={addSeva}
+                  cart={cart}
+                  subtotal={subtotal}
+                  discount={discount}
+                  total={total}
+                  appliedCoupon={appliedCoupon}
+                  changeQty={changeQty}
+                  removeItem={removeItem}
+                  onPay={() => {
+                    if (!user) {
+                      setAuthMode('login')
+                    } else {
+                      setCheckoutOpen(true)
+                    }
+                  }}
+                  user={user}
+                  logout={handleLogout}
+                  onOrders={handleNavigateToMySevas}
+                  onProfile={handleNavigateToProfile}
+                  onWishlist={handleNavigateToWishlist}
+                  wishlistCount={templeWishlist.length}
+                  ordersCount={templeOrders.length}
+                  onDevoteeDetails={handleNavigateToDevotees}
+                  onOpenQrPass={() => setQrPassOpen(true)}
+                  onLogin={() => setAuthMode('login')}
+                  onRegister={() => setAuthMode('register')}
+                  isWished={isWished}
+                  onToggleWish={toggleWish}
+                  onViewSevaDetails={(seva) => setActiveSevaDetail(seva)}
+                  showToast={addToast}
+                  devotees={devotees}
+                  onAddDevotee={addDevotee}
+                  onCompleteOrder={handleCompleteOrder}
+                  updateCartDate={updateCartDate}
+                  onNavigateToAssignDevotee={() => navigate('/sankalpam')}
+                />
+              </div>
             )
+          }
+        />
+
+        {/* ── Assign Devotee / Sankalpam Full Page Route ── */}
+        <Route
+          path="/sankalpam"
+          element={
+            <AssignDevoteePage
+              selectedTemple={selectedTemple}
+              selectedDate={selectedDate}
+              cart={cart}
+              subtotal={subtotal}
+              discount={discount}
+              total={total}
+              devotees={devotees}
+              onAddDevotee={addDevotee}
+              onCompleteOrder={handleCompleteOrder}
+              user={user}
+              onLogin={() => setAuthMode('login')}
+              showToast={addToast}
+              onNavigateToMySevas={handleNavigateToMySevas}
+              onBackToCart={() => navigate('/sevas', { state: { openCart: true } })}
+            />
+          }
+        />
+        <Route
+          path="/assign-devotees"
+          element={
+            <AssignDevoteePage
+              selectedTemple={selectedTemple}
+              selectedDate={selectedDate}
+              cart={cart}
+              subtotal={subtotal}
+              discount={discount}
+              total={total}
+              devotees={devotees}
+              onAddDevotee={addDevotee}
+              onCompleteOrder={handleCompleteOrder}
+              user={user}
+              onLogin={() => setAuthMode('login')}
+              showToast={addToast}
+              onNavigateToMySevas={handleNavigateToMySevas}
+              onBackToCart={() => navigate('/sevas', { state: { openCart: true } })}
+            />
           }
         />
 
@@ -545,8 +682,8 @@ const AppContent = () => {
               onLogout={handleLogout}
               showToast={addToast}
               onDevoteeDetails={handleNavigateToDevotees}
-              onSwitchTemple={() => setPickerOpen(true)}
-              onSevas={() => setPickerOpen(true)}
+              onSwitchTemple={switchTemple}
+              onSevas={navigateToSevas}
               selectedTemple={selectedTemple || undefined}
               orders={templeOrders}
               wishlist={templeWishlist}
@@ -577,7 +714,19 @@ const AppContent = () => {
               onDevoteeDetails={handleNavigateToDevotees}
               onOpenQrPass={() => setQrPassOpen(true)}
               onSwitchTemple={switchTemple}
+              onSevas={navigateToSevas}
               onLogout={handleLogout}
+              onSelectTemple={handleSelectTempleFromSearch}
+              navigateToSevas={navigateToSevas}
+              onOpenSearch={() => {
+                setRedirectToSevasAfterTempleSelect(false)
+                setSearchModalMode('select')
+                setIsSearchModalOpen(true)
+              }}
+              isSearchModalOpen={isSearchModalOpen}
+              setIsSearchModalOpen={setIsSearchModalOpen}
+              searchModalMode={searchModalMode}
+              setSearchModalMode={setSearchModalMode}
             >
               <AboutPage navigateToSevas={navigateToSevas} />
             </MainLayout>
@@ -711,6 +860,19 @@ const AppContent = () => {
         />
       )}
 
+      {/* Global Search / Temple Selection Modal with Temple Cards */}
+      <SearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => {
+          setIsSearchModalOpen(false)
+          setRedirectToSevasAfterTempleSelect(false)
+        }}
+        onSelectTemple={handleSelectTempleFromSearch}
+        selectedTemple={selectedTemple}
+        user={user}
+        mode={searchModalMode}
+      />
+
       {/* Global Slide Menu Drawer */}
       <SideMenuDrawer
         isOpen={sideMenuOpen}
@@ -725,8 +887,8 @@ const AppContent = () => {
         onLogout={handleLogout}
         onOrders={handleNavigateToMySevas}
         onOpenQrPass={() => setQrPassOpen(true)}
-        onSwitchTemple={() => setPickerOpen(true)}
-        onSevas={() => setPickerOpen(true)}
+        onSwitchTemple={switchTemple}
+        onSevas={navigateToSevas}
         onLogin={() => setAuthMode('login')}
         onRegister={() => setAuthMode('register')}
       />

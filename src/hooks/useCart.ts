@@ -1,14 +1,23 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import type { Seva, CartItem, Devotee, Coupon } from '../types'
 import { coupons } from '../data'
+import { readJson } from '../utils/storage'
+
+const STORAGE_CART = 'temple-seva.cart'
 
 export function useCart() {
-  const [cart, setCart] = useState<CartItem[]>([])
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    return readJson<CartItem[]>(STORAGE_CART, [])
+  })
   const [savedForLater, setSavedForLater] = useState<CartItem[]>([])
   const [devoteeSeva, setDevoteeSeva] = useState<Seva | null>(null)
   const [devotee, setDevotee] = useState<Devotee>({ name: '', nakshatra: '', rashi: '', gotram: '' })
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null)
   const [couponError, setCouponError] = useState('')
+
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_CART, JSON.stringify(cart))
+  }, [cart])
 
   const subtotal = useMemo(
     () => cart.reduce((sum, item) => sum + item.seva.price * item.quantity, 0),
@@ -176,6 +185,7 @@ export function useCart() {
 
   const clearCart = useCallback(() => {
     setCart([])
+    window.localStorage.removeItem(STORAGE_CART)
     setAppliedCoupon(null)
     setCouponError('')
   }, [])

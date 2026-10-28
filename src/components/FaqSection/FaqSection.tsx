@@ -88,27 +88,18 @@ const FaqSection = () => {
   const isKn = language === 'KN'
 
   const [activeCategory, setActiveCategory] = useState<'all' | 'booking' | 'qr' | 'account'>('all')
-  const [searchQuery, setSearchQuery] = useState('')
   const [openId, setOpenId] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<Record<string, 'helpful' | 'not-helpful'>>({})
 
-  // Filter questions based on active category and live search query
+  // Filter questions based on active category
   const filteredFaqs = useMemo(() => {
     return FAQS.filter((faq) => {
-      // Category filter
       if (activeCategory !== 'all' && faq.categoryId !== activeCategory) {
         return false
       }
-      // Search filter
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim()
-        const qText = (isKn ? faq.questionKn : faq.questionEn).toLowerCase()
-        const aText = (isKn ? faq.answerKn : faq.answerEn).toLowerCase()
-        return qText.includes(query) || aText.includes(query)
-      }
       return true
     })
-  }, [activeCategory, searchQuery, isKn])
+  }, [activeCategory])
 
   const handleFeedback = (faqId: string, type: 'helpful' | 'not-helpful') => {
     setFeedback((prev) => ({ ...prev, [faqId]: type }))
@@ -127,34 +118,6 @@ const FaqSection = () => {
               ? 'ಪ್ರಶ್ನೆಗಳಿವೆಯೇ? ನಾವು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಲು ಇಲ್ಲಿದ್ದೇವೆ.'
               : "Have questions? We're here to help."}
           </p>
-
-          {/* Search Bar on Clean Theme Background */}
-          <div className="mt-6 relative max-w-xl mx-auto">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-[#c1440e] pointer-events-none">
-              <IonIcon name="search-outline" />
-            </span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={
-                isKn
-                  ? 'ಪ್ರಶ್ನೆಗಳು ಅಥವಾ ಕೀವರ್ಡ್‌ಗಳನ್ನು ಹುಡುಕಿ...'
-                  : 'Search for questions, topics, or keywords...'
-              }
-              className="w-full pl-11 pr-10 py-3 sm:py-3.5 rounded-full bg-white border border-[#e4d6c7] text-xs sm:text-sm text-[#2d1b14] placeholder-[#8c7769] shadow-xs focus:outline-none focus:border-[#c1440e] focus:ring-2 focus:ring-[#c1440e]/20 transition"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-base text-[#8c7769] hover:text-[#2d1b14] cursor-pointer"
-                aria-label="Clear search"
-              >
-                ×
-              </button>
-            )}
-          </div>
         </div>
 
         {/* ── 2. Two-Column Layout (Category Sidebar on Left + Accordion on Right) ── */}
@@ -178,10 +141,7 @@ const FaqSection = () => {
                   <button
                     key={cat.id}
                     type="button"
-                    onClick={() => {
-                      setActiveCategory(cat.id)
-                      setSearchQuery('')
-                    }}
+                    onClick={() => setActiveCategory(cat.id)}
                     className={`shrink-0 lg:w-full flex items-center justify-between gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer text-left whitespace-nowrap ${
                       isActive
                         ? 'bg-[#fceddc] text-[#c1440e] border border-[#f5cb9e] shadow-xs'
@@ -230,10 +190,7 @@ const FaqSection = () => {
                 </p>
                 <button
                   type="button"
-                  onClick={() => {
-                    setSearchQuery('')
-                    setActiveCategory('all')
-                  }}
+                  onClick={() => setActiveCategory('all')}
                   className="mt-4 px-4 py-2 rounded-full bg-[#c1440e] text-white text-xs font-bold shadow-xs cursor-pointer hover:bg-[#a73507] transition"
                 >
                   {isKn ? 'ಎಲ್ಲ ಪ್ರಶ್ನೆಗಳನ್ನು ತೋರಿಸಿ' : 'View All Questions'}

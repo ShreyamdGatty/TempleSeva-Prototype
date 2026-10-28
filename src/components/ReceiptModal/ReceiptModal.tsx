@@ -15,7 +15,11 @@ const ReceiptModal = ({ order, onClose, onTrack }: ReceiptModalProps) => {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-container relative w-full max-w-md max-h-[92vh] overflow-y-auto text-center mx-auto my-auto" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-container relative w-full max-w-md max-h-[92vh] overflow-y-auto text-center mx-auto my-auto"
+        style={{ maxWidth: '420px', width: '100%' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Top Right Close Icon */}
         <button
           type="button"

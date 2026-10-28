@@ -85,17 +85,18 @@ const CalendarModal = ({ selectedDate: _selectedDate, onSelectDate, onClose }: C
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className="modal-container w-full max-w-md max-h-[92vh] overflow-y-auto bg-[#fffdf9] p-4 sm:p-6 shadow-2xl rounded-3xl"
+        className="modal-container w-full max-w-[340px] sm:max-w-[360px] max-h-[92vh] overflow-y-auto bg-[#fffdf9] p-3.5 sm:p-4.5 shadow-2xl rounded-2xl mx-auto"
+        style={{ maxWidth: '360px' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-[#eadfd1] pb-4">
+        <div className="flex items-start justify-between border-b border-[#eadfd1] pb-2.5">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#c1440e]">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#c1440e]">
               {t('step1DateTitle')}
             </p>
-            <h2 className="mt-1 font-serif text-2xl font-bold">{t('calendarTitle')}</h2>
-            <p className="mt-1 text-xs text-[#8b7a6d]">{t('calendarSub')}</p>
+            <h2 className="mt-0.5 font-serif text-lg sm:text-xl font-bold">{t('calendarTitle')}</h2>
+            <p className="mt-0.5 text-[11px] text-[#8b7a6d]">{t('calendarSub')}</p>
           </div>
           <button onClick={onClose} className="modal-close" aria-label="Close">
             ×
@@ -103,21 +104,21 @@ const CalendarModal = ({ selectedDate: _selectedDate, onSelectDate, onClose }: C
         </div>
 
         {/* Month Navigation */}
-        <div className="mt-5 flex items-center justify-between rounded-xl bg-[#f5ede2] p-2.5">
+        <div className="mt-3 flex items-center justify-between rounded-lg bg-[#f5ede2] p-1.5">
           <button
             onClick={handlePrevMonth}
             disabled={isPrevDisabled}
-            className="grid h-9 w-9 place-items-center rounded-lg bg-white text-sm font-bold shadow-sm transition hover:bg-[#ebdcc9] disabled:opacity-30 disabled:hover:bg-white cursor-pointer disabled:cursor-not-allowed"
+            className="grid h-7 w-7 place-items-center rounded-md bg-white text-xs font-bold shadow-xs transition hover:bg-[#ebdcc9] disabled:opacity-30 disabled:hover:bg-white cursor-pointer disabled:cursor-not-allowed"
             title="Previous Month"
           >
             ‹
           </button>
-          <span className="font-serif text-lg font-bold text-[#34251e]">
+          <span className="font-serif text-sm sm:text-base font-bold text-[#34251e]">
             {monthNames[month]} {year}
           </span>
           <button
             onClick={handleNextMonth}
-            className="grid h-9 w-9 place-items-center rounded-lg bg-white text-sm font-bold shadow-sm transition hover:bg-[#ebdcc9] cursor-pointer"
+            className="grid h-7 w-7 place-items-center rounded-md bg-white text-xs font-bold shadow-xs transition hover:bg-[#ebdcc9] cursor-pointer"
             title="Next Month"
           >
             ›
@@ -125,35 +126,35 @@ const CalendarModal = ({ selectedDate: _selectedDate, onSelectDate, onClose }: C
         </div>
 
         {/* Legend */}
-        <div className="mt-3 flex items-center justify-center gap-4 text-xs font-medium text-[#75685d]">
-          <span className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-full border-2 border-[#d4a64a] bg-[#fdf5e6]" />
+        <div className="mt-2 flex items-center justify-center gap-3 text-[10px] font-medium text-[#75685d]">
+          <span className="flex items-center gap-1">
+            <span className="h-2.5 w-2.5 rounded-full border-2 border-[#d4a64a] bg-[#fdf5e6]" />
             {t('todayBadge')}
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-full bg-[#c1440e]" />
+          <span className="flex items-center gap-1">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#c1440e]" />
             {t('selectedBadge')}
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-full bg-[#e3d7ca] opacity-50" />
+          <span className="flex items-center gap-1">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#e3d7ca] opacity-50" />
             {language === 'KN' ? 'ನಿಷ್ಕ್ರಿಯ' : 'Disabled'}
           </span>
         </div>
 
         {/* Weekday Names */}
-        <div className="mt-4 grid grid-cols-7 gap-1 text-center text-xs font-bold uppercase tracking-wider text-[#8b7a6d]">
+        <div className="mt-2.5 grid grid-cols-7 gap-1 text-center text-[10.5px] font-bold uppercase tracking-wider text-[#8b7a6d]">
           {weekDays.map((day) => (
-            <div key={day} className="py-1">
+            <div key={day} className="py-0.5">
               {day}
             </div>
           ))}
         </div>
 
         {/* Calendar Days Grid */}
-        <div className="mt-1 grid grid-cols-7 gap-1.5">
+        <div className="mt-1 grid grid-cols-7 gap-1">
           {/* Empty cells before month start */}
           {Array.from({ length: firstDayIndex }).map((_, i) => (
-            <div key={`empty-${i}`} className="h-10" />
+            <div key={`empty-${i}`} className="h-8 sm:h-8.5" />
           ))}
 
           {/* Days of Month */}
@@ -172,11 +173,11 @@ const CalendarModal = ({ selectedDate: _selectedDate, onSelectDate, onClose }: C
                 type="button"
                 disabled={isPast}
                 onClick={() => handleDayClick(dayNumber)}
-                className={`group relative flex h-11 flex-col items-center justify-center rounded-xl text-sm font-semibold transition-all ${
+                className={`group relative flex h-8 sm:h-8.5 flex-col items-center justify-center rounded-lg text-xs font-semibold transition-all ${
                   isPast
                     ? 'cursor-not-allowed bg-transparent text-[#b5a496] opacity-35 line-through'
                     : isChosen
-                    ? 'scale-105 bg-[#c1440e] text-white shadow-md font-bold'
+                    ? 'scale-105 bg-[#c1440e] text-white shadow-xs font-bold'
                     : isToday
                     ? 'border-2 border-[#d4a64a] bg-[#fef9f0] text-[#7a4800] hover:bg-[#fdebc8]'
                     : 'bg-white text-[#34251e] border border-[#eadfd1] hover:border-[#c1440e] hover:bg-[#faf4ec]'
@@ -187,7 +188,7 @@ const CalendarModal = ({ selectedDate: _selectedDate, onSelectDate, onClose }: C
                 {/* TODAY indicator badge */}
                 {isToday && (
                   <span
-                    className={`absolute -top-1.5 rounded-full px-1.5 py-0.2 text-[8px] font-black uppercase tracking-tight shadow-sm ${
+                    className={`absolute -top-1 rounded-full px-1 py-0 text-[7px] font-black uppercase tracking-tight shadow-xs ${
                       isChosen ? 'bg-[#d4a64a] text-[#34251e]' : 'bg-[#d4a64a] text-white'
                     }`}
                   >
@@ -200,10 +201,10 @@ const CalendarModal = ({ selectedDate: _selectedDate, onSelectDate, onClose }: C
         </div>
 
         {/* Selected date preview and confirm button */}
-        <div className="mt-6 border-t border-[#eadfd1] pt-4">
-          <div className="mb-3 flex items-center justify-between text-xs font-semibold">
+        <div className="mt-3 border-t border-[#eadfd1] pt-2.5">
+          <div className="mb-2 flex items-center justify-between text-xs font-semibold">
             <span className="text-[#8b7a6d]">{t('selectedBadge')}:</span>
-            <span className="font-serif text-base font-bold text-[#c1440e]">
+            <span className="font-serif text-sm sm:text-base font-bold text-[#c1440e]">
               {formatDateLocalized(tempSelectedDate)}
             </span>
           </div>
@@ -211,13 +212,13 @@ const CalendarModal = ({ selectedDate: _selectedDate, onSelectDate, onClose }: C
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="flex-1 rounded-xl border border-[#d8c8b8] py-2.5 text-sm font-bold text-[#674f40] transition hover:bg-[#f5ede2]"
+              className="flex-1 rounded-lg border border-[#d8c8b8] py-2 text-xs sm:text-sm font-bold text-[#674f40] transition hover:bg-[#f5ede2]"
             >
               {t('calendarClose')}
             </button>
             <button
               onClick={handleConfirm}
-              className="btn-primary flex-1 py-2.5 text-sm"
+              className="btn-primary flex-1 py-2 text-xs sm:text-sm rounded-lg"
             >
               {t('calendarConfirm')}
             </button>

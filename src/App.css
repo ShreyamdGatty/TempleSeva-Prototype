@@ -4,7 +4,7 @@ img[src*="photo-1609766857041"] {
 }
 
 /* Distinctive home-page treatment: a framed “sanctuary at dawn” composition. */
-main > section:first-child {
+.home-route > main > section:first-child {
   position: relative;
   isolation: isolate;
   margin: 1.5rem auto 0;
@@ -17,8 +17,8 @@ main > section:first-child {
     #fffaf1;
 }
 
-main > section:first-child::before,
-main > section:first-child::after {
+.home-route > main > section:first-child::before,
+.home-route > main > section:first-child::after {
   position: absolute;
   z-index: -1;
   border: 1px solid rgba(193, 68, 14, .12);
@@ -27,21 +27,21 @@ main > section:first-child::after {
   pointer-events: none;
 }
 
-main > section:first-child::before {
+.home-route > main > section:first-child::before {
   top: -10rem;
   right: 31%;
   width: 28rem;
   height: 28rem;
 }
 
-main > section:first-child::after {
+.home-route > main > section:first-child::after {
   right: -7rem;
   bottom: -10rem;
   width: 25rem;
   height: 25rem;
 }
 
-main > section:first-child h1 {
+.home-route > main > section:first-child h1 {
   max-width: 10ch;
   text-wrap: balance;
 }
@@ -61,15 +61,12 @@ main > section:first-child h1 {
 }
 
 @media (max-width: 640px) {
-  main > section:first-child {
+  .home-route > main > section:first-child {
     margin: .75rem .75rem 0;
     border-radius: 1.5rem;
   }
 }
 
-.sevas-route > header {
-  display: none;
-}
 
 .home-route {
   display: flex;
@@ -91,7 +88,7 @@ main > section:first-child h1 {
 
 .sevas-route > main {
   position: relative;
-  padding-top: 2.5rem;
+  padding-top: 0.5rem;
   padding-bottom: 8rem;
 }
 
@@ -252,7 +249,8 @@ main > section:first-child h1 {
   background: rgba(45, 28, 20, 0.65);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  padding: 1rem;
+  padding: 0.75rem;
+  overflow-y: auto;
   animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -263,12 +261,22 @@ main > section:first-child h1 {
 
 .modal-container {
   position: relative;
-  border-radius: 1.75rem;
+  width: 100%;
+  border-radius: 1.25rem;
   background: #fffdf9;
   border: 1px solid rgba(193, 68, 14, 0.12);
-  padding: 2rem;
+  padding: 1.25rem;
   box-shadow: 0 25px 60px -15px rgba(52, 37, 30, 0.35);
   animation: modalPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 640px) {
+  .modal-overlay {
+    padding: 1.5rem;
+  }
+  .modal-container {
+    border-radius: 1.75rem;
+  }
 }
 
 @keyframes modalPopIn {
@@ -411,5 +419,37 @@ main > section:first-child h1 {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 10px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   GLOBAL MOBILE RESPONSIVENESS & TOUCH ENHANCEMENTS
+   Ensures seamless viewing on all mobile viewports (320px - 768px)
+   ───────────────────────────────────────────────────────────── */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth momentum scrolling for mobile horizontal carousels & tabs */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure images, SVGs, and media never overflow container width */
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0.5rem;
+  }
 }
 

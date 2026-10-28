@@ -138,18 +138,13 @@ export const HowTempleSevaWorks: React.FC = () => {
                       alt="Meenakshi Temple"
                       className="w-full h-full object-cover"
                     />
-                    <span className="absolute top-0.5 left-0.5 bg-emerald-600 text-white text-[2.5px] font-bold px-0.5 rounded-full leading-none">
-                      Active
-                    </span>
                     <span className="absolute top-0.5 right-0.5 bg-black/70 text-[#f8d07e] text-[2.5px] px-0.5 rounded-full leading-none">
                       ★
                     </span>
                   </div>
                   <div className="p-0.5 flex flex-col">
                     <p className="text-[4px] font-bold text-[#34251e] leading-tight truncate">Meenakshi</p>
-                    <div className="mt-0.5 bg-[#c1440e] py-0.5 rounded text-[3.5px] font-bold text-white text-center leading-none shadow-3xs cursor-pointer">
-                      View Sevas
-                    </div>
+                    <p className="text-[3px] text-[#8b7a6d] leading-none">Madurai</p>
                   </div>
                 </div>
 
@@ -161,18 +156,13 @@ export const HowTempleSevaWorks: React.FC = () => {
                       alt="Tirupati Balaji"
                       className="w-full h-full object-cover"
                     />
-                    <span className="absolute top-0.5 left-0.5 bg-emerald-600 text-white text-[2.5px] font-bold px-0.5 rounded-full leading-none">
-                      Active
-                    </span>
                     <span className="absolute top-0.5 right-0.5 bg-black/70 text-[#f8d07e] text-[2.5px] px-0.5 rounded-full leading-none">
                       ★
                     </span>
                   </div>
                   <div className="p-0.5 flex flex-col">
                     <p className="text-[4px] font-bold text-[#34251e] leading-tight truncate">Tirupati</p>
-                    <div className="mt-0.5 bg-[#c1440e] py-0.5 rounded text-[3.5px] font-bold text-white text-center leading-none shadow-3xs cursor-pointer">
-                      View Sevas
-                    </div>
+                    <p className="text-[3px] text-[#8b7a6d] leading-none">Andhra Pradesh</p>
                   </div>
                 </div>
               </div>

@@ -6,3 +6,11 @@ export function readJson<T>(key: string, fallback: T): T {
     return fallback
   }
 }
+
+export function writeJson<T>(key: string, value: T): void {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // Ignore storage write errors (e.g. quota exceeded or private mode)
+  }
+}

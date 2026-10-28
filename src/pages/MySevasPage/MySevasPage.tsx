@@ -4,7 +4,6 @@ import type { Order, User, Devotee, Temple } from '../../types'
 import { temples } from '../../data'
 import { formatPrice } from '../../utils/helpers'
 import { useLanguage } from '../../contexts/LanguageContext'
-import LanguageDropdown from '../../components/LanguageDropdown/LanguageDropdown'
 import { IonIcon } from '../../components/IonIcon'
 
 interface MySevasPageProps {
@@ -36,15 +35,10 @@ const statusColor: Record<string, string> = {
 }
 
 const MySevasPage = ({
-  user,
   orders,
   selectedTemple,
-  switchTemple,
-  onOpenQrPass,
   onCancelOrder,
   onReorder,
-  onOpenSideMenu,
-  onLogin,
   onWishlist,
   wishlistCount = 0,
 }: MySevasPageProps) => {
@@ -128,116 +122,14 @@ const MySevasPage = ({
               </button>
             )}
 
-            {/* Book More Sevas CTA */}
-            <button
-              onClick={() => navigate('/sevas')}
-              className="hidden md:flex items-center rounded-full bg-[#fdf2e9] border border-[#f5cfb5] px-3.5 py-1.5 text-xs font-bold text-[#c1440e] transition hover:bg-[#c1440e] hover:text-white shadow-xs cursor-pointer"
-            >
-              <span>{t('backToSevas')}</span>
-            </button>
-
-            {/* User Account / Profile Menu Button */}
-            {user ? (
-              <button
-                type="button"
-                onClick={onOpenSideMenu}
-                className="group flex items-center gap-2 rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] pl-1 pr-3 py-1 text-xs font-bold text-[#34251e] shadow-2xs transition cursor-pointer shrink-0"
-                aria-label="Open profile menu"
-                title={`${user.name} - Profile & Menu`}
-              >
-                <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-tr from-[#c1440e] to-[#df5619] text-[11px] font-bold text-white shadow-2xs">
-                  {user.name.charAt(0).toUpperCase()}
-                </span>
-                <span className="hidden sm:inline font-semibold text-[#34251e] group-hover:text-[#c1440e] transition-colors max-w-[120px] truncate">
-                  {user.name.split(' ')[0]}
-                </span>
-                <svg
-                  className="h-3.5 w-3.5 text-[#8b7a6d] group-hover:text-[#c1440e] transition-transform group-hover:translate-y-0.5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onLogin}
-                className="rounded-full bg-gradient-to-r from-[#c1440e] to-[#df5619] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:shadow-md cursor-pointer"
-              >
-                {t('navLogin')}
-              </button>
-            )}
-
-            {/* Subtle Divider before Language Dropdown */}
-            <span className="hidden sm:inline-block h-6 w-px bg-[#eadfd1]" />
-
-            {/* Language Dropdown in Corner of Navbar */}
-            <LanguageDropdown />
-
-            {/* Mobile Hamburger Menu Button (Visible on screens < lg) */}
-            <button
-              type="button"
-              onClick={onOpenSideMenu}
-              className="flex lg:hidden items-center justify-center h-9 w-9 rounded-full border border-[#e0d3c5] bg-white text-[#5c4d41] hover:border-[#c1440e] hover:text-[#c1440e] transition shadow-2xs cursor-pointer ml-0.5"
-              aria-label="Open mobile navigation menu"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
           </div>
         </div>
       </header>
 
       {/* ── Main Content Container ── */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Page Hero Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#eadfd1] pb-6">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#f5ede2] px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#c1440e]">
-                <span className="pulse-beacon" />
-                <span>{localizedActiveTemple.name}</span>
-              </div>
-              {switchTemple && (
-                <button
-                  type="button"
-                  onClick={switchTemple}
-                  className="inline-flex items-center gap-1 rounded-full border border-[#eadfd1] bg-white px-3 py-1 text-xs font-bold text-[#c1440e] hover:bg-[#fff9f3] transition cursor-pointer shadow-2xs"
-                >
-                  <span>🛕</span>
-                  <span>{language === 'KN' ? 'ಕ್ಷೇತ್ರ ಬದಲಾಯಿಸಿ' : 'Switch Sanctuary'}</span>
-                </button>
-              )}
-              {onOpenQrPass && (
-                <button
-                  type="button"
-                  onClick={onOpenQrPass}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[#bbf7d0] bg-[#f0fdf4] px-3 py-1 text-xs font-bold text-[#16a34a] hover:bg-[#dcfce7] transition cursor-pointer shadow-2xs"
-                >
-                  <span>📱</span>
-                  <span>{language === 'KN' ? 'ದರ್ಶನ ಕ್ಯೂಆರ್ ಪಾಸ್' : 'Temple QR Pass'}</span>
-                </button>
-              )}
-            </div>
-            <h1 className="mt-3 font-serif text-3xl sm:text-4xl font-bold text-[#34251e]">
-              {localizedActiveTemple.name} — {t('mySevasFullTitle')}
-            </h1>
-            <p className="mt-1.5 max-w-2xl text-xs sm:text-sm text-[#806f61] leading-relaxed">
-              {language === 'KN'
-                ? `${localizedActiveTemple.name} ಕ್ಷೇತ್ರಕ್ಕೆ ಕಾಯ್ದಿರಿಸಲಾದ ನಿಮ್ಮ ಎಲ್ಲಾ ಸೇವಾ ರಶೀದಿಗಳು.`
-                : `Showing all sacred seva receipts booked for ${localizedActiveTemple.name}.`}
-            </p>
-          </div>
-        </div>
-
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {/* ── Statistics Summary Cards (For Selected Temple Only) ── */}
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           <div className="rounded-2xl border border-[#eadfd1] bg-white p-3.5 shadow-2xs">
             <p className="text-[11px] font-bold uppercase text-[#8b7a6d]">Total Sevas</p>
             <p className="mt-0.5 font-serif text-2xl sm:text-3xl font-bold text-[#c1440e]">

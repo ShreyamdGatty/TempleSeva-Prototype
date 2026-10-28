@@ -15,7 +15,7 @@ const AboutPage = ({ navigateToSevas }: AboutPageProps) => {
     if (navigateToSevas) {
       navigateToSevas(temple)
     } else {
-      navigate('/sevas')
+      navigate('/')
     }
   }
 

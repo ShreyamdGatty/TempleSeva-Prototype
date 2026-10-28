@@ -64,7 +64,23 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       let location = temple.location
       let description = temple.description
 
-      if (id === 'meenakshi') {
+      if (id === 'ananthapura') {
+        name = t('t_ananthapura_name')
+        location = t('t_ananthapura_loc')
+        description = t('t_ananthapura_desc')
+      } else if (id === 'udupi-krishna') {
+        name = t('t_udupi_name')
+        location = t('t_udupi_loc')
+        description = t('t_udupi_desc')
+      } else if (id === 'mangaladevi') {
+        name = t('t_mangaladevi_name')
+        location = t('t_mangaladevi_loc')
+        description = t('t_mangaladevi_desc')
+      } else if (id === 'kateel') {
+        name = t('t_kateel_name')
+        location = t('t_kateel_loc')
+        description = t('t_kateel_desc')
+      } else if (id === 'meenakshi') {
         name = t('t_meenakshi_name')
         location = t('t_meenakshi_loc')
         description = t('t_meenakshi_desc')
@@ -129,6 +145,27 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
         } else if (id === 'meenakshi-annadhanam') {
           name = 'ಮಹಾ ಅನ್ನದಾನ ಸೇವೆ'
           description = 'ಮೀನಾಕ್ಷಿ ಅಮ್ಮನವರ ದರ್ಶನಕ್ಕೆ ಬರುವ ಭಕ್ತರಿಗೆ ಪವಿತ್ರ ಪ್ರಸಾದ ಭೋಜನ ಸಮರ್ಪಣೆ.'
+        } else if (id === 'ananthapura-panchamritha') {
+          name = 'ಪಂಚಾಮೃತ ಅಭಿಷೇಕ'
+          description = 'ಹಾಲು, ಜೇನು, ಮೊಸರು, ತುಪ್ಪ ಮತ್ತು ಸಕ್ಕರೆಯಿಂದ ಶ್ರೀ ಅನಂತಪದ್ಮನಾಭ ಸ್ವಾಮಿಗೆ ಪವಿತ್ರ ಸ್ನಾನ ಸೇವೆ.'
+        } else if (id === 'ananthapura-sarovara') {
+          name = 'ಸರೋವರ ಪುಷ್ಪಾಂಜಲಿ ಮತ್ತು ನೈವೇದ್ಯ'
+          description = 'ಪವಿತ್ರ ಸರೋವರದ ಸನ್ನಿಧಿಯಲ್ಲಿ ನಿಮ್ಮ ಗೋತ್ರ-ನಾಮಗಳಲ್ಲಿ ಪುಷ್ಪಾರ್ಚನೆ ಮತ್ತು ನೈವೇದ್ಯ ಸಮರ್ಪಣೆ.'
+        } else if (id === 'ananthapura-babia-naivedya') {
+          name = 'ಬಬಿಯಾ ಸರೋವರ ನೈವೇದ್ಯ ಮತ್ತು ಪ್ರಸಾದ ಸೇವೆ'
+          description = 'ಐತಿಹಾಸಿಕ ರಕ್ಷಕ ಬಬಿಯಾನ ಪವಿತ್ರ ಸರೋವರ ಸನ್ನಿಧಿಯಲ್ಲಿ ಬೆಲ್ಲದ ಪಾಯಸ ಹಾಗೂ ಅನ್ನ ನೈವೇದ್ಯ ಸೇವೆ.'
+        } else if (id === 'ananthapura-deepotsava') {
+          name = 'ಸರೋವರ ದೀಪೋತ್ಸವ ಮತ್ತು ಸಹಸ್ರ ದೀಪ'
+          description = 'ಸರೋವರ ಸನ್ನಿಧಾನದಲ್ಲಿ ೧೦೮ ಸಾಂಪ್ರದಾಯಿಕ ತುಪ್ಪದ ದೀಪಗಳನ್ನು ಬೆಳಗಿಸುವ ಭವ್ಯ ಸಂಜೆ ದೀಪಾರಾಧನೆ.'
+        } else if (id === 'ananthapura-sahasranama') {
+          name = 'ಶ್ರೀ ವಿಷ್ಣು ಸಹಸ್ರನಾಮ ಮತ್ತು ತುಳಸಿ ಅರ್ಚನೆ'
+          description = '೧೦೦೮ ಪವಿತ್ರ ತುಳಸಿ ಎಲೆಗಳು ಹಾಗೂ ಕಮಲದ ಹೂವುಗಳಿಂದ ಶ್ರೀ ಅನಂತಪದ್ಮನಾಭ ಸ್ವಾಮಿಗೆ ಸಹಸ್ರನಾಮ ಅರ್ಚನೆ.'
+        } else if (id === 'ananthapura-ksheera-abhishekam') {
+          name = 'ಕ್ಷೀರ ಧಾರೆ ಮತ್ತು ಕಲಶಾಭಿಷೇಕ'
+          description = 'ಪುರುಷ ಸೂಕ್ತ ಪಠಣೆಯೊಂದಿಗೆ ನಿರಂತರ ಪವಿತ್ರ ಗೋಕ್ಷೀರ ಸ್ನಾನ ಮತ್ತು ಪುಣ್ಯ ಕಲಶಾಭಿಷೇಕ.'
+        } else if (id === 'ananthapura-maha-homam') {
+          name = 'ಸರ್ವ ಕಷ್ಟ ನಿವಾರಣಾ ಮಹಾ ಹೋಮ'
+          description = 'ಗ್ರಹದೋಷ, ವಿಘ್ನ ನಿವಾರಣೆ ಹಾಗೂ ಕುಟುಂಬ ಸಮೃದ್ಧಿಗಾಗಿ ಯಾಗಶಾಲೆಯಲ್ಲಿ ೧೦೮ ಆಹುತಿಗಳ ವೈದಿಕ ಮಹಾಯಾಗ.'
         }
       }
 

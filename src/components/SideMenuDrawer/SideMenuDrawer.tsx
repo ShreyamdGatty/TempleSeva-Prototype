@@ -34,7 +34,7 @@ const SideMenuDrawer = ({
   onProfile,
   onLogout,
   onOrders,
-  onOpenQrPass: _onOpenQrPass,
+  onOpenQrPass,
   onSwitchTemple,
   onSevas,
   onLogin,
@@ -83,7 +83,7 @@ const SideMenuDrawer = ({
       onClick={onClose}
     >
       <aside
-        className="relative flex h-full w-full max-w-[375px] sm:max-w-[395px] flex-col justify-between overflow-hidden bg-white shadow-2xl transition-all duration-300"
+        className="relative flex h-full w-full max-w-[85vw] sm:max-w-[395px] flex-col justify-between overflow-hidden bg-white shadow-2xl transition-all duration-300"
         style={{
           zIndex: 1000000,
           boxShadow: '-6px 0 28px rgba(0, 0, 0, 0.22)',
@@ -190,28 +190,6 @@ const SideMenuDrawer = ({
             {!user && (
               <>
                 <a
-                  href="/#about"
-                  onClick={(e) => {
-                    onClose()
-                    if (window.location.pathname === '/' || window.location.pathname === '') {
-                      e.preventDefault()
-                      document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })
-                    }
-                  }}
-                  className="flex items-center justify-between px-6 py-3.5 hover:bg-[#fafafa] transition cursor-pointer group"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4eb] text-[#c1440e] shrink-0">
-                      <IonIcon name="book-outline" className="text-lg text-[#c1440e]" />
-                    </span>
-                    <span className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
-                      {language === 'KN' ? 'ನಮ್ಮ ಬಗ್ಗೆ (About)' : 'About Sanctum'}
-                    </span>
-                  </div>
-                  <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
-                </a>
-
-                <a
                   href="/#temples"
                   onClick={(e) => {
                     onClose()
@@ -233,27 +211,6 @@ const SideMenuDrawer = ({
                   <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
                 </a>
 
-                <a
-                  href="/#how"
-                  onClick={(e) => {
-                    onClose()
-                    if (window.location.pathname === '/' || window.location.pathname === '') {
-                      e.preventDefault()
-                      document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })
-                    }
-                  }}
-                  className="flex items-center justify-between px-6 py-3.5 hover:bg-[#fafafa] transition cursor-pointer group"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4eb] text-[#c1440e] shrink-0">
-                      <IonIcon name="git-network-outline" className="text-lg text-[#c1440e]" />
-                    </span>
-                    <span className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
-                      {language === 'KN' ? 'ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ (How It Works)' : 'How It Works'}
-                    </span>
-                  </div>
-                  <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
-                </a>
 
                 <a
                   href="/#why-us"
@@ -298,6 +255,39 @@ const SideMenuDrawer = ({
                   </div>
                   <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
                 </a>
+
+                {/* Payment QR Pass for Guest */}
+                {onOpenQrPass && (
+                  <div
+                    onClick={() => {
+                      onClose()
+                      onOpenQrPass()
+                    }}
+                    className="flex items-center justify-between px-6 py-3.5 hover:bg-[#fff9f3] transition cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4ec] text-[#c1440e] shrink-0">
+                        <IonIcon name="qr-code-outline" className="text-lg text-[#c1440e]" />
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
+                            {language === 'KN' ? 'ಪಾವತಿ ಕ್ಯೂಆರ್ ಪಾಸ್ (Payment QR Pass)' : 'Payment QR Pass'}
+                          </h4>
+                          <span className="rounded-full bg-[#e9f5ed] border border-[#a7f3d0] px-2 py-0.5 text-[9px] font-bold text-[#15803d]">
+                            {language === 'KN' ? 'ಸಕ್ರಿಯ / ನಿಷ್ಕ್ರಿಯ' : 'Active & Deactive'}
+                          </span>
+                        </div>
+                        <p className="text-[11.5px] text-[#777777] mt-0.5">
+                          {language === 'KN'
+                            ? 'ಸಕ್ರಿಯ ಮತ್ತು ನಿಷ್ಕ್ರಿಯ ಡಿಜಿಟಲ್ ಕ್ಯೂಆರ್ ಕೋಡ್ ವೀಕ್ಷಿಸಿ'
+                            : 'View active entry passes & deactive ritual codes'}
+                        </p>
+                      </div>
+                    </div>
+                    <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:text-[#c1440e] group-hover:translate-x-0.5 transition" />
+                  </div>
+                )}
               </>
             )}
 
@@ -422,6 +412,39 @@ const SideMenuDrawer = ({
               <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
             </div>
 
+            {/* Payment QR Pass (Active & Deactive QR Codes) */}
+            {onOpenQrPass && (
+              <div
+                onClick={() => {
+                  onClose()
+                  onOpenQrPass()
+                }}
+                className="flex items-center justify-between px-6 py-4 hover:bg-[#fff9f3] transition cursor-pointer group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4ec] text-[#c1440e] shrink-0">
+                    <IonIcon name="qr-code-outline" className="text-lg text-[#c1440e]" />
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
+                        {language === 'KN' ? 'ಪಾವತಿ ಕ್ಯೂಆರ್ ಪಾಸ್ (Payment QR Pass)' : 'Payment QR Pass'}
+                      </h4>
+                      <span className="rounded-full bg-[#e9f5ed] border border-[#a7f3d0] px-2 py-0.5 text-[9px] font-bold text-[#15803d]">
+                        {language === 'KN' ? 'ಸಕ್ರಿಯ / ನಿಷ್ಕ್ರಿಯ' : 'Active & Deactive'}
+                      </span>
+                    </div>
+                    <p className="text-[11.5px] text-[#777777] mt-0.5">
+                      {language === 'KN'
+                        ? 'ಸಕ್ರಿಯ ಮತ್ತು ನಿಷ್ಕ್ರಿಯ ಡಿಜಿಟಲ್ ಕ್ಯೂಆರ್ ಕೋಡ್ ವೀಕ್ಷಿಸಿ'
+                        : 'View active entry passes & deactive ritual codes'}
+                    </p>
+                  </div>
+                </div>
+                <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:text-[#c1440e] group-hover:translate-x-0.5 transition" />
+              </div>
+            )}
+
             {/* Your Wishlist */}
             <div
               onClick={() => {
@@ -478,34 +501,6 @@ const SideMenuDrawer = ({
             </div>
 
 
-
-            {/* How It Works */}
-            <a
-              href="/#how"
-              onClick={(e) => {
-                onClose()
-                if (window.location.pathname === '/' || window.location.pathname === '') {
-                  e.preventDefault()
-                  document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })
-                }
-              }}
-              className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
-            >
-              <div className="flex items-center gap-3.5">
-                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff4eb] text-[#c1440e] shrink-0">
-                  <IonIcon name="git-network-outline" className="text-lg text-[#c1440e]" />
-                </span>
-                <div>
-                  <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
-                    {language === 'KN' ? 'ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ (How It Works)' : 'How It Works'}
-                  </h4>
-                  <p className="text-[11.5px] text-[#777777] mt-0.5">
-                    {language === 'KN' ? 'ಸರಳ ಹಂತಗಳಲ್ಲಿ ಪವಿತ್ರ ಸೇವೆಗಳ ಮಾರ್ಗದರ್ಶಿ' : 'Easy step-by-step puja booking guide'}
-                  </p>
-                </div>
-              </div>
-              <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
-            </a>
             </>
             )}
 
@@ -550,30 +545,6 @@ const SideMenuDrawer = ({
                   ಕನ್ನಡ
                 </button>
               </div>
-            </div>
-
-            {/* Help & Support */}
-            <div
-              onClick={() => {
-                onClose()
-                navigate('/profile?tab=help', { state: { tab: 'help' } })
-              }}
-              className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa] transition cursor-pointer group"
-            >
-              <div className="flex items-center gap-3.5">
-                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#f5ede2] text-[#5c4d41] shrink-0">
-                  <IonIcon name="help-circle-outline" className="text-lg text-[#5c4d41]" />
-                </span>
-                <div>
-                  <h4 className="text-sm font-semibold text-[#222222] group-hover:text-[#c1440e] transition">
-                    {language === 'KN' ? 'ಸಹಾಯ ಮತ್ತು ಬೆಂಬಲ (Help & Support)' : 'Help & Support'}
-                  </h4>
-                  <p className="text-[11.5px] text-[#777777] mt-0.5">
-                    {language === 'KN' ? 'ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೆಗಳು ಮತ್ತು ಅರ್ಚಕರ ಸಹಾಯವಾಣಿ' : 'View commonly asked queries and priest helpline'}
-                  </p>
-                </div>
-              </div>
-              <IonIcon name="chevron-forward-outline" className="text-sm text-[#b5b5b5] group-hover:translate-x-0.5 transition" />
             </div>
 
           </div>

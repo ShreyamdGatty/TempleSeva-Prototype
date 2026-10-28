@@ -7,13 +7,14 @@ import { useLanguage } from '../../contexts/LanguageContext'
 import CalendarModal, { isBeforeToday, isSameDay } from '../../components/CalendarModal/CalendarModal'
 import SideMenuDrawer from '../../components/SideMenuDrawer/SideMenuDrawer'
 import SankalpamModal from '../../components/SankalpamModal/SankalpamModal'
-import LanguageDropdown from '../../components/LanguageDropdown/LanguageDropdown'
+import SearchModal from '../../components/SearchModal/SearchModal'
+import { IonIcon } from '../../components/IonIcon'
 import type { Devotee, Order } from '../../types'
 
 interface SevasPageProps {
   selectedTemple: Temple | null
   pickerOpen: boolean
-  switchTemple: () => void
+  switchTemple?: () => void
   onSelectTemple: (temple: Temple) => void
   dates: string[]
   selectedDate: string
@@ -46,6 +47,7 @@ interface SevasPageProps {
   onAddDevotee?: (devotee: Omit<Devotee, 'id'>) => Devotee
   onCompleteOrder?: (paymentMethod: string, ticketAllocations: Record<string, Devotee[]>) => Order | null
   updateCartDate?: (date: string) => void
+  onNavigateToAssignDevotee?: () => void
 }
 
 
@@ -60,7 +62,8 @@ interface DateCardItem {
 
 const SevasPage = ({
   selectedTemple,
-  switchTemple,
+  pickerOpen,
+  onSelectTemple,
   selectedDate,
   setSelectedDate,
   addSeva,
@@ -88,12 +91,22 @@ const SevasPage = ({
   onAddDevotee,
   onCompleteOrder,
   updateCartDate,
+  onNavigateToAssignDevotee,
 }: SevasPageProps) => {
   const { language, toggleLanguage, t, translateTemple, translateSeva, translateCategory, formatDateLocalized } = useLanguage()
   const navigate = useNavigate()
 
   const [sideMenuOpen, setSideMenuOpen] = useState(false)
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
   const [sankalpamOpen, setSankalpamOpen] = useState(false)
+
+  const handleSelectTempleFromSearch = (temple: Temple) => {
+    setIsSearchModalOpen(false)
+    if (onSelectTemple) {
+      onSelectTemple(temple)
+      navigate('/sevas')
+    }
+  }
 
   // Listen to openCart state from navigation (e.g. Book Seva from Favorites)
   const location = useLocation()
@@ -106,7 +119,7 @@ const SevasPage = ({
   const [selectedSlots, setSelectedSlots] = useState<Record<string, string>>({})
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
-  const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'rating'>('featured')
+  const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc'>('price-asc')
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [customDate, setCustomDate] = useState<Date | null>(null)
 
@@ -176,10 +189,8 @@ const SevasPage = ({
         return matchesTemple && matchesSearch && matchesCategory
       })
       .sort((a, b) => {
-        if (sortBy === 'price-asc') return a.price - b.price
         if (sortBy === 'price-desc') return b.price - a.price
-        if (sortBy === 'rating') return b.rating - a.rating
-        return (b.popular ? 1 : 0) - (a.popular ? 1 : 0)
+        return a.price - b.price
       })
   }, [activeTemple, search, selectedCategory, sortBy, translateSeva])
 
@@ -197,237 +208,96 @@ const SevasPage = ({
 
   return (
     <>
-      {/* ── Top Header Navigation Bar ── */}
-      <header className="sticky top-0 z-30 border-b border-[#eadfd1] bg-[#fffcf6]/95 backdrop-blur-md transition-all shadow-2xs">
-        <div className="flex h-[74px] w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Logo & Navigation */}
-          <div className="flex items-center gap-4 sm:gap-6">
-            <button
-              onClick={() => navigate('/')}
-              className="flex items-center text-left shrink-0 cursor-pointer"
-            >
-              <span className="font-serif text-2xl font-bold tracking-tight whitespace-nowrap">
-                {language === 'KN' ? (
-                  <>
-                    ಟೆಂಪಲ್<span className="text-[#c1440e]">ಸೇವಾ</span>
-                  </>
-                ) : (
-                  <>
-                    Temple<span className="text-[#c1440e]">Seva</span>
-                  </>
-                )}
-              </span>
-            </button>
-
-            {/* Home link */}
-            <button
-              onClick={() => navigate('/')}
-              className="flex items-center rounded-full border border-[#eadfd1] bg-white px-3.5 py-1.5 text-xs font-bold text-[#674f40] transition hover:border-[#c1440e] hover:text-[#c1440e] cursor-pointer"
-              title="Home"
-            >
-              <span>{t('navHome')}</span>
-            </button>
+      {/* ── Sevas Page Navbar with Active Sanctuary Banner ── */}
+      <header className="sticky top-0 z-40 border-b border-[#eadfd1] bg-[#fffcf6]/95 backdrop-blur-md transition-all shadow-xs">
+        <div className="w-full flex min-h-[60px] sm:h-[74px] items-center justify-between px-3 sm:px-6 lg:px-8 py-2 sm:py-0 gap-2 sm:gap-4">
+          {/* Active Sanctuary Info */}
+          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 text-left flex-1">
+            <img
+              src={localizedTemple.image}
+              alt={localizedTemple.name}
+              className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl object-cover shadow-2xs shrink-0"
+            />
+            <div className="min-w-0 text-left">
+              <h2 className="font-serif text-base sm:text-2xl font-bold text-[#2c1d16] leading-tight truncate">
+                {localizedTemple.name}
+              </h2>
+              <p className="text-[11px] sm:text-sm text-[#8b7a6d] flex items-center gap-1 mt-0.5 truncate">
+                <span className="text-xs sm:text-sm leading-none">📍</span>
+                <span>{localizedTemple.location}</span>
+              </p>
+            </div>
           </div>
 
-          {/* Right Action Icons & Controls */}
-          <div className="flex items-center gap-2.5">
-            {/* Switch Sanctuary Pill */}
-            <button
-              onClick={switchTemple}
-              className="hidden sm:flex items-center rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] px-3.5 py-1.5 text-xs font-semibold text-[#5c4d41] hover:text-[#c1440e] shadow-2xs transition cursor-pointer"
-            >
-              <span>{t('switchTemple')}</span>
-            </button>
-
-            {user ? (
-              <>
-                <button
-                  type="button"
-                  onClick={onOrders}
-                  className="flex items-center rounded-full bg-[#f5ede2] hover:bg-[#ebdcc9] px-3.5 py-1.5 text-xs font-bold text-[#5c4d41] transition cursor-pointer"
-                >
-                  <span className="hidden sm:inline">{t('navMySevas')}</span>
-                </button>
-
-                {/* Standard neat User Account / Profile button */}
-                <button
-                  type="button"
-                  onClick={() => setSideMenuOpen(true)}
-                  className="group flex items-center gap-2 rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] pl-1 pr-3 py-1 text-xs font-bold text-[#34251e] shadow-2xs transition cursor-pointer"
-                  aria-label="Open profile menu"
-                  title={`${user.name} - Profile & Menu`}
-                >
-                  <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-tr from-[#c1440e] to-[#df5619] text-[11px] font-bold text-white shadow-2xs">
-                    {user.name.charAt(0).toUpperCase()}
-                  </span>
-                  <span className="font-semibold text-[#34251e] group-hover:text-[#c1440e] transition-colors max-w-[120px] truncate">
-                    {user.name.split(' ')[0]}
-                  </span>
-                  <svg
-                    className="h-3.5 w-3.5 text-[#8b7a6d] group-hover:text-[#c1440e] transition-transform group-hover:translate-y-0.5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={onLogin}
-                  className="rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition hover:text-[#c1440e] cursor-pointer"
-                >
-                  {t('navLogin')}
-                </button>
-                <button
-                  onClick={onRegister}
-                  className="rounded-full bg-gradient-to-r from-[#c1440e] to-[#df5619] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm whitespace-nowrap transition hover:shadow-md cursor-pointer"
-                >
-                  {t('navRegister')}
-                </button>
-              </div>
-            )}
-
-            {/* Subtle Divider before Language Dropdown */}
-            <span className="hidden sm:inline-block h-6 w-px bg-[#eadfd1]" />
-
-            {/* Language Dropdown in Corner of Navbar */}
-            <LanguageDropdown />
-
-            {/* Mobile Hamburger Menu Button (Visible on screens < lg) */}
+          {/* Right Action Buttons: Home, My Sevas, Wishlist (with heart icon) & Switch Temple */}
+          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+            {/* 1. Home */}
             <button
               type="button"
-              onClick={() => setSideMenuOpen(true)}
-              className="flex lg:hidden items-center justify-center h-9 w-9 rounded-full border border-[#e0d3c5] bg-white text-[#5c4d41] hover:border-[#c1440e] hover:text-[#c1440e] transition shadow-2xs cursor-pointer ml-0.5"
-              aria-label="Open mobile navigation menu"
+              onClick={() => navigate('/')}
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-[#5c4d41] hover:text-[#c1440e] transition cursor-pointer py-1.5 px-2 sm:px-3 rounded-lg hover:bg-[#faefe2]"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <IonIcon name="home-outline" className="text-sm shrink-0" />
+              <span className="hidden sm:inline">{t('navHome')}</span>
+            </button>
+
+            {/* 2. My Sevas */}
+            {user ? (
+              <button
+                type="button"
+                onClick={onOrders}
+                className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-[#5c4d41] hover:text-[#c1440e] transition cursor-pointer py-1.5 px-2 sm:px-3 rounded-lg hover:bg-[#faefe2]"
+              >
+                <span className="hidden sm:inline">{t('navMySevas')}</span>
+                <span className="sm:hidden">{language === 'KN' ? 'ಆರ್ಡರ್' : 'Orders'}</span>
+              </button>
+            ) : null}
+
+            {/* 3. Wishlist icon button (exact style as in My Sevas page, no text) */}
+            <button
+              type="button"
+              onClick={onWishlist}
+              className="relative flex items-center justify-center rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] p-1.5 sm:p-2 text-xs font-semibold text-[#5c4d41] hover:text-[#c1440e] shadow-2xs transition cursor-pointer shrink-0"
+              title={language === 'KN' ? 'ಮೆಚ್ಚಿನವುಗಳು' : 'Wishlist'}
+              aria-label="Wishlist"
+            >
+              <IonIcon name="heart-outline" className="text-sm sm:text-base text-[#c1440e]" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 grid h-4 min-w-[16px] place-items-center rounded-full bg-[#c1440e] px-1 text-[10px] font-bold text-white shadow-xs">
+                  {wishlistCount}
+                </span>
+              )}
+            </button>
+
+            <span className="hidden sm:inline-block h-4 w-px bg-[#eadfd1]" />
+
+            {/* 4. Switch Temple */}
+            <button
+              type="button"
+              onClick={() => setIsSearchModalOpen(true)}
+              className="inline-flex items-center gap-1 text-[11px] sm:text-sm font-bold uppercase tracking-wider text-[#c1440e] hover:text-[#a0360a] transition cursor-pointer shrink-0"
+            >
+              <span className="hidden sm:inline">{t('switchTemple')}</span>
+              <span className="sm:hidden">{language === 'KN' ? 'ಬದಲಾಯಿಸಿ' : 'Switch'}</span>
+              <span className="text-xs sm:text-sm font-bold">➔</span>
             </button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
-        {/* ── Top Header Navigation ── */}
-        <div className="flex flex-col justify-between gap-5 border-b border-[#eadfd1] pb-6 sm:flex-row sm:items-center">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[.2em] text-[#c1440e]">
-              {t('sevaStudioHeader')}
-            </p>
-            <h1 className="mt-2 font-serif text-4xl sm:text-5xl">{t('sevaStudioTitle')}</h1>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="flex items-center gap-1.5 rounded-full border border-[#eadfd1] bg-white px-3.5 py-2 text-xs font-bold text-[#5c4d41] transition hover:border-[#c1440e] hover:text-[#c1440e] cursor-pointer"
-            >
-              <span>🏠</span>
-              <span>{t('navHome')}</span>
-            </button>
-            {user && (
-              <button
-                onClick={switchTemple}
-                className="rounded-full border border-[#d8c8b8] bg-white px-4 py-2 text-sm font-bold transition hover:border-[#c1440e] cursor-pointer"
-              >
-                {t('switchTemple')}
-              </button>
-            )}
-          {user ? (
-            <>
-              <button
-                type="button"
-                onClick={onOrders}
-                className="flex items-center gap-1.5 rounded-full bg-[#f5ede2] hover:bg-[#ebdcc9] px-3.5 py-2 text-xs font-bold text-[#5c4d41] transition cursor-pointer"
-              >
-                <span>📿</span>
-                <span>{t('navMySevas')}</span>
-              </button>
+      {/* ── Search Modal with Blurred Background and Temple Cards Grid ── */}
+      <SearchModal
+        isOpen={isSearchModalOpen || pickerOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        onSelectTemple={handleSelectTempleFromSearch}
+        selectedTemple={selectedTemple}
+        user={user}
+      />
 
-              {/* Standard neat User Account / Profile button */}
-              <button
-                type="button"
-                onClick={() => setSideMenuOpen(true)}
-                className="group flex items-center gap-2 rounded-full border border-[#e0d3c5] bg-white hover:border-[#c1440e] hover:bg-[#fff9f3] pl-1 pr-3 py-1 text-xs font-bold text-[#34251e] shadow-2xs transition cursor-pointer"
-                aria-label="Open profile menu"
-                title={`${user.name} - Profile & Menu`}
-              >
-                <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-tr from-[#c1440e] to-[#df5619] text-[11px] font-bold text-white shadow-2xs">
-                  {user.name.charAt(0).toUpperCase()}
-                </span>
-                <span className="font-semibold text-[#34251e] group-hover:text-[#c1440e] transition-colors max-w-[120px] truncate">
-                  {user.name.split(' ')[0]}
-                </span>
-                <svg
-                  className="h-3.5 w-3.5 text-[#8b7a6d] group-hover:text-[#c1440e] transition-transform group-hover:translate-y-0.5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-            </>
-          ) : (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onLogin}
-                className="rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition hover:text-[#c1440e] cursor-pointer"
-              >
-                {t('navLogin')}
-              </button>
-              <button
-                onClick={onRegister}
-                className="rounded-full bg-gradient-to-r from-[#c1440e] to-[#df5619] px-4 py-2 text-sm font-bold text-white shadow-sm whitespace-nowrap transition hover:shadow-md cursor-pointer"
-              >
-                {t('navRegister')}
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-
-      {localizedTemple ? (
-        <>
-          {/* ── Selected Temple Banner ── */}
-          <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-3xl border border-[#eadfd1] bg-white p-5 shadow-sm sm:flex-row sm:items-center">
-            <div className="flex items-center gap-4">
-              <img
-                src={localizedTemple.image}
-                alt={localizedTemple.name}
-                className="h-20 w-20 rounded-2xl object-cover shadow-sm"
-              />
-              <div>
-                <span className="rounded-full bg-[#f5ede2] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#c1440e]">
-                  {t('activeSanctuary')}
-                </span>
-                <h2 className="mt-1 font-serif text-2xl font-bold sm:text-3xl">
-                  {localizedTemple.name}
-                </h2>
-                <p className="text-sm text-[#8b7a6d]">📍 {localizedTemple.location}</p>
-              </div>
-            </div>
-            <button
-              onClick={switchTemple}
-              className="text-xs font-bold uppercase tracking-wider text-[#c1440e] hover:underline cursor-pointer"
-            >
-              {t('changeLocation')}
-            </button>
-          </div>
+      <main className="mx-auto max-w-7xl px-3 sm:px-5 pt-3 pb-8 lg:px-8">
 
           {/* ── Sacred Date Selector with "Select Date" Calendar Card ── */}
-          <section className="mt-8">
+          <section className="mt-2 sm:mt-3">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-serif text-2xl">{t('step1DateTitle')}</h3>
@@ -440,18 +310,30 @@ const SevasPage = ({
               )}
             </div>
 
-            <div className="mt-4 flex gap-3 overflow-x-auto pb-2 items-center">
+            <div className="mt-2.5 flex gap-2 sm:gap-2.5 overflow-x-auto pb-2 pt-2 items-center no-scrollbar">
               {/* Dedicated "Select Date" Card which opens interactive Calendar */}
               <button
                 type="button"
                 onClick={() => setCalendarOpen(true)}
-                className="group relative flex min-w-[130px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#c1440e] bg-[#fdfaf5] p-3 text-center transition-all hover:bg-[#faefe2] hover:shadow-md cursor-pointer"
+                className="group relative flex h-[66px] sm:h-[70px] w-[80px] min-w-[80px] shrink-0 flex-col items-center justify-center rounded-xl border-[1.5px] border-dashed border-[#b84218] bg-[#fdfbf7] p-1.5 text-center transition-all hover:bg-[#faefe2] hover:shadow-xs cursor-pointer"
               >
-                <span className="text-2xl transition-transform group-hover:scale-110">📅</span>
-                <span className="mt-1 block font-serif text-sm font-bold text-[#c1440e]">
+                {/* 3D-style Calendar Icon matching the theme */}
+                <svg className="w-5 h-5 mb-0.5 transition-transform group-hover:scale-105" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="3" y="7" width="30" height="26" rx="6" fill="#818cf8" />
+                  <rect x="5.5" y="13" width="25" height="18" rx="4" fill="#ffffff" />
+                  <rect x="9.5" y="3.5" width="3.5" height="7" rx="1.75" fill="#4f46e5" />
+                  <rect x="23" y="3.5" width="3.5" height="7" rx="1.75" fill="#4f46e5" />
+                  <circle cx="11" cy="18" r="1.5" fill="#818cf8" />
+                  <circle cx="18" cy="18" r="1.5" fill="#818cf8" />
+                  <circle cx="25" cy="18" r="1.5" fill="#ef4444" />
+                  <circle cx="11" cy="24" r="1.5" fill="#818cf8" />
+                  <circle cx="18" cy="24" r="1.5" fill="#3b82f6" />
+                  <circle cx="25" cy="24" r="1.5" fill="#818cf8" />
+                </svg>
+                <span className="block font-serif text-[11px] font-bold text-[#b84218] leading-tight">
                   {t('selectDateCard')}
                 </span>
-                <span className="block text-[10px] font-semibold text-[#8b7a6d]">
+                <span className="block text-[8.5px] font-medium text-[#8c7d70] leading-tight mt-0.5">
                   {t('selectDateCardSub')}
                 </span>
               </button>
@@ -471,38 +353,34 @@ const SevasPage = ({
                       setSelectedDate(card.label)
                       if (updateCartDate) updateCartDate(card.label)
                     }}
-                    className={`relative min-w-[92px] rounded-2xl border p-3 text-center transition-all cursor-pointer ${
+                    className={`relative flex h-[66px] sm:h-[70px] w-[62px] min-w-[62px] shrink-0 flex-col items-center justify-center rounded-xl text-center transition-all cursor-pointer ${
                       card.isPast
-                        ? 'cursor-not-allowed border-[#e3d7ca] bg-[#f9f5f0] text-[#a8998c] opacity-40 line-through'
+                        ? 'cursor-not-allowed border border-[#e3d7ca] bg-[#f9f5f0] text-[#a8998c] opacity-40 line-through'
                         : isSelected
-                        ? 'scale-105 border-[#c1440e] bg-[#c1440e] text-white shadow-lg font-bold'
-                        : 'border-[#e3d7ca] bg-white text-[#34251e] hover:border-[#c1440e]/60 hover:bg-[#fff9f3]'
+                        ? 'bg-[#b84218] text-white shadow-[0_4px_14px_-2px_rgba(184,66,24,0.4)] font-bold scale-[1.02]'
+                        : 'border border-[#eadfd1] bg-white text-[#241b16] shadow-[0_1px_4px_rgba(0,0,0,0.03)] hover:border-[#b84218]/60 hover:bg-[#fffdfa]'
                     }`}
                   >
                     {/* Today Badge on Card */}
                     {card.isToday && (
                       <span
-                        className={`absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-sm whitespace-nowrap ${
-                          isSelected ? 'bg-[#d4a64a] text-[#34251e]' : 'bg-[#d4a64a] text-white'
-                        }`}
+                        className="absolute -top-1.5 left-1/2 -translate-x-1/2 rounded-full px-1.5 py-0 text-[7.5px] font-black uppercase tracking-wider shadow-xs whitespace-nowrap bg-[#c58c2b] text-white"
                       >
                         {t('todayBadge')}
                       </span>
                     )}
 
-                    {/* Custom Chosen Date Badge on Card */}
-                    {card.isCustom && !card.isToday && (
+                    {/* Chosen Date Badge on Selected Card */}
+                    {isSelected && !card.isToday && (
                       <span
-                        className={`absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-sm whitespace-nowrap ${
-                          isSelected ? 'bg-[#d4a64a] text-[#34251e]' : 'bg-[#c1440e] text-white'
-                        }`}
+                        className="absolute -top-1.5 left-1/2 -translate-x-1/2 rounded-full px-1.5 py-0 text-[7.5px] font-black uppercase tracking-wider shadow-xs whitespace-nowrap bg-[#c58c2b] text-white"
                       >
-                        {language === 'KN' ? 'ಆಯ್ಕೆ ದಿನಾಂಕ' : 'Chosen Date'}
+                        {language === 'KN' ? 'ಆಯ್ಕೆ ದಿನ' : 'Chosen'}
                       </span>
                     )}
 
-                    <span className="block font-serif text-2xl font-bold">{datePart}</span>
-                    <span className="mt-0.5 block text-xs font-bold uppercase tracking-wider opacity-85">
+                    <span className="block font-serif text-[18px] sm:text-[19px] font-bold leading-none mb-0.5">{datePart}</span>
+                    <span className="block text-[9.5px] font-black uppercase tracking-wider leading-none opacity-90">
                       {monthPart}
                     </span>
                   </button>
@@ -525,17 +403,17 @@ const SevasPage = ({
               </div>
 
               {/* Search & Sort Controls */}
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 rounded-xl border border-[#e3d7ca] bg-white px-3 py-2 shadow-sm">
-                  <span className="text-[#c1440e]">⌕</span>
+              <div className="flex items-center gap-2.5 w-full md:w-auto">
+                <div className="flex flex-1 sm:flex-none items-center gap-2 rounded-xl border border-[#e3d7ca] bg-white px-3 py-2 shadow-sm min-w-0">
+                  <span className="text-[#c1440e] shrink-0">⌕</span>
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder={t('searchPlaceholder')}
-                    className="w-48 bg-transparent text-sm outline-none"
+                    className="w-full sm:w-48 bg-transparent text-xs sm:text-sm outline-none"
                   />
                   {search && (
-                    <button onClick={() => setSearch('')} className="text-sm text-[#8b7a6d]">
+                    <button onClick={() => setSearch('')} className="text-sm text-[#8b7a6d] shrink-0">
                       ×
                     </button>
                   )}
@@ -545,18 +423,16 @@ const SevasPage = ({
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                   aria-label="Sort Sevas"
-                  className="rounded-xl border border-[#e3d7ca] bg-white px-3 py-2 text-sm font-semibold text-[#34251e] outline-none shadow-sm cursor-pointer"
+                  className="shrink-0 rounded-xl border border-[#e3d7ca] bg-white px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-semibold text-[#34251e] outline-none shadow-sm cursor-pointer"
                 >
-                  <option value="featured">{t('sortFeatured')}</option>
                   <option value="price-asc">{t('sortPriceLowHigh')}</option>
                   <option value="price-desc">{t('sortPriceHighLow')}</option>
-                  <option value="rating">{t('sortRating')}</option>
                 </select>
               </div>
             </div>
 
             {/* Category Pills */}
-            <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-2 no-scrollbar">
               {categories.map((cat) => (
                 <button
                   key={cat}
@@ -614,18 +490,13 @@ const SevasPage = ({
                         >
                           {wished ? '❤️' : '🤍'}
                         </button>
-                        <div className="absolute bottom-2 left-2 flex gap-1.5">
-                          {seva.popular && (
-                            <span className="rounded-full bg-[#c1440e] px-2.5 py-0.5 text-[10px] font-bold text-white shadow">
-                              {t('popularBadge')}
-                            </span>
-                          )}
-                          {discountPct > 0 && (
+                        {discountPct > 0 && (
+                          <div className="absolute bottom-2 left-2 flex gap-1.5">
                             <span className="rounded-full bg-[#28724d] px-2.5 py-0.5 text-[10px] font-bold text-white shadow">
                               {discountPct}% {t('offBadge')}
                             </span>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
 
                       {/* Content */}
@@ -763,20 +634,6 @@ const SevasPage = ({
                               )
                             })()}
                           </div>
-
-                          <div className="mt-2.5 pt-2 border-t border-[#f5ede2]">
-                            {seva.requiresDevotee ? (
-                              <p className="text-[11px] font-bold text-[#c1440e] flex items-center gap-1.5">
-                                <span>🕉️</span>
-                                <span>{language === 'KN' ? 'ಸಂಕಲ್ಪಕ್ಕೆ ಭಕ್ತರ ವಿವರ ಅಗತ್ಯ' : 'Devotee Required for Sankalpa'}</span>
-                              </p>
-                            ) : (
-                              <p className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1.5">
-                                <span className="font-bold">✓</span>
-                                <span>{language === 'KN' ? 'ಭಕ್ತರ ಅಗತ್ಯವಿಲ್ಲ (ಮುಕ್ತ ಸೇವೆ)' : 'Devotee Not Needed (Open Offering)'}</span>
-                              </p>
-                            )}
-                          </div>
                         </div>
                       </div>
                     </article>
@@ -785,48 +642,39 @@ const SevasPage = ({
               </div>
             )}
           </section>
-        </>
-      ) : (
-        <div className="mt-10 rounded-3xl border border-dashed border-[#d8c8b8] p-16 text-center">
-          <p className="font-serif text-2xl font-bold">{t('chooseTemplePrompt')}</p>
-          <button onClick={switchTemple} className="btn-primary mt-4">
-            {t('chooseTempleBtn')}
-          </button>
-        </div>
-      )}
 
       {/* ── Modern Curved Floating Cart Bar ── */}
       {cart.length > 0 && (
         <aside
           onClick={() => setSankalpamOpen(true)}
-          className="fixed bottom-6 left-4 right-4 z-40 mx-auto max-w-xl rounded-full bg-gradient-to-r from-[#2c1d15] via-[#3a251b] to-[#2c1d15] px-5 py-3 text-white shadow-2xl border border-[#d4a64a]/40 backdrop-blur-md transition-all hover:scale-[1.01] cursor-pointer"
+          className="fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.5rem)] sm:w-full max-w-md rounded-2xl sm:rounded-full bg-gradient-to-r from-[#2c1d15] via-[#3a251b] to-[#2c1d15] px-3 sm:px-4 py-2 sm:py-2.5 text-white shadow-2xl border border-[#d4a64a]/40 backdrop-blur-md transition-all hover:scale-[1.01] cursor-pointer"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3.5">
-              <div className="relative grid h-10 w-10 place-items-center rounded-full bg-[#c1440e] text-lg font-bold shadow-sm">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-3.5 min-w-0 flex-1">
+              <div className="relative grid h-8 w-8 sm:h-10 sm:w-10 place-items-center rounded-full bg-[#c1440e] text-sm sm:text-lg font-bold shadow-sm shrink-0">
                 🛒
-                <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-[#f2c778] text-[10px] font-black text-[#34251e]">
+                <span className="absolute -right-1 -top-1 grid h-4 w-4 sm:h-5 sm:w-5 place-items-center rounded-full bg-[#f2c778] text-[9px] sm:text-[10px] font-black text-[#34251e]">
                   {cart.reduce((s, i) => s + i.quantity, 0)}
                 </span>
               </div>
-              <div>
-                <p className="text-sm font-bold text-[#fbf6f0]">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-bold text-[#fbf6f0] truncate leading-tight">
                   {cart.length} {t('cartTitle')} · <span className="text-[#f2c778]">{formatPrice(cartTotal)}</span>
                 </p>
-                <p className="text-[11px] text-[#eadfd1]">
+                <p className="text-[10px] sm:text-[11px] text-[#eadfd1] truncate leading-tight mt-0.5">
                   {selectedDate} · Tap to view & assign devotees
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation()
                   setSankalpamOpen(true)
                 }}
-                className="rounded-full bg-gradient-to-r from-[#c1440e] to-[#df5619] px-5 py-2 text-xs font-bold text-white shadow-md transition hover:brightness-110 cursor-pointer"
+                className="rounded-full bg-gradient-to-r from-[#c1440e] to-[#df5619] px-3 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-white shadow-md transition hover:brightness-110 cursor-pointer whitespace-nowrap"
               >
                 View Cart →
               </button>
@@ -855,6 +703,7 @@ const SevasPage = ({
           onLogin={onLogin || (() => {})}
           showToast={showToast}
           onNavigateToMySevas={onOrders}
+          onNavigateToAssignDevotee={onNavigateToAssignDevotee || (() => navigate('/sankalpam'))}
         />
       )}
 
@@ -894,7 +743,14 @@ const SevasPage = ({
         onLogout={logout}
         onOrders={onOrders}
         onOpenQrPass={onOpenQrPass}
-        onSwitchTemple={switchTemple}
+        onSwitchTemple={() => {
+          setSideMenuOpen(false)
+          setIsSearchModalOpen(true)
+        }}
+        onSevas={() => {
+          setSideMenuOpen(false)
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }}
         onLogin={onLogin || (() => {})}
         onRegister={onRegister || (() => {})}
       />
