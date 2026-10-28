@@ -35,6 +35,7 @@ const statusColor: Record<string, string> = {
 }
 
 const MySevasPage = ({
+  user,
   orders,
   selectedTemple,
   onCancelOrder,

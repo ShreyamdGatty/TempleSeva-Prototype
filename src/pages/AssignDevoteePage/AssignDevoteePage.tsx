@@ -38,9 +38,8 @@ const SacredQrCodeSvg = ({ code }: { code: string }) => {
           return (
             <div
               key={i}
-              className={`rounded-xs transition ${
-                isPattern ? (isCorner ? 'bg-[#c1440e]' : 'bg-[#34251e]') : 'bg-transparent'
-              }`}
+              className={`rounded-xs transition ${isPattern ? (isCorner ? 'bg-[#c1440e]' : 'bg-[#34251e]') : 'bg-transparent'
+                }`}
             />
           )
         })}
@@ -350,12 +349,12 @@ export default function AssignDevoteePage({
                       ? 'ಸಂಕಲ್ಪ ಮತ್ತು ಭಕ್ತರ ನಿಯೋಜನೆ'
                       : 'Sankalpam & Assign Devotees'
                     : pageStep === 'payment'
-                    ? language === 'KN'
-                      ? 'ದೈವಿಕ ಪಾವತಿ'
-                      : 'Devotional Payment'
-                    : language === 'KN'
-                    ? 'ಡಿಜಿಟಲ್ ಸೇವಾ ಪಾಸ್'
-                    : 'Digital Seva Pass'}
+                      ? language === 'KN'
+                        ? 'ದೈವಿಕ ಪಾವತಿ'
+                        : 'Devotional Payment'
+                      : language === 'KN'
+                        ? 'ಡಿಜಿಟಲ್ ಸೇವಾ ಪಾಸ್'
+                        : 'Digital Seva Pass'}
                 </h1>
               </div>
               <p className="text-[10px] sm:text-[11px] text-[#8b7a6d] truncate">
@@ -484,11 +483,10 @@ export default function AssignDevoteePage({
                     <div
                       key={dev.id || dev.name}
                       onClick={() => handleDevoteeCardClick(dev)}
-                      className={`relative flex flex-col justify-between rounded-2xl border p-4 text-xs transition cursor-pointer group ${
-                        isSelected
+                      className={`relative flex flex-col justify-between rounded-2xl border p-4 text-xs transition cursor-pointer group ${isSelected
                           ? 'border-[#c1440e] bg-[#fffaf5] shadow-xs ring-2 ring-[#c1440e]/20'
                           : 'border-[#eadfd1] bg-white hover:border-[#c1440e]/60 hover:bg-[#fffdfa]'
-                      }`}
+                        }`}
                     >
                       <div>
                         <div className="flex items-center justify-between">
@@ -496,9 +494,8 @@ export default function AssignDevoteePage({
                             {dev.name}
                           </span>
                           <span
-                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                              isSelected ? 'bg-[#c1440e] text-white' : 'bg-[#f5ede2] text-[#c1440e]'
-                            }`}
+                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${isSelected ? 'bg-[#c1440e] text-white' : 'bg-[#f5ede2] text-[#c1440e]'
+                              }`}
                           >
                             {dev.relationship || 'Self'}
                           </span>
@@ -770,11 +767,10 @@ export default function AssignDevoteePage({
               ].map((m) => (
                 <label
                   key={m.id}
-                  className={`flex items-center justify-between rounded-2xl border p-4 cursor-pointer transition ${
-                    selectedPayment === m.id
+                  className={`flex items-center justify-between rounded-2xl border p-4 cursor-pointer transition ${selectedPayment === m.id
                       ? 'border-[#c1440e] bg-[#fff9f3] shadow-xs'
                       : 'border-[#eadfd1] bg-white hover:border-[#c1440e]/50'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <input
@@ -1002,9 +998,8 @@ export default function AssignDevoteePage({
                     if (formErrors.name) setFormErrors({ ...formErrors, name: false })
                   }}
                   placeholder="e.g. Ananya Sharma"
-                  className={`w-full rounded-xl border p-2.5 text-xs ${
-                    formErrors.name ? 'border-red-500 bg-red-50' : 'border-[#d8c8b8] bg-white'
-                  }`}
+                  className={`w-full rounded-xl border p-2.5 text-xs ${formErrors.name ? 'border-red-500 bg-red-50' : 'border-[#d8c8b8] bg-white'
+                    }`}
                   autoFocus
                 />
               </div>
